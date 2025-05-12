@@ -5,9 +5,9 @@
       <span class="login-logo-title">SkillSwap</span>
     </div>
     <div class="login-box">
-      <h2>Bienvenue sur SkillSwap</h2>
+      <h2>Bienvenue sur SkillSwap</h2> 
       <div class="switch-link">
-        <span>Déjà un compte ?</span>
+        <span>Déjà un compte ?</span> <br />
         <router-link to="/login">Connectez-vous</router-link>
       </div>
       <h1>Inscrivez-vous</h1>
