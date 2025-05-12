@@ -1,0 +1,39 @@
+:root {
+  --title-color: #C6553B;
+  --primary-light: #ECBC76;
+  --primary-bg: #FFF4E3;
+  --accent: #E48700;
+  --dark: #28303F;
+  --white: #ffffff;
+  --danger: #be4b4b;
+  --border-radius: 8px;
+  --shadow: 0 4px 24px rgba(0, 0, 0, 0.1);
+}
+
+body {
+  background-color: var(--primary-bg);
+  color: var(--dark);
+}
+
+h1, h2, h3 {
+  color: var(--title-color);
+}
+
+button.primary {
+  background-color: var(--accent);
+  color: var(--white);
+}
+
+a:hover {
+  color: var(--accent);
+}
+
+input:focus {
+  border-color: var(--accent);
+  box-shadow: 0 0 0 1px var(--accent);
+}
+
+button:hover {
+  opacity: 0.95;
+  cursor: pointer;
+}
