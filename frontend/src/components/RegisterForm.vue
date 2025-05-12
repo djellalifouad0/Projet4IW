@@ -13,7 +13,7 @@
       <h1>Inscrivez-vous</h1>
       <form @submit.prevent="handleRegister">
         <div class="flex-row">
-          <input v-model="email" type="email" placeholder="adresse e-mail" required />
+          <input v-model="email" type="email" placeholder="Adresse e-mail" required />
           <input v-model="phone" type="tel" placeholder="Numéro de téléphone" required />
         </div>
         <div class="flex-row">
