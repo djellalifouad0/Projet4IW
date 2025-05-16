@@ -45,7 +45,7 @@ export default {
 .home-layout {
   display: flex;
   min-height: 100vh;
-  background: #faf9f6;
+  background: #FFFEF9;
 }
 .home-content {
   flex: 1;
@@ -108,7 +108,7 @@ export default {
   align-items: center;
 }
 .card {
-  background: #fff3e6;
+  background: #FFF4E3;
   border-radius: 16px;
   padding: 22px 28px;
   box-shadow: 0 2px 8px #0001;
@@ -120,7 +120,7 @@ export default {
   max-width: 100%;
 }
 .card-orange {
-  background: #fff3e6;
+  background: #FFF4E3;
 }
 .card-header {
   display: flex;

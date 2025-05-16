@@ -6,16 +6,28 @@
     </div>
     <ul class="navbar-links">
       <li>
-        <router-link to="/" exact-active-class="active">Accueil</router-link>
+        <router-link to="/" exact-active-class="active">
+          <img src="../assets/icons/accueil.svg" alt="Accueil" class="nav-icon" />
+          Accueil
+        </router-link>
       </li>
       <li>
-        <router-link to="/dashboard" exact-active-class="active">Dashboard</router-link>
+        <router-link to="/dashboard" exact-active-class="active">
+          <img src="../assets/icons/dashboard.svg" alt="Dashboard" class="nav-icon" />
+          Dashboard
+        </router-link>
       </li>
       <li>
-        <router-link to="/discussions" exact-active-class="active">Discussions</router-link>
+        <router-link to="/discussions" exact-active-class="active">
+          <img src="../assets/icons/discussions.svg" alt="Discussions" class="nav-icon" />
+          Discussions
+        </router-link>
       </li>
       <li>
-        <router-link to="/carte" exact-active-class="active">Carte</router-link>
+        <router-link to="/carte" exact-active-class="active">
+          <img src="../assets/icons/carte.svg" alt="Carte" class="nav-icon" />
+          Carte
+        </router-link>
       </li>
     </ul>
     <div class="navbar-profile">
@@ -24,6 +36,7 @@
         <span class="username">Fouad Andrieu</span>
         <span class="email">fandrieu@myges.fr</span>
       </div>
+      <img src="../assets/icons/3dots.svg" alt="Options" class="dots-icon" />
     </div>
   </nav>
 </template>
@@ -36,86 +49,115 @@ export default {
 
 <style scoped>
 .navbar-vertical {
-  width: 240px;
+  width: 300p;
   height: 100vh;
   background: #fff;
   border-right: 1px solid #eee;
   display: flex;
   flex-direction: column;
   align-items: flex-start;
-  padding: 32px 0 24px 0;
+  padding: 32px 48px 24px 48px;
   position: fixed;
   top: 0;
   left: 0;
   z-index: 100;
+  font-family: 'Poppins', sans-serif;
 }
+
 .navbar-logo {
   display: flex;
   align-items: center;
   gap: 10px;
-  padding-left: 32px;
   margin-bottom: 40px;
 }
+
 .logo {
   height: 36px;
 }
+
 .brand {
   font-weight: bold;
   font-size: 1.3rem;
-  color: #f59c1a;
+  color: #C6553B;
   letter-spacing: 1px;
 }
+
 .navbar-links {
   display: flex;
   flex-direction: column;
   gap: 18px;
   list-style: none;
   margin: 0;
-  padding: 0 0 0 32px;
+  padding: 0;
   flex: 1;
   width: 100%;
 }
+
 .navbar-links li {
   font-size: 1.08rem;
 }
+
 .navbar-links a {
-  color: #333;
+  color: #28303F;
   text-decoration: none;
-  padding: 10px 0 10px 12px;
+  padding: 10px 12px;
   border-radius: 24px;
-  display: block;
-  transition: background 0.2s, color 0.2s;
-}
-.navbar-links a.active,
-.navbar-links a.router-link-exact-active {
-  color: #f59c1a;
-  background: #fff3e6;
-  font-weight: bold;
-}
-.navbar-profile {
   display: flex;
   align-items: center;
   gap: 12px;
-  padding-left: 32px;
-  margin-top: auto;
+  transition: color 0.2s;
 }
+
+.nav-icon {
+  width: 20px;
+  height: 20px;
+}
+
+.navbar-links a.active,
+.navbar-links a.router-link-exact-active {
+  color: #28303F;
+  font-weight: 600;
+  background: none;
+}
+
+.navbar-profile {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  margin-top: auto;
+  padding-top: 16px;
+  width: 100%;
+  padding-right: 12px;
+}
+
 .avatar {
   width: 40px;
   height: 40px;
   border-radius: 50%;
-  border: 2px solid #f59c1a;
+  border: 2px solid #C6553B;
 }
+
 .profile-info {
   display: flex;
   flex-direction: column;
 }
+
 .username {
   font-size: 1rem;
-  color: #333;
+  color: #28303F;
   font-weight: 500;
 }
+
 .email {
   font-size: 0.92rem;
   color: #888;
+}
+
+.dots-icon {
+  width: 18px;
+  height: 18px;
+  margin-left: auto;
+  margin-right: 8px;
+  cursor: pointer;
 }
 </style>
