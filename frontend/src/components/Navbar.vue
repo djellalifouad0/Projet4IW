@@ -8,25 +8,25 @@
       <li>
         <router-link to="/" exact-active-class="active">
           <img src="../assets/icons/accueil.svg" alt="Accueil" class="nav-icon" />
-          Accueil
+          <span class="nav-label">Accueil</span>
         </router-link>
       </li>
       <li>
         <router-link to="/dashboard" exact-active-class="active">
           <img src="../assets/icons/dashboard.svg" alt="Dashboard" class="nav-icon" />
-          Dashboard
+          <span class="nav-label">Dashboard</span>
         </router-link>
       </li>
       <li>
         <router-link to="/discussions" exact-active-class="active">
           <img src="../assets/icons/discussions.svg" alt="Discussions" class="nav-icon" />
-          Discussions
+          <span class="nav-label">Discussions</span>
         </router-link>
       </li>
       <li>
         <router-link to="/carte" exact-active-class="active">
           <img src="../assets/icons/carte.svg" alt="Carte" class="nav-icon" />
-          Carte
+          <span class="nav-label">Carte</span>
         </router-link>
       </li>
     </ul>
@@ -42,26 +42,20 @@
 </template>
 
 <script>
-export default {
-  name: 'Navbar'
-}
+export default { name: 'Navbar' }
 </script>
 
 <style scoped>
 .navbar-vertical {
-  width: 300p;
+  width: 300px;
   height: 100vh;
-  background: #fff;
   border-right: 1px solid #eee;
   display: flex;
   flex-direction: column;
   align-items: flex-start;
   padding: 32px 48px 24px 48px;
-  position: fixed;
-  top: 0;
-  left: 0;
-  z-index: 100;
   font-family: 'Poppins', sans-serif;
+  transition: width 0.2s;
 }
 
 .navbar-logo {
@@ -80,6 +74,7 @@ export default {
   font-size: 1.3rem;
   color: #C6553B;
   letter-spacing: 1px;
+  transition: opacity 0.2s;
 }
 
 .navbar-links {
@@ -113,6 +108,11 @@ export default {
   height: 20px;
 }
 
+.nav-label {
+  transition: opacity 0.2s;
+  white-space: nowrap;
+}
+
 .navbar-links a.active,
 .navbar-links a.router-link-exact-active {
   color: #28303F;
@@ -140,6 +140,7 @@ export default {
 .profile-info {
   display: flex;
   flex-direction: column;
+  transition: opacity 0.2s;
 }
 
 .username {
@@ -159,5 +160,37 @@ export default {
   margin-left: auto;
   margin-right: 8px;
   cursor: pointer;
+}
+
+/* --- Responsive version Twitter: icons only --- */
+@media (max-width: 1350px) {
+  .navbar-vertical {
+    width: 70px;
+    padding: 32px 0 24px 0;
+    align-items: center;
+  }
+  .navbar-logo .brand,
+  .navbar-links .nav-label,
+  .profile-info {
+    display: none !important;
+  }
+  .navbar-links {
+    align-items: center;
+    padding: 0;
+  }
+  .navbar-links a {
+    justify-content: center;
+    padding: 10px 0;
+    gap: 0;
+  }
+  .navbar-profile {
+    flex-direction: column;
+    align-items: center;
+    padding-right: 0;
+    gap: 6px;
+  }
+  .dots-icon {
+    margin: 0;
+  }
 }
 </style>
