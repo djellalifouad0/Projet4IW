@@ -30,6 +30,22 @@
         </router-link>
       </li>
     </ul>
+    <!-- Ajout Notification et Paramètres -->
+    <ul class="navbar-actions">
+      <li>
+        <router-link to="/notifications" exact-active-class="active">
+          <img src="../assets/icons/notification.svg" alt="Notification" class="nav-icon" />
+          <span class="nav-label">Notification</span>
+          <span class="notif-badge">12</span>
+        </router-link>
+      </li>
+      <li>
+        <router-link to="/parametres" exact-active-class="active">
+          <img src="../assets/icons/settings.svg" alt="Paramètres" class="nav-icon" />
+          <span class="nav-label">Paramètres</span>
+        </router-link>
+      </li>
+    </ul>
     <div class="navbar-profile">
       <img class="avatar" src="https://randomuser.me/api/portraits/men/32.jpg" alt="avatar" />
       <div class="profile-info">
@@ -121,6 +137,52 @@ export default { name: 'Navbar' }
   background: none;
 }
 
+.navbar-actions {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  margin: 32px 0 18px 0;
+  width: 100%;
+  list-style: none;
+  padding: 0;
+}
+
+.navbar-actions li {
+  font-size: 1.08rem;
+}
+
+.navbar-actions a {
+  color: #28303F;
+  text-decoration: none;
+  padding: 10px 12px;
+  border-radius: 24px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  position: relative;
+  transition: color 0.2s;
+}
+
+.notification-icon-placeholder,
+.settings-icon-placeholder {
+  width: 25px;
+  height: 25px;
+  display: inline-block;
+  background: #ffe0b2;
+  border-radius: 50%;
+}
+
+.notif-badge {
+  background: #ECBC76;
+  color: #fff;
+  font-size: 0.92rem;
+  font-weight: bold;
+  border-radius: 8px;
+  padding: 2px 8px;
+  margin-left: 8px;
+  display: inline-block;
+}
+
 .navbar-profile {
   display: flex;
   align-items: center;
@@ -193,6 +255,9 @@ export default { name: 'Navbar' }
   .dots-icon {
     margin: 0;
   }
+  .navbar-actions {
+    display: none !important;
+  }
 }
 @media (max-width: 902px) {
   .navbar-vertical {
@@ -252,6 +317,9 @@ export default { name: 'Navbar' }
   }
   .nav-label {
     display: none;
+  }
+  .navbar-actions {
+    display: none !important;
   }
 }
 
