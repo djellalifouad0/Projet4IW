@@ -3,6 +3,7 @@ import MainLayout from '../layouts/MainLayout.vue'
 import Home from '../components/Home.vue'
 import LoginForm from '../components/LoginForm.vue'
 import RegisterForm from '../components/RegisterForm.vue'
+import Carte from '../components/Carte.vue'
 
 const routes = [
   {
@@ -10,6 +11,7 @@ const routes = [
     component: MainLayout,
     children: [
       { path: '', component: Home },
+      { path: 'carte', component: Carte },
       // d'autres pages ici avec menu si besoin
     ]
   },

@@ -1,8 +1,8 @@
 <template>
   <div class="main-layout">
-    <Navbar v-if="!isAuthPage" />
+    <Navbar v-if="!isAuthPage && !isCartePage" />
     <main class="main-content">
-      <SearchBar v-if="!isAuthPage" v-model="search" />
+      <SearchBar v-if="!isAuthPage && !isCartePage" v-model="search" />
       <router-view />
     </main>
   </div>
@@ -22,8 +22,9 @@ export default {
     const isAuthPage = computed(() =>
       route.path === '/login' || route.path === '/register'
     )
+    const isCartePage = computed(() => route.path === '/carte')
     const search = ref('')
-    return { isAuthPage, search }
+    return { isAuthPage, isCartePage, search }
   }
 }
 </script>
