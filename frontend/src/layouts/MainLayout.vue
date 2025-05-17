@@ -1,7 +1,8 @@
 <template>
   <div class="main-layout">
-    <Navbar />
+    <Navbar v-if="!isAuthPage" />
     <main class="main-content">
+      <SearchBar v-if="!isAuthPage" v-model="search" />
       <router-view />
     </main>
   </div>
@@ -9,7 +10,22 @@
 
 <script>
 import Navbar from '../components/Navbar.vue'
-export default { components: { Navbar } }
+import SearchBar from '../components/SearchBar.vue'
+import { useRoute } from 'vue-router'
+import { ref, computed } from 'vue'
+
+export default {
+  components: { Navbar, SearchBar },
+  setup() {
+    const route = useRoute()
+    // Détecte si on est sur une page d'authentification
+    const isAuthPage = computed(() =>
+      route.path === '/login' || route.path === '/register'
+    )
+    const search = ref('')
+    return { isAuthPage, search }
+  }
+}
 </script>
 
 <style scoped>

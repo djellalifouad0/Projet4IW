@@ -1,15 +1,10 @@
 <template>
   <div class="home-content">
-    <div class="search-bar">
-      <div class="search-input-wrapper">
-        <img src="@/assets/icons/search.svg" alt="search" class="search-icon" />
-        <input type="text" placeholder="Rechercher des skills" />
-      </div>
-    </div>
     <div class="filters-bar">
       <button class="filter-btn">Filtrer par <span>▼</span></button>
       <button class="publish-btn">+ Publier</button>
     </div>
+
     <div class="cards">
       <!-- Post normal -->
       <PostCard
@@ -41,7 +36,11 @@
 
 <script>
 import PostCard from './PostCard.vue'
-export default { name: 'Home', components: { PostCard } }
+
+export default {
+  name: 'Home',
+  components: { PostCard }
+}
 </script>
 
 <style scoped>
@@ -50,40 +49,8 @@ export default { name: 'Home', components: { PostCard } }
   display: flex;
   flex-direction: column;
   align-items: center;
-  padding: 1.2rem 1rem;
-  min-height: 100vh;
+  padding: 1.2rem 1rem 2.2rem 1rem;
   background: #FFFEF9;
-}
-/* Search bar & input + icon */
-.search-bar {
-  display: flex;
-  justify-content: center;
-  margin-bottom: 32px;
-}
-.search-input-wrapper {
-  position: relative;
-  width: 700px;
-  max-width: 100%;
-}
-.search-icon {
-  position: absolute;
-  top: 50%;
-  left: 20px;
-  transform: translateY(-50%);
-  width: 22px;
-  height: 22px;
-  pointer-events: none;
-}
-.search-input-wrapper input {
-  width: 100%;
-  padding: 18px 32px 18px 54px;
-  border-radius: 18px;
-  border: none;
-  background: #fff;
-  font-size: 1.18rem;
-  box-shadow: 0 2px 16px #0001;
-  color: #d48a2f;
-  font-weight: 500;
 }
 /* Filters bar + boutons */
 .filters-bar {
@@ -130,7 +97,6 @@ export default { name: 'Home', components: { PostCard } }
   align-items: center;
 }
 @media (max-width: 900px) {
-  .search-input-wrapper,
   .filters-bar,
   .cards {
     width: 100%;
@@ -142,18 +108,11 @@ export default { name: 'Home', components: { PostCard } }
   .cards {
     gap: 16px;
   }
-    .search-icon {
-    left: 30px;
-  }
-    .home-content, .cards {
+  .home-content, .cards {
     padding-bottom: 50px; 
   }
 }
 @media (max-width: 700px) {
-  .search-bar {
-    margin-bottom: 20px;
-  }
-  .search-input-wrapper,
   .filters-bar,
   .cards {
     padding-left: 3vw;
@@ -177,20 +136,10 @@ export default { name: 'Home', components: { PostCard } }
   }
 }
 @media (max-width: 480px) {
-  .search-input-wrapper,
   .filters-bar,
   .cards {
     padding-left: 4vw;
     padding-right: 4vw;
-  }
-  .search-input-wrapper input {
-    font-size: 1rem;
-    padding: 14px 14px 14px 44px;
-    border-radius: 13px;
-  }
-  .search-icon {
-    width: 18px;
-    height: 18px;
   }
   .filters-bar .filter-btn,
   .filters-bar .publish-btn {
@@ -199,5 +148,4 @@ export default { name: 'Home', components: { PostCard } }
     border-radius: 8px;
   }
 }
-
 </style>
