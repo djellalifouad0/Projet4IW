@@ -117,7 +117,7 @@ export default { name: 'Navbar' }
 .navbar-links a.active,
 .navbar-links a.router-link-exact-active {
   color: #28303F;
-  font-weight: 600;
+  font-weight: bold;
   background: none;
 }
 
