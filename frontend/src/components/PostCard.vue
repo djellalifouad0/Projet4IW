@@ -346,7 +346,8 @@ export default {
   max-width: 100%;
   box-shadow: 0 4px 28px #0002;
   position: relative;
-  height: 80vh;
+  height: auto;
+  max-height: 90vh;
   overflow-y: auto;
   display: flex;
   flex-direction: column;
