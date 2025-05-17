@@ -12,6 +12,7 @@ const routes = [
     children: [
       { path: '', component: Home },
       { path: 'carte', component: Carte },
+      { path: 'discussions', component: () => import('../components/Discussions.vue') },
       // d'autres pages ici avec menu si besoin
     ]
   },
