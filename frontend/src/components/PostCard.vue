@@ -38,7 +38,7 @@
 
     <!-- MODALE -->
     <div v-if="showModal" class="modal-overlay" @click="closeModal">
-      <div class="modal-card" @click.stop>
+      <div :class="['modal-card', paid ? 'card-paid' : 'card-orange']" @click.stop>
         <div class="card-header">
           <img class="avatar" :src="avatar" alt="avatar" />
           <div>
@@ -253,8 +253,8 @@ export default {
   max-width: 100%;
   box-shadow: 0 4px 28px #0002;
   position: relative;
-  max-height: 80vh;
-  overflow-y: auto;
+  height: auto;
+  overflow-y: visible;
 }
 /* Espaces verticaux dans la modale */
 .modal-card .card-header {
@@ -271,4 +271,92 @@ export default {
   gap: 24px;
   margin-top: 0;
 }
+@media (max-width: 900px) {
+  .card,
+  .modal-card {
+    width: 95vw;
+    padding: 18px 6vw;
+    min-width: 0;
+  }
+}
+@media (max-width: 600px) {
+  .card,
+  .modal-card {
+    width: 100%;
+    max-width: 100%;
+    padding: 18px 12px 18px 12px;
+    border-radius: 16px;
+    box-shadow: 0 1px 10px #0001;
+    box-sizing: border-box;
+    margin-bottom: 10px;
+  }
+  .card-header,
+  .modal-card .card-header {
+    flex-direction: row !important;    /* Toujours en row */
+    align-items: center;
+    gap: 10px;
+  }
+  .avatar {
+    width: 56px;        /* Plus grosse photo */
+    height: 56px;
+  }
+  .name {
+    font-size: 1.08rem;
+  }
+  .address,
+  .rate,
+  .rate-paid {
+    font-size: 0.95rem !important;
+  }
+  .rate,
+  .rate-paid {
+    padding: 4px 10px;
+    border-radius: 6px;
+    margin-left: auto;        /* Toujours aligné à droite */
+    margin-top: 0;
+    font-size: 1rem !important;
+  }
+  .card-footer,
+  .modal-card .card-footer {
+    gap: 12px;
+    margin-top: 8px;
+  }
+  .pastille, .pastille-paid {
+    padding: 6px 10px 6px 6px;
+    min-width: 28px;
+    font-size: 0.95rem;
+  }
+  .icon-svg {
+    width: 22px;
+    height: 16px;
+  }
+  .icon-number {
+    font-size: 0.97rem;
+    margin-left: 3px;
+  }
+  .modal-card .card-header {
+    margin-bottom: 12px;
+  }
+  .modal-card .card-body {
+    margin-bottom: 16px;
+  }
+  .modal-card .card-body p {
+    font-size: 1rem;
+  }
+}
+@media (max-width: 420px) {
+  .card,
+  .modal-card {
+    padding: 10px 10px 10px 10px;
+    border-radius: 12px;
+    width: 100%;
+    max-width: 100%;
+    box-sizing: border-box;
+  }
+  .name, .address {
+    font-size: 0.97rem;
+  }
+}
+
+
 </style>

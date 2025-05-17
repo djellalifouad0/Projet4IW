@@ -129,4 +129,75 @@ export default { name: 'Home', components: { PostCard } }
   gap: 22px;
   align-items: center;
 }
+@media (max-width: 900px) {
+  .search-input-wrapper,
+  .filters-bar,
+  .cards {
+    width: 100%;
+    max-width: 100%;
+    box-sizing: border-box;
+    padding-left: 2vw;
+    padding-right: 2vw;
+  }
+  .cards {
+    gap: 16px;
+  }
+    .search-icon {
+    left: 30px;
+  }
+    .home-content, .cards {
+    padding-bottom: 50px; 
+  }
+}
+@media (max-width: 700px) {
+  .search-bar {
+    margin-bottom: 20px;
+  }
+  .search-input-wrapper,
+  .filters-bar,
+  .cards {
+    padding-left: 3vw;
+    padding-right: 3vw;
+  }
+  .filters-bar {
+    gap: 12px;
+    flex-direction: column;
+    align-items: stretch;
+    margin-bottom: 18px;
+  }
+  .filters-bar .filter-btn,
+  .filters-bar .publish-btn {
+    width: 100%;
+    padding: 14px 0;
+    border-radius: 12px;
+    font-size: 1rem;
+  }
+  .cards {
+    gap: 12px;
+  }
+}
+@media (max-width: 480px) {
+  .search-input-wrapper,
+  .filters-bar,
+  .cards {
+    padding-left: 4vw;
+    padding-right: 4vw;
+  }
+  .search-input-wrapper input {
+    font-size: 1rem;
+    padding: 14px 14px 14px 44px;
+    border-radius: 13px;
+  }
+  .search-icon {
+    width: 18px;
+    height: 18px;
+  }
+  .filters-bar .filter-btn,
+  .filters-bar .publish-btn {
+    padding: 11px 0;
+    font-size: 0.98rem;
+    border-radius: 8px;
+  }
+}
+
 </style>

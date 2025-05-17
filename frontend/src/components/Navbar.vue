@@ -194,4 +194,65 @@ export default { name: 'Navbar' }
     margin: 0;
   }
 }
+@media (max-width: 902px) {
+  .navbar-vertical {
+    /* NAVBAR BAS */
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    top: unset;
+    width: 100vw !important;
+    height: 64px;
+    flex-direction: row;
+    align-items: center;
+    justify-content: space-between;
+    border-right: none;
+    border-top: 1px solid #eee;
+    padding: 0 0 0 0;
+    z-index: 100;
+    background: #fff;
+    box-shadow: 0 -3px 16px #0001;
+  }
+
+  .navbar-logo,
+  .navbar-profile {
+    display: none !important;
+  }
+  .navbar-links {
+    /* Passe les liens sur une ligne, centrés */
+    flex-direction: row;
+    gap: 0;
+    width: 100vw;
+    justify-content: space-evenly;
+    align-items: center;
+    height: 100%;
+    margin: 0;
+    padding: 0;
+  }
+  .navbar-links li {
+    width: 25%;
+    text-align: center;
+  }
+  .navbar-links a {
+    padding: 0;
+    border-radius: 0;
+    background: none !important;
+    justify-content: center;
+    width: 100%;
+    height: 64px;
+    display: flex;
+    align-items: center;
+    gap: 0;
+  }
+  .nav-icon {
+    width: 28px;
+    height: 28px;
+    margin: 0 auto;
+  }
+  .nav-label {
+    display: none;
+  }
+}
+
 </style>
