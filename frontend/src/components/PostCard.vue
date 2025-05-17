@@ -1,7 +1,7 @@
 <template>
   <div>
     <!-- Post Card -->
-    <div class="card card-orange" @click="openModal">
+    <div :class="['card', paid ? 'card-paid' : 'card-orange']" @click="openModal">
       <div class="card-header" @click.stop>
         <img class="avatar" :src="avatar" alt="avatar" @click.stop />
         <div>
@@ -11,7 +11,12 @@
           </div>
           <div class="address" @click.stop>{{ address }}</div>
         </div>
-        <div class="rate" v-if="rate" @click.stop>{{ rate }}</div>
+        <div
+          class="rate"
+          :class="paid ? 'rate-paid' : ''"
+          v-if="rate"
+          @click.stop
+        >{{ rate }}</div>
       </div>
       <div class="card-body">
         <p>
@@ -20,21 +25,20 @@
         </p>
       </div>
       <div class="card-footer" @click.stop>
-        <span class="icon pastille">
+        <span :class="['icon', 'pastille', paid ? 'pastille-paid' : '']">
           <img src="@/assets/icons/coeur.svg" alt="likes" class="icon-svg" />
           <span class="icon-number">{{ likes }}</span>
         </span>
-        <span class="icon pastille">
+        <span :class="['icon', 'pastille', paid ? 'pastille-paid' : '']">
           <img src="@/assets/icons/comment.svg" alt="views" class="icon-svg" />
           <span class="icon-number">{{ views }}</span>
         </span>
       </div>
     </div>
 
-    <!-- MODALE (inchangé) -->
+    <!-- MODALE -->
     <div v-if="showModal" class="modal-overlay" @click="closeModal">
       <div class="modal-card" @click.stop>
-        <button class="modal-close" @click="closeModal">&times;</button>
         <div class="card-header">
           <img class="avatar" :src="avatar" alt="avatar" />
           <div>
@@ -44,17 +48,17 @@
             </div>
             <div class="address">{{ address }}</div>
           </div>
-          <div class="rate" v-if="rate">{{ rate }}</div>
+          <div class="rate" :class="paid ? 'rate-paid' : ''" v-if="rate">{{ rate }}</div>
         </div>
         <div class="card-body">
           <p>{{ description }}</p>
         </div>
         <div class="card-footer">
-          <span class="icon pastille">
+          <span :class="['icon', 'pastille', paid ? 'pastille-paid' : '']">
             <img src="@/assets/icons/coeur.svg" alt="likes" class="icon-svg" />
             <span class="icon-number">{{ likes }}</span>
           </span>
-          <span class="icon pastille">
+          <span :class="['icon', 'pastille', paid ? 'pastille-paid' : '']">
             <img src="@/assets/icons/comment.svg" alt="views" class="icon-svg" />
             <span class="icon-number">{{ views }}</span>
           </span>
@@ -75,7 +79,7 @@ export default {
     description: { type: String, required: true },
     likes: { type: Number, default: 0 },
     views: { type: Number, default: 0 },
-    showMore: { type: Boolean, default: false },
+    paid: { type: Boolean, default: false },
     online: { type: Boolean, default: false }
   },
   data() {
@@ -124,6 +128,9 @@ export default {
 .card-orange {
   background: #FFF4E3;
 }
+.card-paid {
+  background: #ECBC76;
+}
 .card-header {
   display: flex;
   align-items: center;
@@ -162,6 +169,11 @@ export default {
   font-size: 0.95rem;
   font-weight: bold;
   margin-left: auto;
+  transition: background 0.16s;
+}
+.rate-paid {
+  background: #28303F !important;
+  color: #fff !important;
 }
 .card-body p {
   margin: 0;
@@ -169,12 +181,11 @@ export default {
   font-size: 1rem;
 }
 .more {
-  color: #d48a2f;
+  color: #763D03;
   font-weight: 500;
   margin-left: 2px;
   user-select: none;
 }
-
 .card-footer {
   display: flex;
   gap: 18px;
@@ -195,6 +206,12 @@ export default {
   transition: background 0.15s, box-shadow 0.15s;
   cursor: pointer;
 }
+.pastille-paid {
+  background: #FFF4E3 !important;
+}
+.pastille-paid .icon-number {
+  color: #28303F !important;
+}
 .pastille:hover {
   background: #e4a94f;
   box-shadow: 0 2px 8px #ecbc7640;
@@ -213,7 +230,6 @@ export default {
   font-size: 1rem;
   margin-left: 4px;
 }
-
 /* MODALE */
 .modal-overlay {
   position: fixed;
@@ -232,28 +248,15 @@ export default {
 .modal-card {
   background: #FFF4E3;
   border-radius: 18px;
-  padding: 22px 28px;           
-  width: 700px;                 
-  max-width: 100%;             
+  padding: 22px 28px;
+  width: 700px;
+  max-width: 100%;
   box-shadow: 0 4px 28px #0002;
   position: relative;
   max-height: 80vh;
   overflow-y: auto;
 }
-.modal-close {
-  position: absolute;
-  right: 24px;
-  top: 18px;
-  font-size: 2rem;
-  color: #d48a2f;
-  background: transparent;
-  border: none;
-  cursor: pointer;
-  transition: color 0.14s;
-}
-.modal-close:hover {
-  color: #e48700;
-}
+/* Espaces verticaux dans la modale */
 .modal-card .card-header {
   margin-bottom: 18px;
 }
@@ -268,5 +271,4 @@ export default {
   gap: 24px;
   margin-top: 0;
 }
-
 </style>

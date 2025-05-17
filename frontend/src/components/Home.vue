@@ -11,18 +11,29 @@
       <button class="publish-btn">+ Publier</button>
     </div>
     <div class="cards">
+      <!-- Post normal -->
       <PostCard
-        v-for="n in 3"
-        :key="n"
         name="Fouad Andrieu"
         address="242 Rue du Faubourg Saint-Antoine, 75012 Paris"
         :avatar="'https://randomuser.me/api/portraits/men/32.jpg'"
-        :rate="n === 3 ? '12€/h' : ''"
-        description="Je suis passionné par l’apprentissage collaboratif et l’accompagnement de développeurs débutants ou confirmés sur leurs projets. J’organise chaque mois des sessions de code, de la revue de projets, et des masterclass sur les meilleures pratiques front-end et back-end. J’ai déjà accompagné plus de trente personnes sur divers sujets, avec un focus particulier sur Vue.js, React, Node.js, mais aussi sur l’automatisation des tâches avec des outils modernes. Si tu veux progresser, surmonter un blocage, ou tout simplement partager ta passion, n’hésite pas à me contacter ici. Les sessions sont toujours adaptées à tes besoins, on avance à ton rythme, et toujours dans la bonne humeur. Mon objectif : faire progresser toute la communauté ensemble ! 🚀🚀🚀"
+        rate=""
         :likes="6"
-        :views="n === 2 ? 6 : 8"
-        :showMore="true"
+        :views="8"
         :online="true"
+        :description="'Ici c’est un post normal, visible pour tous, sans indication de tarif. Le contenu s’affiche classiquement et le fond reste clair (#FFF4E3). Tu peux interagir avec ce post comme d’habitude. Si le texte dépasse 270 caractères, ...afficher plus s’affichera automatiquement. Profite des fonctionnalités standards de la plateforme pour poster, liker, commenter, etc.'"
+      />
+
+      <!-- Post service payant -->
+      <PostCard
+        name="Laurane Dupont"
+        address="88 Rue Oberkampf, 75011 Paris"
+        :avatar="'https://randomuser.me/api/portraits/women/44.jpg'"
+        rate="18€/h"
+        :likes="8"
+        :views="15"
+        :online="true"
+        :paid="true"
+        :description="'Ceci est un post de service payant : tu vois le fond en #ECBC76, les pastilles like/comment en #FFF4E3, et l’étiquette de tarif en haut à droite est sur fond #28303F avec texte blanc. Le contenu long sera coupé à 270 caractères avec ...afficher plus si besoin. Ce type de post est idéal pour mettre en avant des offres professionnelles ou des prestations à tarif horaire.'"
       />
     </div>
   </div>
@@ -43,7 +54,6 @@ export default { name: 'Home', components: { PostCard } }
   min-height: 100vh;
   background: #FFFEF9;
 }
-
 /* Search bar & input + icon */
 .search-bar {
   display: flex;
@@ -66,7 +76,7 @@ export default { name: 'Home', components: { PostCard } }
 }
 .search-input-wrapper input {
   width: 100%;
-  padding: 18px 32px 18px 54px; /* padding-left pour l’icône */
+  padding: 18px 32px 18px 54px;
   border-radius: 18px;
   border: none;
   background: #fff;
@@ -75,7 +85,6 @@ export default { name: 'Home', components: { PostCard } }
   color: #d48a2f;
   font-weight: 500;
 }
-
 /* Filters bar + boutons */
 .filters-bar {
   display: flex;
@@ -113,7 +122,6 @@ export default { name: 'Home', components: { PostCard } }
   box-shadow: 0 2px 8px #0001;
   transition: background 0.18s;
 }
-
 /* Cards grid */
 .cards {
   display: flex;
