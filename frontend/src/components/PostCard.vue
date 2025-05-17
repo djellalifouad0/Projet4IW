@@ -65,7 +65,6 @@
         </div>
         <!-- Section Commentaires -->
         <div class="modal-comments">
-          <h3>Commentaires</h3>
           <div v-if="comments.length === 0" class="no-comments">Aucun commentaire pour l'instant.</div>
           <ul v-else class="comments-list">
             <li v-for="(comment, idx) in comments" :key="idx" class="comment-item">
@@ -369,10 +368,11 @@ export default {
 }
 .modal-comments {
   margin-top: 28px;
-  background: #fff8ef;
+  background: none;
   border-radius: 12px;
-  padding: 18px 18px 12px 18px;
-  box-shadow: 0 1px 6px #0001;
+  padding: 18px 0 12px 0;
+  box-shadow: none;
+  width: 100%; /* occupe toute la largeur de la modale */
 }
 .modal-comments h3 {
   margin: 0 0 10px 0;
@@ -530,6 +530,9 @@ export default {
     padding: 18px 6vw;
     min-width: 0;
   }
+  .modal-comments {
+    padding: 14px 0 10px 0;
+  }
 }
 @media (max-width: 600px) {
   .card,
@@ -608,6 +611,10 @@ export default {
   .name, .address {
     font-size: 0.97rem;
   }
+}
+.comments-list .comment-item + .comment-item {
+  margin-top: 18px;
+  border-top: none;
 }
 
 </style>
