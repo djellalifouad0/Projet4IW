@@ -66,11 +66,12 @@ export default { name: 'Navbar' }
 }
 
 .logo {
-  height: 36px;
+  height: 46px;
 }
 
 .brand {
-  font-weight: bold;
+  font-family: 'Feather', 'Poppins', sans-serif;
+  font-weight: 700;
   font-size: 1.3rem;
   color: #C6553B;
   letter-spacing: 1px;
@@ -104,8 +105,8 @@ export default { name: 'Navbar' }
 }
 
 .nav-icon {
-  width: 20px;
-  height: 20px;
+  width: 25px;
+  height: 25px;
 }
 
 .nav-label {
