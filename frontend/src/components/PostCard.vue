@@ -246,7 +246,6 @@ export default {
   to { opacity: 1; }
 }
 .modal-card {
-  background: #FFF4E3;
   border-radius: 18px;
   padding: 22px 28px;
   width: 700px;
