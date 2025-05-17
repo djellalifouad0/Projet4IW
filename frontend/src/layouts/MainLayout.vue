@@ -32,16 +32,24 @@ export default {
 <style scoped>
 .main-layout {
   display: flex;
+  flex-direction: row;
   justify-content: center;
   min-height: 100vh;
   background: #fefcf6;
+  width: 100vw;
+  max-width: 100vw;
+  box-sizing: border-box;
 }
 
 .main-content {
+  flex: 1;
   display: flex;
   flex-direction: column;
   align-items: center;
   min-width: 0;
   padding: 0;
+  max-width: 1200px;
+  width: 100%;
+  box-sizing: border-box;
 }
 </style>

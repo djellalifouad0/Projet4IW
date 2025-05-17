@@ -1,6 +1,6 @@
 <template>
   <nav class="navbar-vertical">
-    <div class="navbar-logo">
+    <div class="navbar-logo" @click="$router.push('/')" style="cursor:pointer">
       <img src="../assets/images/SkillSwap Logo.png" alt="SkillSwap" class="logo" />
       <span class="brand">SkillSwap</span>
     </div>
@@ -46,7 +46,7 @@
         </router-link>
       </li>
     </ul>
-    <div class="navbar-profile">
+    <div class="navbar-profile" @click="$router.push('/profile')" style="cursor:pointer">
       <img class="avatar" src="https://randomuser.me/api/portraits/men/32.jpg" alt="avatar" />
       <div class="profile-info">
         <span class="username">Fouad Andrieu</span>

@@ -2,7 +2,7 @@
   <div class="carte-page">
     <div class="carte-header-fixed">
       <div class="carte-header-inner">
-        <div class="carte-logo-bar">
+        <div class="carte-logo-bar" @click="$router.push('/')" style="cursor:pointer">
           <img
             src="@/assets/images/SkillSwap Logo.png"
             alt="SkillSwap"
