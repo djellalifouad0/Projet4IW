@@ -1,16 +1,22 @@
 <template>
-  <div class="main-layout">
-    <Navbar />
-    <main class="main-content">
-      <router-view />
-    </main>
-  </div>
+  <router-view />
 </template>
+
 
 <script>
 import Navbar from './components/Navbar.vue'
-export default { components: { Navbar } }
+import { useRoute } from 'vue-router'
+
+export default {
+  components: { Navbar },
+  setup() {
+    const route = useRoute()
+    const isAuthPage = route.path === '/login' || route.path === '/register'
+    return { isAuthPage }
+  }
+}
 </script>
+
 
 <style>
 .main-layout {
@@ -24,7 +30,6 @@ export default { components: { Navbar } }
   display: flex;
   flex-direction: column;
   align-items: center;
-  /* no margin-left! */
   min-width: 0;
   padding: 0;
 }
