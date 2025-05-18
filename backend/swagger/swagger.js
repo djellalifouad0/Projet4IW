@@ -31,7 +31,7 @@ const options = {
       }
     ]
   },
-  apis: ['./routes/*.js'], // 🔗 Charge les annotations Swagger des routes
+  apis: ['./routes/*.js','./controllers/*.js'], // 🔗 Charge les annotations Swagger des routes
 };
 
 const swaggerSpec = swaggerJsDoc(options);
