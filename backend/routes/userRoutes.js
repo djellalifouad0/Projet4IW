@@ -88,4 +88,16 @@ router.patch('/users/:id/toggle', authenticate, authorizeAdmin, userController.t
  */
 router.delete('/users/:id', authenticate, authorizeAdmin, userController.deleteUser);
 
+// Ajout route pour récupérer l'utilisateur connecté
+router.get('/users/me', authenticate, (req, res) => {
+  // req.user contient { id, role } grâce au middleware authenticate
+  const User = require('../models/user');
+  User.findByPk(req.user.id, { attributes: ['id', 'username', 'email'] })
+    .then(user => {
+      if (!user) return res.status(404).json({ error: 'Utilisateur non trouvé' });
+      res.json(user);
+    })
+    .catch(() => res.status(500).json({ error: 'Erreur serveur' }));
+});
+
 module.exports = router;

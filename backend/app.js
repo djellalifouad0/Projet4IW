@@ -25,8 +25,8 @@ app.use('/api/likes', likeRoutes);
 setupSwagger(app);
 
 // ➕ Sync DB
-sequelize.sync().then(() => {
-  console.log('🗄️  Base de données synchronisée');
+sequelize.sync({ alter: true }).then(() => {
+  console.log('🗄️  Base de données synchronisée (alter)');
 });
 
 module.exports = app;
