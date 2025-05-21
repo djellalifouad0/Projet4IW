@@ -27,17 +27,39 @@
 </template>
 
 <script>
+import api from '../services/api'
+import { useRouter } from 'vue-router'
+
 export default {
   data() {
     return {
       email: '',
       password: '',
       showPassword: false,
+      error: '',
+      loading: false,
     };
   },
+  setup() {
+    const router = useRouter();
+    return { router };
+  },
   methods: {
-    handleLogin() {
-      console.log('Connexion avec', this.email, this.password);
+    async handleLogin() {
+      this.error = '';
+      this.loading = true;
+      try {
+        const res = await api.post('/auth/login', {
+          email: this.email,
+          password: this.password,
+        });
+        localStorage.setItem('token', res.data.token);
+        this.$router.push('/dashboard');
+      } catch (err) {
+        this.error = err.response?.data?.error || 'Erreur de connexion';
+      } finally {
+        this.loading = false;
+      }
     },
   },
 };

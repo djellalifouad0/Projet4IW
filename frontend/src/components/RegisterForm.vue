@@ -14,7 +14,6 @@
       <form @submit.prevent="handleRegister">
         <div class="flex-row">
           <input v-model="email" type="email" placeholder="Adresse e-mail" required />
-          <input v-model="phone" type="tel" placeholder="Numéro de téléphone" required />
         </div>
         <div class="flex-row">
           <input v-model="firstName" type="text" placeholder="Prénom" required />
@@ -22,12 +21,14 @@
         </div>
         <input v-model="password" type="password" placeholder="Mot de passe" required />
         <button type="submit" class="primary">S'inscrire</button>
+        <div v-if="error" class="error-message">{{ error }}</div>
       </form>
     </div>
   </div>
 </template>
 
 <script>
+import api from '../services/api'
 import { RouterLink } from 'vue-router'
 
 export default {
@@ -37,15 +38,29 @@ export default {
   data() {
     return {
       email: '',
-      phone: '',
       firstName: '',
       lastName: '',
       password: '',
+      error: '',
+      loading: false,
     };
   },
   methods: {
-    handleRegister() {
-      console.log('Inscription avec', this.email);
+    async handleRegister() {
+      this.error = '';
+      this.loading = true;
+      try {
+        const res = await api.post('/auth/register', {
+          email: this.email,
+          username: this.firstName + ' ' + this.lastName,
+          password: this.password,
+        });
+        this.$router.push('/login');
+      } catch (err) {
+        this.error = err.response?.data?.error || 'Erreur lors de l\'inscription';
+      } finally {
+        this.loading = false;
+      }
     },
   },
 };

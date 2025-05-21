@@ -47,10 +47,10 @@
       </li>
     </ul>
     <div class="navbar-profile" @click="$router.push('/profile')" style="cursor:pointer">
-      <img class="avatar" src="https://randomuser.me/api/portraits/men/32.jpg" alt="avatar" />
+      <img class="avatar" :src="user?.avatar || 'https://randomuser.me/api/portraits/men/32.jpg'" alt="avatar" />
       <div class="profile-info">
-        <span class="username">Fouad Andrieu</span>
-        <span class="email">fandrieu@myges.fr</span>
+        <span class="username">{{ user ? user.username : 'Non connecté' }}</span>
+        <span class="email">{{ user ? user.email : '' }}</span>
       </div>
       <img src="../assets/icons/3dots.svg" alt="Options" class="dots-icon" />
     </div>
@@ -58,7 +58,27 @@
 </template>
 
 <script>
-export default { name: 'Navbar' }
+import api from '../services/api'
+
+export default {
+  name: 'Navbar',
+  data() {
+    return {
+      user: null
+    }
+  },
+  async mounted() {
+    const token = localStorage.getItem('token')
+    if (token) {
+      try {
+        const res = await api.get('/users/me')
+        this.user = res.data
+      } catch (e) {
+        this.user = null
+      }
+    }
+  }
+}
 </script>
 
 <style scoped>
