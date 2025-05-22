@@ -46,13 +46,16 @@
         </router-link>
       </li>
     </ul>
-    <div class="navbar-profile" @click="$router.push('/profile')" style="cursor:pointer">
+    <div class="navbar-profile" @click="$router.push('/profile')" style="cursor:pointer; position: relative;">
       <img class="avatar" :src="user?.avatar || 'https://randomuser.me/api/portraits/men/32.jpg'" alt="avatar" />
       <div class="profile-info">
-        <span class="username">{{ user ? user.username : 'Non connecté' }}</span>
-        <span class="email">{{ user ? user.email : '' }}</span>
+        <span class="username" :title="user ? user.username : ''">{{ user ? user.username : 'Non connecté' }}</span>
+        <span class="email" :title="user ? user.email : ''">{{ user ? user.email : '' }}</span>
       </div>
-      <img src="../assets/icons/3dots.svg" alt="Options" class="dots-icon" />
+      <img src="../assets/icons/3dots.svg" alt="Options" class="dots-icon" @click.stop="showMenu = !showMenu" />
+      <div v-if="showMenu" class="dropdown-menu" @click.stop>
+        <button @click="handleLogout">Se déconnecter</button>
+      </div>
     </div>
   </nav>
 </template>
@@ -64,17 +67,41 @@ export default {
   name: 'Navbar',
   data() {
     return {
-      user: null
+      user: null,
+      showMenu: false
     }
   },
   async mounted() {
     const token = localStorage.getItem('token')
-    if (token) {
-      try {
-        const res = await api.get('/users/me')
-        this.user = res.data
-      } catch (e) {
-        this.user = null
+    if (!token) {
+      this.$router.push('/login')
+      return
+    }
+    try {
+      const res = await api.get('/auth/me')
+      this.user = res.data
+    } catch (e) {
+      this.user = null
+      this.$router.push('/login')
+    }
+    document.addEventListener('click', this.handleClickOutside)
+  },
+  beforeUnmount() {
+    document.removeEventListener('click', this.handleClickOutside)
+  },
+  methods: {
+    handleLogout() {
+      localStorage.removeItem('token')
+      this.user = null
+      this.$router.push('/login')
+    },
+    handleClickOutside(e) {
+      // Ferme le menu si on clique en dehors du menu ou de l'icône
+      if (!this.$el.querySelector('.dropdown-menu')) return;
+      const menu = this.$el.querySelector('.dropdown-menu');
+      const dots = this.$el.querySelector('.dots-icon');
+      if (this.showMenu && !menu.contains(e.target) && !dots.contains(e.target)) {
+        this.showMenu = false;
       }
     }
   }
@@ -211,6 +238,7 @@ export default {
   padding-top: 16px;
   width: 100%;
   padding-right: 12px;
+  position: relative;
 }
 
 .avatar {
@@ -223,18 +251,29 @@ export default {
 .profile-info {
   display: flex;
   flex-direction: column;
-  transition: opacity 0.2s;
+  max-width: 120px;
+  overflow: hidden;
 }
 
 .username {
   font-size: 1rem;
   color: #28303F;
   font-weight: 500;
+  text-overflow: ellipsis;
+  overflow: hidden;
+  white-space: nowrap;
+  max-width: 120px;
+  display: block;
 }
 
 .email {
   font-size: 0.92rem;
   color: #888;
+  text-overflow: ellipsis;
+  overflow: hidden;
+  white-space: nowrap;
+  max-width: 120px;
+  display: block;
 }
 
 .dots-icon {
@@ -243,6 +282,35 @@ export default {
   margin-left: auto;
   margin-right: 8px;
   cursor: pointer;
+}
+
+.dropdown-menu {
+  position: absolute;
+  right: 0;
+  bottom: 48px;
+  background: #fff;
+  border: 1px solid #eee;
+  border-radius: 8px;
+  box-shadow: 0 2px 8px #0002;
+  z-index: 10;
+  min-width: 140px;
+  padding: 8px 0;
+}
+
+.dropdown-menu button {
+  width: 100%;
+  background: none;
+  border: none;
+  padding: 10px 16px;
+  text-align: left;
+  font-size: 1rem;
+  color: #c6553b;
+  cursor: pointer;
+  transition: background 0.15s;
+}
+
+.dropdown-menu button:hover {
+  background: #f5f5f5;
 }
 
 /* --- Responsive version Twitter: icons only --- */
