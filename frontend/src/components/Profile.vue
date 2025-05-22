@@ -2,10 +2,10 @@
   <div class="profile-content">
     <h1 class="profile-title">Mon profil</h1>
     <div class="profile-card">
-      <img class="profile-avatar" src="https://randomuser.me/api/portraits/men/32.jpg" alt="Avatar utilisateur" />
+      <img class="profile-avatar" :src="user?.avatar || 'https://randomuser.me/api/portraits/men/32.jpg'" alt="Avatar utilisateur" />
       <div class="profile-infos">
-        <h2 class="profile-name">Fouad Andrieu</h2>
-        <p class="profile-email">fouad.andrieu@email.com</p>
+        <h2 class="profile-name">{{ user?.username || '' }}</h2>
+        <p class="profile-email">{{ user?.email || '' }}</p>
         <div class="profile-actions">
           <button class="profile-btn">Modifier le profil</button>
           <button class="profile-btn profile-btn-secondary">Changer le mot de passe</button>
@@ -20,8 +20,24 @@
 </template>
 
 <script>
+import api from '../services/api'
+
 export default {
   name: 'Profile',
+  data() {
+    return {
+      user: null
+    }
+  },
+  async mounted() {
+    try {
+      const res = await api.get('/auth/me')
+      this.user = res.data
+    } catch (e) {
+      this.user = null
+      this.$router.push('/login')
+    }
+  }
 }
 </script>
 
