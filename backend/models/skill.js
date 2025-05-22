@@ -9,10 +9,6 @@ const Skill = sequelize.define('Skill', {
     autoIncrement: true,
     primaryKey: true
   },
-  title: {
-    type: DataTypes.STRING,
-    allowNull: false
-  },
   description: {
     type: DataTypes.TEXT,
     allowNull: false

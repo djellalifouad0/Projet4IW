@@ -9,7 +9,7 @@
       <PostCard
         v-for="post in posts"
         :key="post.id"
-        :name="post.userId"
+        :name="post.User?.username || ''"
         :address="post.location || ''"
         :avatar="post.avatar || 'https://randomuser.me/api/portraits/men/32.jpg'"
         :rate="post.pricePerHour ? post.pricePerHour + '€/h' : ''"
@@ -26,7 +26,6 @@
       <div class="modal-card" @click.stop>
         <h2>Publier un service</h2>
         <form @submit.prevent="handlePublish">
-          <input v-model="form.title" type="text" placeholder="Titre du service" required />
           <textarea v-model="form.description" placeholder="Description" required></textarea>
           <input v-model="form.location" type="text" placeholder="Adresse (optionnel)" />
           <input v-model.number="form.pricePerHour" type="number" min="0" step="1" placeholder="Tarif horaire (€) (optionnel)" />
@@ -51,7 +50,6 @@ export default {
       posts: [],
       showForm: false,
       form: {
-        title: '',
         description: '',
         location: '',
         pricePerHour: null
@@ -74,9 +72,13 @@ export default {
     async handlePublish() {
       this.error = '';
       try {
-        await api.post('/skills', this.form);
+        await api.post('/skills', {
+          description: this.form.description,
+          location: this.form.location,
+          pricePerHour: this.form.pricePerHour || null
+        });
         this.showForm = false;
-        this.form = { title: '', description: '', location: '', pricePerHour: null };
+        this.form = { description: '', location: '', pricePerHour: null };
         await this.fetchPosts();
       } catch (e) {
         this.error = e.response?.data?.error || 'Erreur lors de la publication.';

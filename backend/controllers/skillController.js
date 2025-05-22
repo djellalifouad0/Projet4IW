@@ -19,7 +19,12 @@ const Skill = require('../models/skill');
  */
 exports.getAllSkills = async (req, res) => {
   try {
-    const skills = await Skill.findAll();
+    const skills = await Skill.findAll({
+      include: [{
+        model: require('../models/user'),
+        attributes: ['username']
+      }]
+    });
     res.json(skills);
   } catch (error) {
     res.status(500).json({ error: 'Erreur lors de la récupération des compétences' });
@@ -46,7 +51,12 @@ exports.getAllSkills = async (req, res) => {
  */
 exports.getSkillById = async (req, res) => {
   try {
-    const skill = await Skill.findByPk(req.params.id);
+    const skill = await Skill.findByPk(req.params.id, {
+      include: [{
+        model: require('../models/user'),
+        attributes: ['username']
+      }]
+    });
     if (!skill) return res.status(404).json({ error: 'Compétence non trouvée' });
     res.json(skill);
   } catch (error) {
@@ -69,8 +79,6 @@ exports.getSkillById = async (req, res) => {
  *           schema:
  *             type: object
  *             properties:
- *               title:
- *                 type: string
  *               description:
  *                 type: string
  *               pricePerHour:
@@ -83,9 +91,8 @@ exports.getSkillById = async (req, res) => {
  */
 exports.createSkill = async (req, res) => {
   try {
-    const { title, description, pricePerHour, location } = req.body;
+    const { description, pricePerHour, location } = req.body;
     const skill = await Skill.create({
-      title,
       description,
       pricePerHour,
       location,
@@ -118,8 +125,6 @@ exports.createSkill = async (req, res) => {
  *           schema:
  *             type: object
  *             properties:
- *               title:
- *                 type: string
  *               description:
  *                 type: string
  *               pricePerHour:
@@ -136,7 +141,8 @@ exports.updateSkill = async (req, res) => {
   try {
     const skill = await Skill.findByPk(req.params.id);
     if (!skill || skill.userId !== req.user.id) return res.status(403).json({ error: 'Non autorisé' });
-    await skill.update(req.body);
+    const { description, pricePerHour, location } = req.body;
+    await skill.update({ description, pricePerHour, location });
     res.json(skill);
   } catch (error) {
     res.status(500).json({ error: 'Erreur mise à jour' });
