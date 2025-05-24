@@ -96,6 +96,8 @@ export default {
   align-items: center;
   padding: 1.2rem 1rem 2.2rem 1rem;
   background: #FFFEF9;
+  overflow-x: hidden; /* Empêche le scroll horizontal */
+  max-width: 100vw; /* Limite la largeur à 100% de la vue */
 }
 /* Filters bar + boutons */
 .filters-bar {
@@ -140,6 +142,10 @@ export default {
   flex-direction: column;
   gap: 22px;
   align-items: center;
+  width: 100%;
+  max-width: 700px;
+  box-sizing: border-box;
+  overflow-x: hidden; /* Ajouté pour éviter tout débordement */
 }
 @media (max-width: 900px) {
   .filters-bar,
@@ -257,5 +263,10 @@ export default {
   font-size: 0.9rem;
   text-align: center;
   margin-top: 1rem;
+}
+
+/* Empêche tout débordement horizontal sur la page, même si un enfant déborde */
+:global(body) {
+  overflow-x: hidden;
 }
 </style>

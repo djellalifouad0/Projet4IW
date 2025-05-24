@@ -9,7 +9,7 @@
             {{ name }}
             <span v-if="online" class="status-dot"></span>
           </div>
-          <div class="address" @click.stop>{{ address }}</div>
+          <div class="address" @click.stop>{{ truncatedAddress }}</div>
         </div>
         <div
           class="rate"
@@ -46,7 +46,7 @@
               {{ name }}
               <span v-if="online" class="status-dot"></span>
             </div>
-            <div class="address">{{ address }}</div>
+            <div class="address">{{ truncatedAddress }}</div>
           </div>
           <div class="rate" :class="paid ? 'rate-paid' : ''" v-if="rate">{{ rate }}</div>
         </div>
@@ -161,6 +161,14 @@ export default {
         return this.description.substring(0, this.charLimit);
       }
       return this.description;
+    },
+    truncatedAddress() {
+      let max = 28;
+      if (window.innerWidth <= 600) max = 20;
+      if (this.address.length > max) {
+        return this.address.substring(0, max) + '...';
+      }
+      return this.address;
     }
   },
   methods: {
@@ -538,7 +546,7 @@ export default {
 @media (max-width: 600px) {
   .card,
   .modal-card {
-    width: 100%;
+    width: 85vw;
     max-width: 100%;
     padding: 18px 12px 18px 12px;
     border-radius: 16px;
@@ -605,7 +613,7 @@ export default {
   .modal-card {
     padding: 10px 10px 10px 10px;
     border-radius: 12px;
-    width: 100%;
+    width: 85vw;
     max-width: 100%;
     box-sizing: border-box;
   }

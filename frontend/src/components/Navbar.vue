@@ -119,6 +119,11 @@ export default {
   padding: 32px 48px 24px 48px;
   font-family: 'Poppins', sans-serif;
   transition: width 0.2s;
+  position: fixed;
+  top: 0;
+  left: 0;
+  z-index: 200;
+  background: #fff;
 }
 
 .navbar-logo {
