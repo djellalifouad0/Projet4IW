@@ -25,13 +25,19 @@
     <!-- Formulaire de création de post -->
     <div v-if="showForm" class="modal-overlay" @click.self="showForm = false">
       <div class="modal-card" @click.stop>
-        <h2>Publier un service</h2>
+        <div class="modal-header">
+          <span class="modal-icon">📝</span>
+          <h2>Publier un service</h2>
+        </div>
+        <div class="modal-separator"></div>
         <form @submit.prevent="handlePublish">
           <textarea v-model="form.description" placeholder="Description" required></textarea>
           <input v-model="form.location" type="text" placeholder="Adresse (optionnel)" />
           <input v-model.number="form.pricePerHour" type="number" min="0" step="1" placeholder="Tarif horaire (€) (optionnel)" />
-          <button type="submit">Publier</button>
-          <button type="button" @click="showForm = false">Annuler</button>
+          <div class="modal-actions">
+            <button type="submit">Publier</button>
+            <button type="button" @click="showForm = false">Annuler</button>
+          </div>
         </form>
         <div v-if="error" class="error-message">{{ error }}</div>
       </div>
@@ -215,59 +221,147 @@ export default {
   z-index: 1000;
 }
 .modal-card {
-  background: #fff;
-  border-radius: 12px;
-  padding: 2rem;
-  width: 90%;
-  max-width: 500px;
-  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.2);
+  background: #fffbe6;
+  border-radius: 18px;
+  padding: 0 2rem 2rem 2rem;
+  width: 95%;
+  max-width: 440px;
+  box-shadow: 0 8px 32px rgba(228, 135, 0, 0.13), 0 2px 8px #0001;
+  position: relative;
+  animation: modalPop 0.25s cubic-bezier(.4,1.6,.6,1) 1;
+}
+@keyframes modalPop {
+  0% { transform: scale(0.95) translateY(30px); opacity: 0; }
+  100% { transform: scale(1) translateY(0); opacity: 1; }
+}
+.modal-header {
+  background: #E48700;
+  border-radius: 18px 18px 0 0;
+  padding: 1.2rem 0 1rem 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  margin: 0 -2rem;
+}
+.modal-icon {
+  font-size: 2.1rem;
+  margin-bottom: 0.2rem;
 }
 .modal-card h2 {
-  margin-top: 0;
-  font-size: 1.5rem;
+  margin: 0;
+  font-size: 1.45rem;
+  color: #fff;
+  font-weight: 700;
+  letter-spacing: 0.5px;
   text-align: center;
+}
+.modal-separator {
+  width: 100%;
+  height: 3px;
+  background: #ffe1a1;
+  border-radius: 2px;
+  margin: 0.5rem 0 1.2rem 0;
+  box-shadow: 0 1px 4px #e4870022;
 }
 .modal-card form {
   display: flex;
   flex-direction: column;
-  gap: 1rem;
+  gap: 1.1rem;
 }
 .modal-card input,
 .modal-card textarea {
-  padding: 12px;
-  border: 1px solid #ccc;
-  border-radius: 8px;
-  font-size: 1rem;
-  width: 100%;
-  box-sizing: border-box;
+  padding: 14px 14px 14px 18px;
+  border: 1.5px solid #e6cfa1;
+  border-radius: 10px;
+  font-size: 1.04rem;
+  background: #fffef9;
+  transition: border 0.18s, box-shadow 0.18s;
+  outline: none;
+  box-shadow: 0 1px 4px #e4870022;
+}
+.modal-card input:focus,
+.modal-card textarea:focus {
+  border-color: #E48700;
+  box-shadow: 0 2px 8px #e4870033;
+}
+.modal-card textarea {
+  min-height: 80px;
+  resize: vertical;
+}
+.modal-actions {
+  display: flex;
+  flex-direction: row;
+  gap: 1rem;
+  margin-top: 0.2rem;
+  justify-content: flex-end;
 }
 .modal-card button {
-  padding: 12px;
+  width: 100%;
+  max-width: 50%;
+  padding: 13px 0;
   border: none;
-  border-radius: 8px;
-  font-size: 1rem;
+  border-radius: 10px;
+  font-size: 1.08rem;
   cursor: pointer;
-  transition: background 0.18s;
+  transition: background 0.18s, box-shadow 0.18s;
+  font-weight: 600;
+  box-shadow: 0 1px 4px #e4870022;
+  margin: 0;
 }
 .modal-card button[type="submit"] {
   background: #E48700;
   color: #fff;
   font-weight: bold;
+  letter-spacing: 0.5px;
+  box-shadow: 0 2px 8px #e4870033;
 }
-.modal-card button[type="button"] {
-  background: #ccc;
+.modal-card button[type="submit"]:hover {
+  background: #ECBC76;
   color: #111;
 }
-.modal-card button:hover {
-  opacity: 0.9;
+.modal-card button[type="button"] {
+  background: #fffbe6;
+  color: #E48700;
+  font-weight: 500;
+  border: 1.2px solid #e6cfa1;
+}
+.modal-card button[type="button"]:hover {
+  background: #ECBC76;
+  color: #b97a00;
 }
 .error-message {
-  color: red;
-  font-size: 0.9rem;
+  color: #d32f2f;
+  font-size: 1rem;
   text-align: center;
-  margin-top: 1rem;
+  margin-top: 1.1rem;
+  background: #fff3f3;
+  border-radius: 8px;
+  padding: 7px 0;
+  border: 1px solid #ffd6d6;
 }
 
+@media (max-width: 600px) {
+  .modal-card {
+    padding: 0 0.5rem 1.2rem 0.5rem;
+    max-width: 98vw;
+  }
+  .modal-header {
+    padding: 0.8rem 0 0.7rem 0;
+    margin: 0 -0.5rem;
+  }
+  .modal-card h2 {
+    font-size: 1.1rem;
+  }
+  .modal-actions {
+    flex-direction: row;
+    gap: 0.5rem;
+  }
+  .modal-card button {
+    max-width: 100%;
+    font-size: 1rem;
+  }
+}
 /* Empêche tout débordement horizontal sur la page, même si un enfant déborde */
 :global(body) {
   overflow-x: hidden;
