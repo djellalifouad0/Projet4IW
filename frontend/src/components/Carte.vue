@@ -30,6 +30,11 @@
           :online="post.online"
           :paid="post.paid"
           :description="post.description"
+          :createdAt="post.createdAt"
+          :postId="post.postId"
+          :likedByMe="post.likedByMe"
+          @like="likePost"
+          @dislike="dislikePost"
         />
       </div>
       <div class="carte-map">
@@ -49,61 +54,70 @@
 <script>
 import PostCard from './PostCard.vue'
 import SearchBar from './SearchBar.vue'
+import api from '../services/api'
 
 export default {
   name: 'Carte',
   components: { PostCard, SearchBar },
   data() {
     return {
-      posts: [
-        {
-          name: 'Fouad Andrieu',
-          address: '242 Rue du Faubourg Saint-Antoine, 75012 Paris',
-          avatar: 'https://randomuser.me/api/portraits/men/32.jpg',
-          rate: '',
-          likes: 8,
-          views: 6,
-          online: true,
-          paid: false,
-          description: `Lorem ipsum is simply dummy text of the printing and typesetting industry. Lorem Ipsum has been the industry's standard dummy text ever since the 1500s, when an unknown printer took a galley of type and scrambled it to make a type specimen.`
-        },
-        {
-          name: 'Fouad Andrieu',
-          address: '242 Rue du Faubourg Saint-Antoine, 75012 Paris',
-          avatar: 'https://randomuser.me/api/portraits/men/32.jpg',
-          rate: '',
-          likes: 8,
-          views: 6,
-          online: true,
-          paid: false,
-          description: `Lorem ipsum is simply dummy text of the printing and typesetting industry. Lorem Ipsum has been the industry's dummy text.`
-        },
-        {
-          name: 'Fouad Andrieu',
-          address: '242 Rue du Faubourg Saint-Antoine, 75012 Paris',
-          avatar: 'https://randomuser.me/api/portraits/men/32.jpg',
-          rate: '',
-          likes: 8,
-          views: 6,
-          online: true,
-          paid: false,
-          description: `Lorem ipsum is simply dummy text of the printing and typesetting industry. Lorem Ipsum has been the industry's dummy text.`
-        },
-        {
-          name: 'Fouad Andrieu',
-          address: '242 Rue du Faubourg Saint-Antoine, 75012 Paris',
-          avatar: 'https://randomuser.me/api/portraits/men/32.jpg',
-          rate: '',
-          likes: 8,
-          views: 6,
-          online: true,
-          paid: false,
-          description: `Lorem ipsum is simply dummy text of the printing and typesetting industry. Lorem Ipsum has been the industry's dummy text.`
-        }
-      ],
+      posts: [],
       mapUrl: 'https://www.openstreetmap.org/export/embed.html?bbox=2.3775%2C48.8495%2C2.3865%2C48.8535&layer=mapnik'
     }
-  }
+  },
+  async mounted() {
+    try {
+      const res = await api.get('/skills')
+      // Adapter les données pour PostCard
+      this.posts = res.data.map(skill => ({
+        name: skill.User?.username || 'Utilisateur inconnu',
+        address: skill.location || '',
+        avatar: skill.User?.avatar || 'https://randomuser.me/api/portraits/men/32.jpg',
+        rate: skill.pricePerHour ? skill.pricePerHour + ' €/h' : '',
+        likes: skill.likes || 0,
+        views: skill.views || 0,
+        online: skill.User?.online || false,
+        paid: false, // À adapter si tu as une info paid
+        description: skill.description,
+        createdAt: skill.createdAt || '',
+        postId: skill.id,
+        likedByMe: skill.likedByMe || false
+      }))
+    } catch (e) {
+      // Optionnel : gestion d'erreur
+      this.posts = []
+    }
+  },
+  methods: {
+    async likePost(postId) {
+      try {
+        const idx = this.posts.findIndex(p => p.postId === postId)
+        if (idx !== -1 && !this.posts[idx].likedByMe) {
+          this.posts[idx].likes++
+          this.posts[idx].likedByMe = true
+        }
+        await api.post(`/likes/${postId}/like`)
+        // Optionnel : rafraîchir les posts pour synchro
+        // await this.fetchPosts()
+      } catch (e) {
+        // Optionnel : gestion d'erreur
+      }
+    },
+    async dislikePost(postId) {
+      try {
+        const idx = this.posts.findIndex(p => p.postId === postId)
+        if (idx !== -1 && this.posts[idx].likedByMe) {
+          this.posts[idx].likes = Math.max(0, this.posts[idx].likes - 1)
+          this.posts[idx].likedByMe = false
+        }
+        await api.delete(`/likes/${postId}/unlike`)
+        // Optionnel : rafraîchir les posts pour synchro
+        // await this.fetchPosts()
+      } catch (e) {
+        // Optionnel : gestion d'erreur
+      }
+    }
+  },
 }
 </script>
 
