@@ -77,7 +77,7 @@ export default {
         likes: skill.likes || 0,
         views: skill.views || 0,
         online: skill.User?.online || false,
-        paid: false, // À adapter si tu as une info paid
+        paid: !!skill.pricePerHour, // paid = true si un prix est défini
         description: skill.description,
         createdAt: skill.createdAt || '',
         postId: skill.id,
