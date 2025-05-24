@@ -202,9 +202,9 @@ export default {
 }
 .profile-avatar-block {
   display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 0.3rem;
+  flex-direction: column; /* Stack avatar and name vertically */
+  align-items: flex-start; /* Align items to the left */
+  gap: 0.3rem; /* Add spacing between avatar and name */
 }
 .profile-avatar-v2 {
   width: 110px;
@@ -219,8 +219,8 @@ export default {
   font-size: 1.35rem;
   font-weight: bold;
   color: #181b26;
-  margin: 0.7rem 0 0.1rem 0;
-  text-align: center;
+  margin: 0; /* Remove unnecessary margins */
+  text-align: left; /* Align the username to the left */
 }
 .profile-infos-v2 {
   display: flex;
