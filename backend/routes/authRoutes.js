@@ -117,7 +117,7 @@ router.post('/google', authController.googleAuthCallback);
  */
 router.get('/me', authenticate, (req, res) => {
   const User = require('../models/user');
-  User.findByPk(req.user.id, { attributes: ['id', 'username', 'email'] })
+  User.findByPk(req.user.id, { attributes: ['id', 'username', 'email', 'avatar', 'cover'] })
     .then(user => {
       if (!user) return res.status(404).json({ error: 'Utilisateur non trouvé' });
       res.json(user);

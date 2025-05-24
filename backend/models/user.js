@@ -30,6 +30,12 @@
  *           type: boolean
  *           default: true
  *           description: Statut actif ou désactivé
+ *         avatar:
+ *           type: string
+ *           description: URL de l'image avatar de l'utilisateur
+ *         cover:
+ *           type: string
+ *           description: URL de l'image de couverture de l'utilisateur
  *       example:
  *         id: 1
  *         username: "fouad"
@@ -66,7 +72,19 @@ const User = sequelize.define('User', {
   isActive: {
     type: DataTypes.BOOLEAN,
     defaultValue: true
+  },
+  avatar: {
+    type: DataTypes.STRING,
+    allowNull: true,
+    description: 'URL of the user avatar image'
+  },
+  cover: {
+    type: DataTypes.STRING,
+    allowNull: true,
+    description: 'URL of the user cover image'
   }
 });
+
+sequelize.sync({ alter: true });
 
 module.exports = User;

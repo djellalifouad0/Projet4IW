@@ -100,4 +100,39 @@ router.get('/users/me', authenticate, (req, res) => {
     .catch(() => res.status(500).json({ error: 'Erreur serveur' }));
 });
 
+/**
+ * @swagger
+ * /api/profile:
+ *   put:
+ *     summary: Mettre à jour le profil de l'utilisateur connecté
+ *     tags: [Users]
+ *     security:
+ *       - bearerAuth: []
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               username:
+ *                 type: string
+ *               email:
+ *                 type: string
+ *               avatar:
+ *                 type: string
+ *               cover:
+ *                 type: string
+ *     responses:
+ *       200:
+ *         description: Profil mis à jour
+ *       400:
+ *         description: Données de requête invalides
+ *       401:
+ *         description: Non authentifié
+ *       403:
+ *         description: Non autorisé
+ */
+router.put('/profile', authenticate, userController.updateUserProfile);
+
 module.exports = router;

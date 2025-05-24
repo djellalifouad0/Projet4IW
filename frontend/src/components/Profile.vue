@@ -120,13 +120,26 @@ export default {
       this.edit.cover = ''
     },
     saveProfile() {
-      // À compléter: appel API pour sauvegarder les infos
-      this.user.username = this.edit.username
-      this.user.bio = this.edit.bio
-      this.user.address = this.edit.address
-      this.user.avatar = this.edit.avatar
-      this.user.cover = this.edit.cover
-      this.showEditModal = false
+      const updatedProfile = {
+        username: this.edit.username,
+        bio: this.edit.bio,
+        address: this.edit.address,
+        avatar: this.edit.avatar,
+        cover: this.edit.cover
+      };
+
+      api.put('/profile', updatedProfile)
+        .then(() => {
+          this.user.username = this.edit.username;
+          this.user.bio = this.edit.bio;
+          this.user.address = this.edit.address;
+          this.user.avatar = this.edit.avatar;
+          this.user.cover = this.edit.cover;
+          this.showEditModal = false;
+        })
+        .catch((error) => {
+          console.error('Error updating profile:', error);
+        });
     }
   }
 }
