@@ -20,12 +20,15 @@ const Like = require('../models/like');
  */
 exports.likeSkill = async (req, res) => {
   try {
+    console.log('LIKE: userId:', req.user && req.user.id, 'skillId:', req.params.id);
     const [like, created] = await Like.findOrCreate({
       where: { userId: req.user.id, skillId: req.params.id }
     });
+    console.log('LIKE RESULT:', like, 'CREATED:', created);
     res.json({ liked: created });
   } catch (error) {
-    res.status(500).json({ error: 'Erreur lors du like' });
+    console.error('LIKE ERROR:', error);
+    res.status(500).json({ error: 'Erreur lors du like', details: error.message });
   }
 };
 

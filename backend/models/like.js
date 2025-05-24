@@ -14,6 +14,7 @@ const Like = sequelize.define('Like', {
   }
 });
 
+// Associations définies ici pour éviter les boucles d'import !
 Skill.hasMany(Like, { foreignKey: 'skillId', onDelete: 'CASCADE' });
 Like.belongsTo(Skill, { foreignKey: 'skillId' });
 User.hasMany(Like, { foreignKey: 'userId' });

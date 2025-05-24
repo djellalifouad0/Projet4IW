@@ -5,6 +5,7 @@
       <button class="publish-btn" @click="showForm = true">+ Publier</button>
     </div>
 
+    <div v-if="likeError" class="error-message" style="margin-bottom: 10px;">{{ likeError }}</div>
     <div class="cards">
       <PostCard
         v-for="post in posts"
@@ -19,6 +20,10 @@
         :paid="!!post.pricePerHour"
         :description="post.description"
         :createdAt="post.createdAt || ''"
+        :postId="post.id"
+        :likedByMe="post.likedByMe"
+        @like="likePost"
+        @dislike="dislikePost"
       />
     </div>
 
@@ -39,7 +44,7 @@
             <button type="button" @click="showForm = false">Annuler</button>
           </div>
         </form>
-        <div v-if="error" class="error-message">{{ error }}</div>
+        <div v-if="publishError" class="error-message">{{ publishError }}</div>
       </div>
     </div>
   </div>
@@ -61,7 +66,8 @@ export default {
         location: '',
         pricePerHour: null
       },
-      error: ''
+      publishError: '', // Erreur pour la publication
+      likeError: ''     // Erreur pour les likes
     }
   },
   async mounted() {
@@ -71,15 +77,13 @@ export default {
     async fetchPosts() {
       try {
         const res = await api.get('/skills');
-        console.log('API response:', res.data);
-        console.log('API response structure:', res.data);
         this.posts = res.data;
       } catch (e) {
-        this.error = "Erreur lors du chargement des posts.";
+        this.publishError = "Erreur lors du chargement des posts.";
       }
     },
     async handlePublish() {
-      this.error = '';
+      this.publishError = '';
       try {
         await api.post('/skills', {
           description: this.form.description,
@@ -90,7 +94,35 @@ export default {
         this.form = { description: '', location: '', pricePerHour: null };
         await this.fetchPosts();
       } catch (e) {
-        this.error = e.response?.data?.error || 'Erreur lors de la publication.';
+        this.publishError = e.response?.data?.error || 'Erreur lors de la publication.';
+      }
+    },
+    async likePost(postId) {
+      this.likeError = '';
+      try {
+        const idx = this.posts.findIndex(p => p.id === postId);
+        if (idx !== -1 && !this.posts[idx].likedByMe) {
+          this.posts[idx].likes++;
+          this.posts[idx].likedByMe = true;
+        }
+        await api.post(`/likes/${postId}/like`); // Correction ici
+        await this.fetchPosts();
+      } catch (e) {
+        this.likeError = 'Erreur lors du like.';
+      }
+    },
+    async dislikePost(postId) {
+      this.likeError = '';
+      try {
+        const idx = this.posts.findIndex(p => p.id === postId);
+        if (idx !== -1 && this.posts[idx].likedByMe) {
+          this.posts[idx].likes = Math.max(0, this.posts[idx].likes - 1);
+          this.posts[idx].likedByMe = false;
+        }
+        await api.delete(`/likes/${postId}/unlike`); // Correction ici
+        await this.fetchPosts();
+      } catch (e) {
+        this.likeError = 'Erreur lors du dislike.';
       }
     }
   }

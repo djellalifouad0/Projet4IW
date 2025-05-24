@@ -26,7 +26,11 @@
         </p>
       </div>
       <div class="card-footer" @click.stop>
-        <span :class="['icon', 'pastille', paid ? 'pastille-paid' : '']">
+        <span
+          :class="['icon', 'pastille', paid ? 'pastille-paid' : '', likedByMe ? 'liked' : '']"
+          @click.stop="toggleLike"
+          style="user-select: none;"
+        >
           <img src="@/assets/icons/coeur.svg" alt="likes" class="icon-svg" />
           <span class="icon-number">{{ likes }}</span>
         </span>
@@ -59,7 +63,11 @@
           </div>
         </div>
         <div class="card-footer">
-          <span :class="['icon', 'pastille', paid ? 'pastille-paid' : '']">
+          <span
+            :class="['icon', 'pastille', paid ? 'pastille-paid' : '', likedByMe ? 'liked' : '']"
+            @click.stop="toggleLike"
+            style="user-select: none;"
+          >
             <img src="@/assets/icons/coeur.svg" alt="likes" class="icon-svg" />
             <span class="icon-number">{{ likes }}</span>
           </span>
@@ -129,7 +137,9 @@ export default {
     views: { type: Number, default: 0 },
     paid: { type: Boolean, default: false },
     online: { type: Boolean, default: false },
-    createdAt: { type: String, required: true } // Ajout de la date de création
+    createdAt: { type: String, required: true },
+    postId: { type: Number, required: true },
+    likedByMe: { type: Boolean, default: false }
   },
   data() {
     return {
@@ -243,6 +253,13 @@ export default {
         });
         this.replyText = '';
         this.replyingTo = null;
+      }
+    },
+    toggleLike() {
+      if (this.likedByMe) {
+        this.$emit('dislike', this.postId);
+      } else {
+        this.$emit('like', this.postId);
       }
     }
   },
@@ -697,5 +714,16 @@ export default {
   font-size: 0.85rem;
   color: #888;
   margin-left: 8px;
+}
+.liked {
+  background: #E48700 !important;
+  color: #fff !important;
+  box-shadow: 0 2px 8px #e4870033;
+}
+.liked .icon-svg {
+  filter: brightness(0) invert(1);
+}
+.liked .icon-number {
+  color: #fff !important;
 }
 </style>

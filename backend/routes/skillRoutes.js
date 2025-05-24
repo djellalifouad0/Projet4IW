@@ -3,7 +3,7 @@ const router = express.Router();
 const skillController = require('../controllers//skillController')
 const { authenticate } = require('../middlewares/authMiddleware'); // <-- ton fichier
 
-router.get('/', skillController.getAllSkills);
+router.get('/', authenticate, skillController.getAllSkills);
 router.get('/:id', skillController.getSkillById);
 
 

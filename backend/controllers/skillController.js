@@ -1,5 +1,6 @@
 const Skill = require('../models/skill');
 const User = require('../models/user'); // Import du modèle User
+const Like = require('../models/like'); // Import du modèle Like
 
 /**
  * @swagger
@@ -20,15 +21,31 @@ const User = require('../models/user'); // Import du modèle User
  */
 exports.getAllSkills = async (req, res) => {
   try {
+    const userId = req.user ? req.user.id : null;
     const skills = await Skill.findAll({
       include: [
         {
           model: User,
           attributes: ['username', 'avatar'], // Inclure l'avatar
         },
+        {
+          model: Like,
+          attributes: ['userId'],
+          required: false
+        }
       ],
     });
-    res.json(skills);
+    // Ajout des infos de like pour le front
+    const result = skills.map(skill => {
+      const likes = skill.Likes ? skill.Likes.length : 0;
+      const likedByMe = userId ? skill.Likes.some(l => l.userId === userId) : false;
+      return {
+        ...skill.toJSON(),
+        likes,
+        likedByMe
+      };
+    });
+    res.json(result);
   } catch (error) {
     res.status(500).json({ error: 'Erreur lors de la récupération des compétences' });
   }
