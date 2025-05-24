@@ -8,6 +8,7 @@
           <div class="name" @click.stop>
             {{ name }}
             <span v-if="online" class="status-dot"></span>
+            <span v-if="postTimeAgo" class="post-time-ago-inline">{{ postTimeAgo }}</span>
           </div>
           <div class="address" @click.stop>{{ truncatedAddress }}</div>
         </div>
@@ -33,6 +34,7 @@
           <img src="@/assets/icons/comment.svg" alt="views" class="icon-svg" />
           <span class="icon-number">{{ views }}</span>
         </span>
+        <!-- Suppression de l'heure ici -->
       </div>
     </div>
 
@@ -52,6 +54,9 @@
         </div>
         <div class="card-body">
           <p>{{ description }}</p>
+          <div class="post-date-modal">
+            <span class="post-date-time">{{ postDateTime }}</span>
+          </div>
         </div>
         <div class="card-footer">
           <span :class="['icon', 'pastille', paid ? 'pastille-paid' : '']">
@@ -123,7 +128,8 @@ export default {
     likes: { type: Number, default: 0 },
     views: { type: Number, default: 0 },
     paid: { type: Boolean, default: false },
-    online: { type: Boolean, default: false }
+    online: { type: Boolean, default: false },
+    createdAt: { type: String, required: true } // Ajout de la date de création
   },
   data() {
     return {
@@ -169,6 +175,37 @@ export default {
         return this.address.substring(0, max) + '...';
       }
       return this.address;
+    },
+    postTimeAgo() {
+      // Affiche "41 min" ou "2 h" ou "3 j" (style Twitter)
+      // Ajout debug pour voir la valeur de createdAt
+      // eslint-disable-next-line no-console
+      console.log('createdAt:', this.createdAt);
+      if (!this.createdAt) return '';
+      const postDate = new Date(this.createdAt);
+      if (isNaN(postDate.getTime())) return '';
+      const now = new Date();
+      const diff = Math.floor((now - postDate) / 1000);
+      if (diff < 60) return `${diff} sec`;
+      if (diff < 3600) return `${Math.floor(diff/60)} min`;
+      if (diff < 86400) return `${Math.floor(diff/3600)} h`;
+      return `${Math.floor(diff/86400)} j`;
+    },
+    postDateTime() {
+      // Format dynamique façon Twitter : "16:38 · 24 mai 2025"
+      if (!this.createdAt) return '';
+      const date = new Date(this.createdAt);
+      if (isNaN(date.getTime())) return '';
+      const heures = date.getHours().toString().padStart(2, '0');
+      const minutes = date.getMinutes().toString().padStart(2, '0');
+      const jours = date.getDate();
+      const mois = [
+        'janv.', 'févr.', 'mars', 'avr.', 'mai', 'juin',
+        'juil.', 'août', 'sept.', 'oct.', 'nov.', 'déc.'
+      ];
+      const moisStr = mois[date.getMonth()];
+      const annee = date.getFullYear();
+      return `${heures}:${minutes} · ${jours} ${moisStr} ${annee}`;
     }
   },
   methods: {
@@ -359,6 +396,7 @@ export default {
   overflow-y: auto;
   display: flex;
   flex-direction: column;
+  background: #fff !important;
 }
 /* Espaces verticaux dans la modale */
 .modal-card .card-header {
@@ -532,6 +570,33 @@ export default {
   background: #e4a94f;
   color: #181b26;
 }
+.post-date-modal {
+  margin-top: 12px;
+  color: #536471;
+  font-size: 1.01rem;
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  font-family: 'Segoe UI', 'Arial', sans-serif;
+}
+.post-date-time {
+  font-weight: 400;
+}
+.post-date-dot {
+  font-size: 1.2em;
+  margin: 0 4px;
+}
+.post-date-views {
+  font-weight: 500;
+  color: #536471;
+}
+.post-time-ago-inline {
+  color: #888;
+  font-size: 0.93rem;
+  margin-left: 10px;
+  font-weight: 400;
+  white-space: nowrap;
+}
 @media (max-width: 900px) {
   .card,
   .modal-card {
@@ -625,5 +690,9 @@ export default {
   margin-top: 18px;
   border-top: none;
 }
-
+.post-time-ago-inline {
+  font-size: 0.85rem;
+  color: #888;
+  margin-left: 8px;
+}
 </style>

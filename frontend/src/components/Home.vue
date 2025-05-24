@@ -18,6 +18,7 @@
         :online="true"
         :paid="!!post.pricePerHour"
         :description="post.description"
+        :createdAt="post.createdAt || ''"
       />
     </div>
 
