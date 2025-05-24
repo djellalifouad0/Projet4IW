@@ -1,4 +1,5 @@
 const Skill = require('../models/skill');
+const User = require('../models/user'); // Import du modèle User
 
 /**
  * @swagger
@@ -20,10 +21,12 @@ const Skill = require('../models/skill');
 exports.getAllSkills = async (req, res) => {
   try {
     const skills = await Skill.findAll({
-      include: [{
-        model: require('../models/user'),
-        attributes: ['username']
-      }]
+      include: [
+        {
+          model: User,
+          attributes: ['username', 'avatar'], // Inclure l'avatar
+        },
+      ],
     });
     res.json(skills);
   } catch (error) {

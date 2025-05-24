@@ -3,7 +3,7 @@
     <!-- Post Card -->
     <div :class="['card', paid ? 'card-paid' : 'card-orange']" @click="openModal">
       <div class="card-header" @click.stop>
-        <img class="avatar" :src="avatar" alt="avatar" @click.stop />
+        <img class="avatar" :src="avatar || 'https://randomuser.me/api/portraits/men/32.jpg'" alt="avatar" @click.stop />
         <div>
           <div class="name" @click.stop>
             {{ name }}
@@ -42,7 +42,7 @@
     <div v-if="showModal" class="modal-overlay" @click="closeModal">
       <div :class="['modal-card', paid ? 'card-paid' : 'card-orange']" @click.stop>
         <div class="card-header">
-          <img class="avatar" :src="avatar" alt="avatar" />
+          <img class="avatar" :src="avatar || 'https://randomuser.me/api/portraits/men/32.jpg'" alt="avatar" />
           <div>
             <div class="name">
               {{ name }}
@@ -245,6 +245,9 @@ export default {
         this.replyingTo = null;
       }
     }
+  },
+  mounted() {
+    console.log('Avatar prop:', this.avatar);
   }
 }
 </script>

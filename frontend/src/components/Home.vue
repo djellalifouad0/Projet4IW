@@ -11,7 +11,7 @@
         :key="post.id"
         :name="post.User?.username || ''"
         :address="post.location || ''"
-        :avatar="post.avatar || 'https://randomuser.me/api/portraits/men/32.jpg'"
+        :avatar="post.User?.avatar || 'https://randomuser.me/api/portraits/men/32.jpg'"
         :rate="post.pricePerHour ? post.pricePerHour + '€/h' : ''"
         :likes="post.likes || 0"
         :views="post.views || 0"
@@ -65,6 +65,8 @@ export default {
     async fetchPosts() {
       try {
         const res = await api.get('/skills');
+        console.log('API response:', res.data);
+        console.log('API response structure:', res.data);
         this.posts = res.data;
       } catch (e) {
         this.error = "Erreur lors du chargement des posts.";
