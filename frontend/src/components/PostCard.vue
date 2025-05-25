@@ -261,6 +261,7 @@ export default {
           this.successComment = 'Commentaire envoyé !';
           this.newComment = '';
           await this.fetchComments();
+          this.$emit('comment-posted'); // Ajout : notifie le parent
         } catch (e) {
           if (e.response && e.response.status === 401) {
             this.errorComments = "Vous devez être connecté pour commenter.";

@@ -35,6 +35,7 @@
         :commentsCount="post.commentsCount || 0"
         @like="likePost"
         @dislike="dislikePost"
+        @comment-posted="fetchPosts"
       />
     </div>
 
@@ -552,7 +553,7 @@ export default {
   position: absolute;
   top: 110%;
   left: 0;
-  background: #fffbe6;
+  background: #fff;
   border: 1.5px solid #e6cfa1;
   border-radius: 10px;
   box-shadow: 0 2px 12px #e4870033;
@@ -570,7 +571,7 @@ export default {
   text-align: left;
   padding: 12px 18px;
   font-size: 1.05rem;
-  color: #C6553B;
+  color: #28303F;
   cursor: pointer;
   transition: background 0.15s, color 0.15s;
   border-radius: 0;
