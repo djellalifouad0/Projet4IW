@@ -33,6 +33,7 @@
           :createdAt="post.createdAt"
           :postId="post.postId"
           :likedByMe="post.likedByMe"
+          :commentsCount="post.commentsCount || 0"
           @like="likePost"
           @dislike="dislikePost"
         />
@@ -69,20 +70,44 @@ export default {
     try {
       const res = await api.get('/skills')
       // Adapter les données pour PostCard
-      this.posts = res.data.map(skill => ({
-        name: skill.User?.username || 'Utilisateur inconnu',
-        address: skill.location || '',
-        avatar: skill.User?.avatar || 'https://randomuser.me/api/portraits/men/32.jpg',
-        rate: skill.pricePerHour ? skill.pricePerHour + ' €/h' : '',
-        likes: skill.likes || 0,
-        views: skill.views || 0,
-        online: skill.User?.online || false,
-        paid: !!skill.pricePerHour, // paid = true si un prix est défini
-        description: skill.description,
-        createdAt: skill.createdAt || '',
-        postId: skill.id,
-        likedByMe: skill.likedByMe || false
+      const postsWithComments = await Promise.all(res.data.map(async skill => {
+        try {
+          const commentsRes = await api.get(`/skills/${skill.id}/comments`);
+          const commentsCount = Array.isArray(commentsRes.data) ? commentsRes.data.length : 0;
+          return {
+            name: skill.User?.username || 'Utilisateur inconnu',
+            address: skill.location || '',
+            avatar: skill.User?.avatar || 'https://randomuser.me/api/portraits/men/32.jpg',
+            rate: skill.pricePerHour ? skill.pricePerHour + ' €/h' : '',
+            likes: skill.likes || 0,
+            views: skill.views || 0,
+            online: skill.User?.online || false,
+            paid: !!skill.pricePerHour,
+            description: skill.description,
+            createdAt: skill.createdAt || '',
+            postId: skill.id,
+            likedByMe: skill.likedByMe || false,
+            commentsCount
+          };
+        } catch {
+          return {
+            name: skill.User?.username || 'Utilisateur inconnu',
+            address: skill.location || '',
+            avatar: skill.User?.avatar || 'https://randomuser.me/api/portraits/men/32.jpg',
+            rate: skill.pricePerHour ? skill.pricePerHour + ' €/h' : '',
+            likes: skill.likes || 0,
+            views: skill.views || 0,
+            online: skill.User?.online || false,
+            paid: !!skill.pricePerHour,
+            description: skill.description,
+            createdAt: skill.createdAt || '',
+            postId: skill.id,
+            likedByMe: skill.likedByMe || false,
+            commentsCount: 0
+          };
+        }
       }))
+      this.posts = postsWithComments
     } catch (e) {
       // Optionnel : gestion d'erreur
       this.posts = []

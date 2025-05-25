@@ -22,6 +22,7 @@
         :createdAt="post.createdAt || ''"
         :postId="post.id"
         :likedByMe="post.likedByMe"
+        :commentsCount="post.commentsCount || 0"
         @like="likePost"
         @dislike="dislikePost"
       />
@@ -77,7 +78,19 @@ export default {
     async fetchPosts() {
       try {
         const res = await api.get('/skills');
-        this.posts = res.data;
+        // Pour chaque post, on va chercher le nombre de commentaires (y compris réponses)
+        const postsWithComments = await Promise.all(res.data.map(async post => {
+          // On récupère tous les commentaires de ce post
+          try {
+            const commentsRes = await api.get(`/skills/${post.id}/comments`);
+            // Compte total = tous les commentaires (racine + réponses)
+            const commentsCount = Array.isArray(commentsRes.data) ? commentsRes.data.length : 0;
+            return { ...post, commentsCount };
+          } catch {
+            return { ...post, commentsCount: 0 };
+          }
+        }));
+        this.posts = postsWithComments;
       } catch (e) {
         this.publishError = "Erreur lors du chargement des posts.";
       }

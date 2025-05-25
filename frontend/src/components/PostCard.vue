@@ -36,7 +36,7 @@
         </span>
         <span :class="['icon', 'pastille', paid ? 'pastille-paid' : '']" @click.stop="openModal">
           <img src="@/assets/icons/comment.svg" alt="views" class="icon-svg" />
-          <span class="icon-number">{{ comments.length }}</span>
+          <span class="icon-number">{{ commentsCount }}</span>
         </span>
         <!-- Suppression de l'heure ici -->
       </div>
@@ -73,7 +73,7 @@
           </span>
           <span :class="['icon', 'pastille', paid ? 'pastille-paid' : '']">
             <img src="@/assets/icons/comment.svg" alt="views" class="icon-svg" />
-            <span class="icon-number">{{ comments.length }}</span>
+            <span class="icon-number">{{ totalCommentsCount }}</span>
           </span>
         </div>
         <!-- Section Commentaires -->
@@ -143,7 +143,8 @@ export default {
     online: { type: Boolean, default: false },
     createdAt: { type: String, required: true },
     postId: { type: Number, required: true },
-    likedByMe: { type: Boolean, default: false }
+    likedByMe: { type: Boolean, default: false },
+    commentsCount: { type: Number, default: 0 }
   },
   data() {
     return {
@@ -206,7 +207,11 @@ export default {
       const moisStr = mois[date.getMonth()];
       const annee = date.getFullYear();
       return `${heures}:${minutes} · ${jours} ${moisStr} ${annee}`;
-    }
+    },
+    totalCommentsCount() {
+      // Compte tous les commentaires et leurs réponses
+      return this.comments.reduce((acc, c) => acc + 1 + (c.replies ? c.replies.length : 0), 0);
+    },
   },
   methods: {
     async openModal() {
