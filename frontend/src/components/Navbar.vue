@@ -46,7 +46,7 @@
         </router-link>
       </li>
     </ul>
-    <div class="navbar-profile" @click="console.log('Profile link:', getProfileLink()); $router.push(getProfileLink())" style="cursor:pointer; position: relative;">
+    <div class="navbar-profile" @click="navigateToMyProfile" style="cursor:pointer; position: relative;">
       <img class="avatar" :src="user?.avatar || 'https://randomuser.me/api/portraits/men/32.jpg'" alt="avatar" />
       <div class="profile-info">
         <span class="username" :title="user ? user.username : ''">{{ user ? user.username : 'Non connecté' }}</span>
@@ -104,12 +104,24 @@ export default {
       if (this.showMenu && !menu.contains(e.target) && !dots.contains(e.target)) {
         this.showMenu = false;
       }
-    },
-    getProfileLink() {
+    },    getProfileLink() {
       if (this.user && this.user.profileToken) {
         return `/profile/${this.user.profileToken}`;
       }
       return '/profile';
+    },
+    navigateToMyProfile() {
+      const profileLink = this.getProfileLink();
+      console.log('Navigating to profile:', profileLink);
+      
+      // Forcer la navigation même si on est déjà sur une page de profil
+      if (this.$route.path.startsWith('/profile/')) {
+        // Si on est déjà sur une page de profil, utiliser replace pour forcer le rechargement
+        this.$router.replace(profileLink);
+      } else {
+        // Sinon, navigation normale
+        this.$router.push(profileLink);
+      }
     },
   }
 }

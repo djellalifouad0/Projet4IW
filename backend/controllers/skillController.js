@@ -33,11 +33,10 @@ exports.getAllSkills = async (req, res) => {
     }
 
     const skills = await Skill.findAll({
-      where: whereClause,
-      include: [
+      where: whereClause,      include: [
         {
           model: User,
-          attributes: ['username', 'avatar'], // Inclure l'avatar
+          attributes: ['username', 'avatar', 'profileToken'], // Inclure l'avatar et profileToken
         },
         {
           model: Like,

@@ -3,9 +3,8 @@
     <!-- Post Card -->
     <div :class="['card', paid ? 'card-paid' : 'card-orange']" @click="openModal">
       <div class="card-header" @click.stop>
-        <img class="avatar" :src="avatar || 'https://randomuser.me/api/portraits/men/32.jpg'" alt="avatar" @click.stop />
-        <div>
-          <div class="name" @click.stop>
+        <img class="avatar" :src="avatar || 'https://randomuser.me/api/portraits/men/32.jpg'" alt="avatar" @click.stop />        <div>
+          <div class="name" @click.stop="handleProfileClick" style="cursor:pointer;">
             {{ name }}
             <span v-if="online" class="status-dot"></span>
             <span v-if="postTimeAgo" class="post-time-ago-inline">{{ postTimeAgo }}</span>
@@ -46,9 +45,8 @@
     <div v-if="showModal" class="modal-overlay" @click="closeModal">
       <div :class="['modal-card', paid ? 'card-paid' : 'card-orange']" @click.stop>
         <div class="card-header">
-          <img class="avatar" :src="avatar || 'https://randomuser.me/api/portraits/men/32.jpg'" alt="avatar" />
-          <div>
-            <div class="name">
+          <img class="avatar" :src="avatar || 'https://randomuser.me/api/portraits/men/32.jpg'" alt="avatar" />          <div>
+            <div class="name" @click.stop="handleProfileClick" style="cursor:pointer;">
               {{ name }}
               <span v-if="online" class="status-dot"></span>
             </div>
@@ -130,8 +128,7 @@
 import api from '../services/api'
 
 export default {
-  name: 'PostCard',
-  props: {
+  name: 'PostCard',  props: {
     name: { type: String, required: true },
     address: { type: String, required: true },
     avatar: { type: String, required: true },
@@ -144,7 +141,8 @@ export default {
     createdAt: { type: String, required: true },
     postId: { type: Number, required: true },
     likedByMe: { type: Boolean, default: false },
-    commentsCount: { type: Number, default: 0 }
+    commentsCount: { type: Number, default: 0 },
+    profileToken: { type: String, default: '' }
   },
   data() {
     return {
@@ -300,13 +298,18 @@ export default {
       } else {
         this.$emit('like', this.postId);
       }
-    },
-    handleAddressClick() {
+    },    handleAddressClick() {
       // Si on est déjà sur /carte, émettre l'event, sinon router vers /carte avec query
       if (this.$route && this.$route.path === '/carte') {
         this.$emit('addressClicked', this.address);
       } else {
         this.$router.push({ path: '/carte', query: { address: this.address } });
+      }
+    },
+    handleProfileClick() {
+      // Navigation vers la page de profil de l'utilisateur
+      if (this.profileToken) {
+        this.$router.push(`/profile/${this.profileToken}`);
       }
     }
   },

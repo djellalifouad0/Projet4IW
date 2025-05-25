@@ -81,31 +81,41 @@ export default {
     }
   },
   async mounted() {
-    try {
-      const profileToken = this.$route.params.profileToken; // Get profileToken from the URL
-
-      // Fetch the logged-in user's data
-      const loggedInRes = await api.get('/auth/me');
-      this.loggedInUser = loggedInRes.data;
-
-      // Fetch the visited user's profile data
-      const res = await api.get(`/users/profile/${profileToken}`);
-      this.user = res.data;
-      this.edit.username = this.user.username;
-      this.edit.bio = this.user.bio || '';
-      this.edit.address = this.user.address || '';
-      this.edit.avatar = this.user.avatar || '';
-      this.edit.cover = this.user.cover || '';
-
-      // Fetch posts of the visited user
-      const postsRes = await api.get(`/skills?profileToken=${profileToken}`);
-      this.userPosts = postsRes.data;
-    } catch (e) {
-      this.user = null;
-      this.$router.push('/login');
+    await this.loadProfileData();
+  },  watch: {
+    // Surveiller les changements de route pour recharger le profil
+    '$route'(to, from) {
+      if (to.params.profileToken !== from.params.profileToken) {
+        this.loadProfileData();
+      }
     }
   },
   methods: {
+    async loadProfileData() {
+      try {
+        const profileToken = this.$route.params.profileToken; // Get profileToken from the URL
+
+        // Fetch the logged-in user's data
+        const loggedInRes = await api.get('/auth/me');
+        this.loggedInUser = loggedInRes.data;
+
+        // Fetch the visited user's profile data
+        const res = await api.get(`/users/profile/${profileToken}`);
+        this.user = res.data;
+        this.edit.username = this.user.username;
+        this.edit.bio = this.user.bio || '';
+        this.edit.address = this.user.address || '';
+        this.edit.avatar = this.user.avatar || '';
+        this.edit.cover = this.user.cover || '';
+
+        // Fetch posts of the visited user
+        const postsRes = await api.get(`/skills?profileToken=${profileToken}`);
+        this.userPosts = postsRes.data;
+      } catch (e) {
+        this.user = null;
+        this.$router.push('/login');
+      }
+    },
     onAvatarChange(e) {
       const file = e.target.files[0]
       if (file) {

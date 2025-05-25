@@ -17,8 +17,7 @@
       <div class="carte-list">
         <button class="btn-retour" @click="$router.push('/')">
           ← Retour à l'accueil
-        </button>
-        <PostCard
+        </button>        <PostCard
           v-for="(post, i) in posts"
           :key="i"
           :name="post.name"
@@ -34,6 +33,7 @@
           :postId="post.postId"
           :likedByMe="post.likedByMe"
           :commentsCount="post.commentsCount || 0"
+          :profileToken="post.profileToken || ''"
           @like="likePost"
           @dislike="dislikePost"
           @addressClicked="centerMapOnAddress"
@@ -94,7 +94,8 @@ export default {
             createdAt: skill.createdAt || '',
             postId: skill.id,
             likedByMe: skill.likedByMe || false,
-            commentsCount
+            commentsCount,
+            profileToken: skill.User?.profileToken || ''
           };
         } catch {
           return {
@@ -110,7 +111,8 @@ export default {
             createdAt: skill.createdAt || '',
             postId: skill.id,
             likedByMe: skill.likedByMe || false,
-            commentsCount: 0
+            commentsCount: 0,
+            profileToken: skill.User?.profileToken || ''
           };
         }
       }))
@@ -155,8 +157,7 @@ export default {
         const postsWithComments = await Promise.all(res.data.map(async skill => {
           try {
             const commentsRes = await api.get(`/skills/${skill.id}/comments`);
-            const commentsCount = Array.isArray(commentsRes.data) ? commentsRes.data.length : 0;
-            return {
+            const commentsCount = Array.isArray(commentsRes.data) ? commentsRes.data.length : 0;            return {
               name: skill.User?.username || 'Utilisateur inconnu',
               address: skill.location || '',
               avatar: skill.User?.avatar || 'https://randomuser.me/api/portraits/men/32.jpg',
@@ -169,10 +170,10 @@ export default {
               createdAt: skill.createdAt || '',
               postId: skill.id,
               likedByMe: skill.likedByMe || false,
-              commentsCount
+              commentsCount,
+              profileToken: skill.User?.profileToken || ''
             };
-          } catch {
-            return {
+          } catch {            return {
               name: skill.User?.username || 'Utilisateur inconnu',
               address: skill.location || '',
               avatar: skill.User?.avatar || 'https://randomuser.me/api/portraits/men/32.jpg',
@@ -185,7 +186,8 @@ export default {
               createdAt: skill.createdAt || '',
               postId: skill.id,
               likedByMe: skill.likedByMe || false,
-              commentsCount: 0
+              commentsCount: 0,
+              profileToken: skill.User?.profileToken || ''
             };
           }
         }))
