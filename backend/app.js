@@ -28,9 +28,11 @@ app.use('/api/conversations', conversationRoutes);
 // ➕ Swagger (dispo sur /api-docs)
 setupSwagger(app);
 
-// ➕ Sync DB
-sequelize.sync({ force: false }).then(() => {
-  console.log('🗄️  Base de données synchronisée');
+// ➕ Test de connexion DB sans synchronisation pour éviter les contraintes
+sequelize.authenticate().then(() => {
+  console.log('🗄️  Connexion à la base de données établie');
+}).catch((error) => {
+  console.error('❌ Erreur de connexion DB:', error.message);
 });
 
 module.exports = app;

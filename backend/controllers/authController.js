@@ -36,12 +36,15 @@ exports.login = async (req, res) => {
     const user = await User.findOne({ where: { email } });
 
     if (!user || !user.isActive)
-      return res.status(403).json({ error: 'Utilisateur désactivé ou inexistant' });
-
-    const match = await bcrypt.compare(password, user.password);
+      return res.status(403).json({ error: 'Utilisateur désactivé ou inexistant' });    const match = await bcrypt.compare(password, user.password);
     if (!match) return res.status(401).json({ error: 'Mot de passe incorrect' });
 
-    const token = jwt.sign({ id: user.id, role: user.role }, JWT_SECRET, { expiresIn: '2h' });
+    const token = jwt.sign({ 
+      id: user.id, 
+      userId: user.id, // Ajouter pour compatibilité WebSocket
+      role: user.role,
+      profileToken: user.profileToken 
+    }, JWT_SECRET, { expiresIn: '2h' });
 
     res.json({ token });
   } catch (error) {
@@ -64,9 +67,12 @@ exports.googleAuthCallback = async (req, res) => {
         role: 'user',
         password: null
       });
-    }
-
-    const token = jwt.sign({ id: user.id, role: user.role }, JWT_SECRET, { expiresIn: '2h' });
+    }    const token = jwt.sign({ 
+      id: user.id, 
+      userId: user.id, // Ajouter pour compatibilité WebSocket
+      role: user.role,
+      profileToken: user.profileToken 
+    }, JWT_SECRET, { expiresIn: '2h' });
 
     res.json({ token });
   } catch (error) {

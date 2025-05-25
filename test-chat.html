@@ -1,0 +1,210 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Test Chat WebSocket</title>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 20px; }
+        .chat-container { max-width: 600px; margin: 0 auto; }
+        .messages { height: 300px; border: 1px solid #ccc; overflow-y: auto; padding: 10px; margin: 10px 0; }
+        .message { margin: 5px 0; padding: 5px; background: #f0f0f0; border-radius: 5px; }
+        .my-message { background: #007bff; color: white; text-align: right; }
+        input, button { padding: 8px; margin: 5px; }
+        .status { color: #666; font-style: italic; }
+        .online { color: green; }
+        .typing { color: orange; }
+    </style>
+</head>
+<body>
+    <div class="chat-container">
+        <h1>Test Chat WebSocket</h1>
+        
+        <div>
+            <label>Token JWT:</label>
+            <input type="text" id="token" placeholder="Coller le token ici" style="width: 300px;">
+            <button onclick="connect()">Se connecter</button>
+        </div>
+        
+        <div id="status" class="status">Déconnecté</div>
+        
+        <div>
+            <label>Conversation ID:</label>
+            <input type="number" id="conversationId" value="1" min="1">
+            <button onclick="joinConversation()">Rejoindre</button>
+        </div>
+        
+        <div id="messages" class="messages"></div>
+        
+        <div>
+            <input type="text" id="messageInput" placeholder="Tapez votre message..." onkeyup="handleTyping(event)">
+            <button onclick="sendMessage()">Envoyer</button>
+        </div>
+        
+        <div>
+            <h3>Utilisateurs en ligne:</h3>
+            <div id="onlineUsers" class="status"></div>
+        </div>    </div>
+
+    <script src="https://cdn.socket.io/4.7.4/socket.io.min.js"></script>
+    <script>
+        let socket = null;
+        let currentConversationId = null;
+        let typingTimeout = null;
+
+        function connect() {
+            const token = document.getElementById('token').value;
+            if (!token) {
+                alert('Veuillez entrer un token JWT');
+                return;
+            }            socket = io('http://localhost:5000', {
+                auth: { token: token },
+                transports: ['websocket', 'polling'],
+                upgrade: true,
+                rememberUpgrade: false
+            });
+
+            socket.on('connect', () => {
+                document.getElementById('status').innerHTML = '<span class="online">✅ Connecté</span>';
+                socket.emit('get-online-users');
+            });
+
+            socket.on('disconnect', () => {
+                document.getElementById('status').innerHTML = '❌ Déconnecté';
+            });
+
+            socket.on('connect_error', (error) => {
+                document.getElementById('status').innerHTML = `❌ Erreur: ${error.message}`;
+            });
+
+            socket.on('new-message', (message) => {
+                addMessage(`[${message.senderName}]: ${message.content}`, false);
+            });
+
+            socket.on('user-typing', (data) => {
+                if (data.isTyping) {
+                    document.getElementById('status').innerHTML = `<span class="typing">⌨️ Utilisateur ${data.userId} tape...</span>`;
+                } else {
+                    document.getElementById('status').innerHTML = '<span class="online">✅ Connecté</span>';
+                }
+            });
+
+            socket.on('online-users', (users) => {
+                document.getElementById('onlineUsers').textContent = `${users.length} utilisateurs: ${users.join(', ')}`;
+            });
+
+            socket.on('user-connected', (data) => {
+                console.log('Utilisateur connecté:', data.userId);
+                socket.emit('get-online-users');
+            });
+
+            socket.on('user-disconnected', (data) => {
+                console.log('Utilisateur déconnecté:', data.userId);
+                socket.emit('get-online-users');
+            });
+        }
+
+        function joinConversation() {
+            if (!socket) {
+                alert('Connectez-vous d\'abord');
+                return;
+            }
+
+            const conversationId = parseInt(document.getElementById('conversationId').value);
+            if (currentConversationId) {
+                socket.emit('leave-conversation', currentConversationId);
+            }
+
+            currentConversationId = conversationId;
+            socket.emit('join-conversation', conversationId);
+            
+            document.getElementById('messages').innerHTML = '';
+            addMessage(`📋 Rejoint la conversation ${conversationId}`, false, 'status');
+        }
+
+        function sendMessage() {
+            if (!socket || !currentConversationId) {
+                alert('Connectez-vous et rejoignez une conversation d\'abord');
+                return;
+            }
+
+            const messageInput = document.getElementById('messageInput');
+            const content = messageInput.value.trim();
+            if (!content) return;
+
+            const message = {
+                id: Date.now(),
+                content: content,
+                senderName: 'TestUser',
+                createdAt: new Date().toISOString()
+            };
+
+            socket.emit('send-message', {
+                conversationId: currentConversationId,
+                message: message
+            });
+
+            addMessage(`[Moi]: ${content}`, true);
+            messageInput.value = '';
+        }
+
+        function handleTyping(event) {
+            if (event.key === 'Enter') {
+                sendMessage();
+                return;
+            }
+
+            if (!socket || !currentConversationId) return;
+
+            const isTyping = event.target.value.length > 0;
+            socket.emit('typing', {
+                conversationId: currentConversationId,
+                isTyping: isTyping
+            });
+
+            if (typingTimeout) clearTimeout(typingTimeout);
+            if (isTyping) {
+                typingTimeout = setTimeout(() => {
+                    socket.emit('typing', {
+                        conversationId: currentConversationId,
+                        isTyping: false
+                    });
+                }, 2000);
+            }
+        }
+
+        function addMessage(text, isMine, type = 'message') {
+            const messagesDiv = document.getElementById('messages');
+            const messageDiv = document.createElement('div');
+            messageDiv.className = `message ${isMine ? 'my-message' : ''} ${type}`;
+            messageDiv.textContent = text;
+            messagesDiv.appendChild(messageDiv);
+            messagesDiv.scrollTop = messagesDiv.scrollHeight;
+        }        // Générer un token de test valide
+        function generateTestToken(userId = 1) {
+            // Pour les tests, nous allons créer un token JWT simple
+            const header = { alg: "HS256", typ: "JWT" };
+            const payload = { 
+                userId: userId, 
+                profileToken: `test-profile-${userId}`,
+                iat: Math.floor(Date.now() / 1000),
+                exp: Math.floor(Date.now() / 1000) + (60 * 60) // 1 heure
+            };
+            
+            // Encoder en base64url (simulation simple pour les tests)
+            const encodedHeader = btoa(JSON.stringify(header)).replace(/[+\/=]/g, m => ({'+':'-', '/':'_', '=':''}[m] || m));
+            const encodedPayload = btoa(JSON.stringify(payload)).replace(/[+\/=]/g, m => ({'+':'-', '/':'_', '=':''}[m] || m));
+            
+            // Signature simple (ne pas utiliser en production)
+            const signature = btoa(`${encodedHeader}.${encodedPayload}.SECRET_KEY`).substring(0, 43);
+            
+            return `${encodedHeader}.${encodedPayload}.${signature}`;
+        }        // Remplir automatiquement avec un token de test valide
+        window.onload = function() {
+            // Token JWT valide généré avec notre clé secrète
+            const validToken = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOjEsInByb2ZpbGVUb2tlbiI6InRlc3QtcHJvZmlsZS0xIiwiaWF0IjoxNzQ4MTk3NjI1LCJleHAiOjE3NDgyMDEyMjV9.CmXdshncr6LtxH0fIyJ4ZMHAiwjs-WK5eZ0DPgDOtF4';
+            document.getElementById('token').value = validToken;
+        };
+    </script>
+</body>
+</html>

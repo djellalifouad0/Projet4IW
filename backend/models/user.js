@@ -97,10 +97,7 @@ const User = sequelize.define('User', {
       if (user.changed('profileToken')) {
         throw new Error('profileToken cannot be updated');
       }
-    }
-  }
+    }  }
 });
-
-sequelize.sync({ alter: true });
 
 module.exports = User;

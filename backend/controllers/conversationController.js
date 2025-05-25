@@ -310,9 +310,7 @@ exports.sendMessage = async (req, res) => {
     await conversation.update({
       lastMessageId: message.id,
       lastMessageAt: new Date()
-    });
-
-    // Récupérer le message avec les informations de l'expéditeur
+    });    // Récupérer le message avec les informations de l'expéditeur
     const messageWithSender = await Message.findByPk(message.id, {
       include: [
         {
@@ -322,6 +320,19 @@ exports.sendMessage = async (req, res) => {
         }
       ]
     });
+
+    // Émettre le message via WebSocket à tous les participants de la conversation
+    const io = req.app.get('socketio');
+    if (io) {
+      io.to(`conversation-${conversationId}`).emit('new-message', {
+        id: messageWithSender.id,
+        content: messageWithSender.content,
+        senderId: messageWithSender.senderId,
+        senderName: messageWithSender.sender.username,
+        createdAt: messageWithSender.createdAt,
+        fromMe: false // Pour les autres participants
+      });
+    }
 
     res.status(201).json({
       id: messageWithSender.id,

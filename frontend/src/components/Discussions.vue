@@ -9,29 +9,55 @@
         <button @click="showNewDiscussion = false">Annuler</button>
       </div>
       <div v-if="loading" class="loading">Chargement...</div>
-      <div v-if="error" class="error">{{ error }}</div>
-      <div v-for="conv in conversations" :key="conv.id" class="discussion-item" :class="{ active: selectedConversation && selectedConversation.id === conv.id }" @click="selectConversation(conv)">
-        <img :src="conv.avatar" class="avatar" />
+      <div v-if="error" class="error">{{ error }}</div>      <div v-for="conv in conversations" :key="conv.id" class="discussion-item" :class="{ active: selectedConversation && selectedConversation.id === conv.id }" @click="selectConversation(conv)">
+        <div class="avatar-container">
+          <img :src="conv.avatar" class="avatar" />
+          <div v-if="isUserOnline(conv.userId)" class="online-indicator"></div>
+        </div>
         <div class="info">
           <div class="name">{{ conv.name }}</div>
           <div class="last-message">{{ conv.lastMessage }}</div>
         </div>
       </div>
     </div>
-    <div class="chat-window">
-      <template v-if="selectedConversation">
+    <div class="chat-window">      <template v-if="selectedConversation">
         <div class="chat-header">
-          <img :src="selectedConversation.avatar" class="avatar" />
-          <span class="name">{{ selectedConversation.name }}</span>
-        </div>
-        <div class="chat-messages">
+          <div class="avatar-container">
+            <img :src="selectedConversation.avatar" class="avatar" />
+            <div v-if="isUserOnline(selectedConversation.userId)" class="online-indicator"></div>
+          </div>
+          <div class="user-info">
+            <span class="name">{{ selectedConversation.name }}</span>
+            <span v-if="isUserOnline(selectedConversation.userId)" class="status online">En ligne</span>
+            <span v-else class="status offline">Hors ligne</span>
+          </div>
+        </div>        <div class="chat-messages">
           <div v-for="msg in messages" :key="msg.id" :class="['chat-message', msg.fromMe ? 'me' : 'other']">
             <span>{{ msg.text }}</span>
+            <div v-if="msg.fromMe" class="message-status">
+              <span v-if="msg.status === 'sent'" class="status-icon">📤</span>
+              <span v-else-if="msg.status === 'delivered'" class="status-icon">✓</span>
+              <span v-else-if="msg.status === 'read'" class="status-icon">✓✓</span>
+            </div>
           </div>
-        </div>
-        <div class="chat-input">
-          <input v-model="newMessage" @keyup.enter="sendMessage" placeholder="Écrire un message..." />
-          <button @click="sendMessage">Envoyer</button>
+          <!-- Indicateur de frappe -->
+          <div v-if="typingUsers.size > 0" class="typing-indicator">
+            <span>{{ getTypingText() }}</span>
+            <div class="typing-dots">
+              <span></span>
+              <span></span>
+              <span></span>
+            </div>
+          </div>
+        </div>        <div class="chat-input">
+          <input 
+            v-model="newMessage" 
+            @keyup.enter="sendMessage" 
+            @input="handleTyping"
+            :placeholder="getInputPlaceholder()" 
+            :disabled="false"
+          />
+          <button @click="sendMessage" :disabled="!newMessage.trim()">Envoyer</button>
         </div>
       </template>
       <template v-else>
@@ -45,11 +71,11 @@
 
 <script>
 import api from '../services/api'
+import socketService from '../services/socket'
 
 export default {
   name: 'Discussions',
-  data() {
-    return {
+  data() {    return {
       conversations: [],
       selectedConversation: null,
       messages: [],
@@ -58,19 +84,49 @@ export default {
       newDiscussionName: '',
       newDiscussionMessage: '',
       loading: false,
-      error: ''
+      error: '',
+      typingUsers: new Set(),
+      typingTimeout: null,
+      onlineUsers: new Set(),
+      reconnecting: false
     }
   },  async created() {
+    await this.initializeWebSocket();
     await this.loadConversations();
   },
   async activated() {
     // Recharger les conversations quand le composant devient actif (utile avec keep-alive)
     await this.loadConversations();
-  },
-  watch: {
+  },  beforeUnmount() {
+    // Nettoyer les listeners WebSocket
+    this.cleanupSocketListeners();
+    if (this.selectedConversation) {
+      socketService.leaveConversation(this.selectedConversation.id);
+    }
+    // Nettoyer le timeout de frappe
+    if (this.typingTimeout) {
+      clearTimeout(this.typingTimeout);
+    }
+    // Déconnecter le WebSocket
+    socketService.disconnect();
+  },watch: {
     // Surveiller les changements de route pour recharger les conversations
     '$route'() {
       this.loadConversations();
+    },
+    // Surveiller les changements de conversation sélectionnée
+    selectedConversation(newConv, oldConv) {
+      if (oldConv) {
+        socketService.leaveConversation(oldConv.id);
+        this.typingUsers.clear();
+      }
+      if (newConv) {
+        socketService.joinConversation(newConv.id);
+        this.typingUsers.clear();
+      }
+    },    // Surveiller les changements du champ de saisie pour l'indicateur de frappe
+    newMessage(newVal, oldVal) {
+      // Logique déplacée vers handleTyping pour éviter les conflits
     }
   },
   methods: {
@@ -78,12 +134,12 @@ export default {
       try {
         this.loading = true;
         this.error = '';
-        const response = await api.get('/conversations');
-        this.conversations = response.data.map(conv => ({
+        const response = await api.get('/conversations');        this.conversations = response.data.map(conv => ({
           id: conv.id,
           name: conv.otherUser.username,
           avatar: conv.otherUser.avatar || 'https://randomuser.me/api/portraits/lego/1.jpg',
           profileToken: conv.otherUser.profileToken,
+          userId: conv.otherUser.id,
           lastMessage: conv.lastMessage ? conv.lastMessage.content : 'Aucun message',
           lastMessageAt: conv.lastMessageAt
         }));
@@ -106,13 +162,13 @@ export default {
       try {
         this.selectedConversation = conv;
         this.error = '';
-        const response = await api.get(`/conversations/${conv.id}/messages`);
-        this.messages = response.data.map(msg => ({
+        const response = await api.get(`/conversations/${conv.id}/messages`);        this.messages = response.data.map(msg => ({
           id: msg.id,
           text: msg.content,
           fromMe: msg.fromMe,
           createdAt: msg.createdAt,
-          sender: msg.sender
+          sender: msg.sender,
+          status: msg.fromMe ? 'delivered' : null
         }));
         
         // Scroll to bottom after loading messages
@@ -126,28 +182,40 @@ export default {
         this.error = 'Erreur lors du chargement des messages';
         console.error('Error loading messages:', error);
       }
-    },
-    async sendMessage() {
+    },    async sendMessage() {
       if (this.newMessage.trim() && this.selectedConversation) {
         try {
           this.error = '';
-          const response = await api.post(`/conversations/${this.selectedConversation.id}/messages`, {
-            content: this.newMessage
-          });
+          const messageContent = this.newMessage;
           
-          // Ajouter le nouveau message à la liste
+          const response = await api.post(`/conversations/${this.selectedConversation.id}/messages`, {
+            content: messageContent
+          });
+            // Ajouter le nouveau message à la liste localement
           this.messages.push({
             id: response.data.id,
             text: response.data.content,
             fromMe: true,
             createdAt: response.data.createdAt,
-            sender: response.data.sender
+            sender: response.data.sender,
+            status: 'sent'
           });
+          
+          // Envoyer via WebSocket pour notification en temps réel
+          if (socketService.isConnected()) {
+            socketService.sendMessage(this.selectedConversation.id, {
+              id: response.data.id,
+              content: response.data.content,
+              senderName: response.data.sender.username,
+              createdAt: response.data.createdAt
+            });
+          }
           
           // Mettre à jour le dernier message dans la liste des conversations
           const convIndex = this.conversations.findIndex(c => c.id === this.selectedConversation.id);
           if (convIndex !== -1) {
-            this.conversations[convIndex].lastMessage = this.newMessage;
+            this.conversations[convIndex].lastMessage = messageContent;
+            this.conversations[convIndex].lastMessageAt = response.data.createdAt;
           }
           
           this.newMessage = '';
@@ -180,8 +248,154 @@ export default {
           this.error = 'Erreur lors de la création de la discussion';
           console.error('Error creating discussion:', error);
         }
+      }    },    async initializeWebSocket() {
+      const token = localStorage.getItem('token');
+      if (!token) {
+        console.error('❌ Aucun token trouvé pour l\'authentification WebSocket');
+        this.error = 'Vous devez être connecté pour utiliser le chat';
+        return;
       }
-    }
+
+      console.log('🔌 Initialisation de la connexion WebSocket...');
+      
+      try {
+        await socketService.connect(token);
+        console.log('✅ WebSocket initialisé avec succès');
+        this.setupSocketListeners();
+        this.error = ''; // Effacer les erreurs précédentes
+      } catch (error) {
+        console.error('❌ Erreur lors de l\'initialisation WebSocket:', error);
+        if (error.message.includes('Token invalide')) {
+          this.error = 'Session expirée, veuillez vous reconnecter';
+          // Optionnel : rediriger vers la page de connexion
+          // this.$router.push('/login');
+        } else {
+          this.error = 'Erreur de connexion au serveur de discussion';
+        }
+      }
+    },setupSocketListeners() {
+      socketService.onNewMessage(this.handleNewMessage);
+      socketService.onUserTyping(this.handleUserTyping);
+      socketService.onOnlineUsers(this.handleOnlineUsers);
+      socketService.onUserConnected(this.handleUserConnected);
+      socketService.onUserDisconnected(this.handleUserDisconnected);
+      socketService.onMessageStatus(this.handleMessageStatus);
+      
+      // Demander la liste des utilisateurs en ligne
+      socketService.getOnlineUsers();
+    },cleanupSocketListeners() {
+      socketService.offNewMessage();
+      socketService.offUserTyping();
+      socketService.removeAllListeners();
+    },handleNewMessage(message) {
+      console.log('Nouveau message reçu:', message);
+      
+      // Ajouter le message à la conversation sélectionnée
+      if (this.selectedConversation && this.selectedConversation.id == message.conversationId) {
+        this.messages.push({
+          id: message.id,
+          text: message.content,
+          fromMe: message.senderId == this.$store?.state?.user?.id || false,
+          createdAt: message.createdAt,
+          sender: { username: message.senderName }
+        });
+        
+        // Scroll to bottom
+        this.$nextTick(() => {
+          const messagesContainer = this.$el.querySelector('.chat-messages');
+          if (messagesContainer) {
+            messagesContainer.scrollTop = messagesContainer.scrollHeight;
+          }
+        });
+      }
+      
+      // Mettre à jour la liste des conversations si nécessaire
+      const convIndex = this.conversations.findIndex(c => c.id == message.conversationId);
+      if (convIndex !== -1) {
+        this.conversations[convIndex].lastMessage = message.content;
+        this.conversations[convIndex].lastMessageAt = message.createdAt;
+        
+        // Trier les conversations par dernier message
+        this.conversations.sort((a, b) => new Date(b.lastMessageAt) - new Date(a.lastMessageAt));
+      }
+    },    handleUserTyping({ userId, isTyping, conversationId }) {
+      if (this.selectedConversation && this.selectedConversation.id == conversationId) {
+        if (isTyping) {
+          this.typingUsers.add(userId);
+        } else {
+          this.typingUsers.delete(userId);
+        }
+        
+        // Forcer la mise à jour du DOM pour l'indicateur de frappe
+        this.$nextTick(() => {
+          const messagesContainer = this.$el.querySelector('.chat-messages');
+          if (messagesContainer && this.typingUsers.size > 0) {
+            messagesContainer.scrollTop = messagesContainer.scrollHeight;
+          }
+        });
+      }
+    },
+    handleOnlineUsers(users) {
+      this.onlineUsers = new Set(users);
+    },
+
+    handleUserConnected(data) {
+      this.onlineUsers.add(data.userId);
+    },
+
+    handleUserDisconnected(data) {
+      this.onlineUsers.delete(data.userId);
+    },    isUserOnline(userId) {
+      return this.onlineUsers.has(userId);
+    },
+    getInputPlaceholder() {
+      if (!this.selectedConversation) {
+        return "Écrire un message...";
+      }
+      
+      if (this.isUserOnline(this.selectedConversation.userId)) {
+        return "Écrire un message...";
+      } else {
+        return "Écrire un message (utilisateur hors ligne)...";
+      }
+    },
+    getTypingText() {
+      if (this.typingUsers.size === 1) {
+        return "En train d'écrire...";
+      } else if (this.typingUsers.size > 1) {
+        return `${this.typingUsers.size} personnes écrivent...`;
+      }
+      return "";
+    },
+    handleTyping() {
+      if (this.selectedConversation) {
+        if (this.newMessage.length > 0) {
+          socketService.sendTyping(this.selectedConversation.id, true);
+          
+          if (this.typingTimeout) {
+            clearTimeout(this.typingTimeout);
+          }
+          
+          this.typingTimeout = setTimeout(() => {
+            if (this.selectedConversation) {
+              socketService.sendTyping(this.selectedConversation.id, false);
+            }
+          }, 2000);
+        } else {
+          socketService.sendTyping(this.selectedConversation.id, false);
+          if (this.typingTimeout) {
+            clearTimeout(this.typingTimeout);
+          }
+        }
+      }
+    },
+    handleMessageStatus(data) {
+      const { messageId, status } = data;
+      const messageIndex = this.messages.findIndex(msg => msg.id === messageId);
+      if (messageIndex !== -1) {
+        this.messages[messageIndex].status = status;
+      }
+    },
   }
 }
 </script>
@@ -287,6 +501,20 @@ body, html, #app {
   background: #ffe7c2;
   box-shadow: 0 2px 8px #ecbc76aa;
 }
+.avatar-container {
+  position: relative;
+  display: inline-block;
+}
+.online-indicator {
+  position: absolute;
+  bottom: 2px;
+  right: 2px;
+  width: 12px;
+  height: 12px;
+  background: #4CAF50;
+  border: 2px solid #fff;
+  border-radius: 50%;
+}
 .avatar {
   width: 48px;
   height: 48px;
@@ -308,6 +536,21 @@ body, html, #app {
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
+}
+.user-info {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+.status {
+  font-size: 0.85rem;
+  font-weight: 500;
+}
+.status.online {
+  color: #4CAF50;
+}
+.status.offline {
+  color: #999;
 }
 .chat-window {
   flex: 1;
@@ -351,6 +594,49 @@ body, html, #app {
   color: #28303F;
   align-self: flex-end;
 }
+
+/* Indicateur de frappe */
+.typing-indicator {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 12px;
+  color: #666;
+  font-style: italic;
+  font-size: 0.9rem;
+}
+
+.typing-dots {
+  display: flex;
+  gap: 3px;
+}
+
+.typing-dots span {
+  width: 6px;
+  height: 6px;
+  background: #999;
+  border-radius: 50%;
+  animation: typing-dot 1.4s infinite ease-in-out;
+}
+
+.typing-dots span:nth-child(1) {
+  animation-delay: -0.32s;
+}
+
+.typing-dots span:nth-child(2) {
+  animation-delay: -0.16s;
+}
+
+@keyframes typing-dot {
+  0%, 80%, 100% {
+    transform: scale(0.8);
+    opacity: 0.5;
+  }
+  40% {
+    transform: scale(1);
+    opacity: 1;
+  }
+}
 .chat-input {
   display: flex;
   gap: 8px;
@@ -363,6 +649,17 @@ body, html, #app {
   border-radius: 10px;
   border: 1.5px solid #ecbc76;
   font-size: 1rem;
+  cursor: text;
+}
+.chat-input input:disabled {
+  background: #f5f5f5;
+  color: #999;
+  cursor: not-allowed;
+}
+.chat-input input:focus {
+  outline: none;
+  border-color: #d4a562;
+  cursor: text;
 }
 .chat-input button {
   background: #ecbc76;
@@ -375,8 +672,12 @@ body, html, #app {
   cursor: pointer;
   transition: background 0.15s;
 }
-.chat-input button:hover {
-  background: #e4a94f;
+.chat-input button:disabled {
+  background: #ccc;
+  cursor: not-allowed;
+}
+.chat-input button:disabled:hover {
+  background: #ccc;
 }
 .chat-placeholder {
   flex: 1;
@@ -387,6 +688,15 @@ body, html, #app {
   text-align: center;
   color: #888;
   font-size: 1.1rem;
+}
+.message-status {
+  font-size: 0.75rem;
+  margin-top: 2px;
+  text-align: right;
+}
+
+.status-icon {
+  opacity: 0.7;
 }
 @media (max-width: 900px) {
   .discussions-page {
