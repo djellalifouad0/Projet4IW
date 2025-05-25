@@ -1,4 +1,21 @@
+const crypto = require('crypto');
 const User = require('../models/user');
+
+// Generate a unique profile token for a user
+function generateProfileToken() {
+  return crypto.randomBytes(16).toString('hex');
+}
+
+// Update or create user logic
+User.beforeCreate((user) => {
+  user.profileToken = generateProfileToken();
+});
+
+User.beforeUpdate((user) => {
+  if (!user.profileToken) {
+    user.profileToken = generateProfileToken();
+  }
+});
 
 // ✅ Récupérer tous les utilisateurs (admin)
 exports.getAllUsers = async (req, res) => {
@@ -60,5 +77,19 @@ exports.updateUserProfile = async (req, res) => {
     res.json({ message: 'Profil mis à jour avec succès', user });
   } catch (error) {
     res.status(500).json({ error: 'Erreur mise à jour du profil' });
+  }
+};
+
+// ✅ Récupérer un utilisateur par son token de profil
+exports.getUserByProfileToken = async (req, res) => {
+  try {
+    const { profileToken } = req.params;
+    const user = await User.findOne({ where: { profileToken } });
+    if (!user) {
+      return res.status(404).json({ error: 'Utilisateur non trouvé' });
+    }
+    res.json(user);
+  } catch (error) {
+    res.status(500).json({ error: 'Erreur serveur' });
   }
 };

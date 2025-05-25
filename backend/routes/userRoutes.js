@@ -135,4 +135,18 @@ router.get('/users/me', authenticate, (req, res) => {
  */
 router.put('/profile', authenticate, userController.updateUserProfile);
 
+/**
+ * @swagger
+ * /api/users/profile/{profileToken}:
+ *   get:
+ *     summary: Récupérer un utilisateur par son profileToken
+ *     tags: [Users]
+ *     responses:
+ *       200:
+ *         description: Utilisateur récupéré avec succès
+ *       404:
+ *         description: Utilisateur non trouvé
+ */
+router.get('/users/profile/:profileToken', userController.getUserByProfileToken);
+
 module.exports = router;

@@ -1,5 +1,6 @@
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
+const crypto = require('crypto');
 const User = require('../models/user');
 
 const JWT_SECRET = 'votre_clé_secrète'; // Remplace avec un .env sécurisé
@@ -13,11 +14,13 @@ exports.register = async (req, res) => {
     if (existingUser) return res.status(400).json({ error: 'Utilisateur déjà existant' });
 
     const hashedPassword = await bcrypt.hash(password, 10);
+    const profileToken = crypto.randomBytes(16).toString('hex');
     const user = await User.create({
       username,
       email,
       password: hashedPassword,
-      role: role || 'user'
+      role: role || 'user',
+      profileToken
     });
 
     res.status(201).json({ message: 'Compte créé', user });

@@ -36,6 +36,9 @@
  *         cover:
  *           type: string
  *           description: URL de l'image de couverture de l'utilisateur
+ *         profileToken:
+ *           type: string
+ *           description: Token opaque pour les URLs de profil
  *       example:
  *         id: 1
  *         username: "fouad"
@@ -82,6 +85,19 @@ const User = sequelize.define('User', {
     type: DataTypes.STRING,
     allowNull: true,
     description: 'URL of the user cover image'
+  },
+  profileToken: {
+    type: DataTypes.STRING,
+    allowNull: false,
+    unique: true
+  }
+}, {
+  hooks: {
+    beforeUpdate: (user) => {
+      if (user.changed('profileToken')) {
+        throw new Error('profileToken cannot be updated');
+      }
+    }
   }
 });
 

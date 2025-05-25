@@ -46,7 +46,7 @@
         </router-link>
       </li>
     </ul>
-    <div class="navbar-profile" @click="$router.push('/profile')" style="cursor:pointer; position: relative;">
+    <div class="navbar-profile" @click="console.log('Profile link:', getProfileLink()); $router.push(getProfileLink())" style="cursor:pointer; position: relative;">
       <img class="avatar" :src="user?.avatar || 'https://randomuser.me/api/portraits/men/32.jpg'" alt="avatar" />
       <div class="profile-info">
         <span class="username" :title="user ? user.username : ''">{{ user ? user.username : 'Non connecté' }}</span>
@@ -72,17 +72,18 @@ export default {
     }
   },
   async mounted() {
-    const token = localStorage.getItem('token')
+    const token = localStorage.getItem('token');
     if (!token) {
-      this.$router.push('/login')
-      return
+      this.$router.push('/login');
+      return;
     }
     try {
-      const res = await api.get('/auth/me')
-      this.user = res.data
+      const res = await api.get('/auth/me');
+      this.user = res.data;
+      console.log('User data:', this.user); // Debugging line to verify user data
     } catch (e) {
-      this.user = null
-      this.$router.push('/login')
+      this.user = null;
+      this.$router.push('/login');
     }
     document.addEventListener('click', this.handleClickOutside)
   },
@@ -103,7 +104,13 @@ export default {
       if (this.showMenu && !menu.contains(e.target) && !dots.contains(e.target)) {
         this.showMenu = false;
       }
-    }
+    },
+    getProfileLink() {
+      if (this.user && this.user.profileToken) {
+        return `/profile/${this.user.profileToken}`;
+      }
+      return '/profile';
+    },
   }
 }
 </script>

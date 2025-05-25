@@ -80,19 +80,20 @@ export default {
   },
   async mounted() {
     try {
-      const res = await api.get('/auth/me')
-      this.user = res.data
-      this.edit.username = this.user.username
-      this.edit.bio = this.user.bio || ''
-      this.edit.address = this.user.address || ''
-      this.edit.avatar = this.user.avatar || ''
-      this.edit.cover = this.user.cover || ''
-      // Récupérer les posts de l'utilisateur
-      const postsRes = await api.get(`/skills?userId=${this.user.id}`)
-      this.userPosts = postsRes.data
+      const profileToken = this.$route.params.profileToken; // Get profileToken from the URL
+      const res = await api.get(`/users/profile/${profileToken}`); // Fetch profile data using profileToken
+      this.user = res.data;
+      this.edit.username = this.user.username;
+      this.edit.bio = this.user.bio || '';
+      this.edit.address = this.user.address || '';
+      this.edit.avatar = this.user.avatar || '';
+      this.edit.cover = this.user.cover || '';
+      // Fetch posts of the user
+      const postsRes = await api.get(`/skills?profileToken=${profileToken}`);
+      this.userPosts = postsRes.data;
     } catch (e) {
-      this.user = null
-      this.$router.push('/login')
+      this.user = null;
+      this.$router.push('/login');
     }
   },
   methods: {
