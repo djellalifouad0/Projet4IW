@@ -20,8 +20,7 @@
         </div>
       </div>
     </div>
-    <div class="chat-window">      <template v-if="selectedConversation">
-        <div class="chat-header">
+    <div class="chat-window">      <template v-if="selectedConversation">        <div class="chat-header">
           <div class="avatar-container">
             <img :src="selectedConversation.avatar" class="avatar" />
             <div v-if="isUserOnline(selectedConversation.userId)" class="online-indicator"></div>
@@ -31,7 +30,44 @@
             <span v-if="isUserOnline(selectedConversation.userId)" class="status online">En ligne</span>
             <span v-else class="status offline">Hors ligne</span>
           </div>
-        </div>        <div class="chat-messages">
+        </div>
+
+        <!-- Section Rendez-vous en attente -->
+        <div v-if="pendingAppointments.length > 0" class="pending-appointments">
+          <div class="pending-appointments-title">
+            <span>📅 Rendez-vous en attente ({{ pendingAppointments.length }})</span>
+          </div>
+          <div v-for="appointment in pendingAppointments" :key="appointment.id" class="pending-appointment-card">
+            <div class="appointment-info">
+              <div class="appointment-title">{{ appointment.title }}</div>
+              <div class="appointment-date">{{ formatAppointmentDate(appointment.appointmentDate) }}</div>
+              <div v-if="appointment.location" class="appointment-location">📍 {{ appointment.location }}</div>
+              <div v-if="appointment.description" class="appointment-description">{{ appointment.description }}</div>
+              <div class="appointment-requester">
+                Proposé par {{ appointment.requester.username }}
+              </div>
+            </div>
+            <div v-if="isAppointmentReceiver(appointment)" class="appointment-actions">
+              <button 
+                @click="updateAppointmentStatus(appointment.id, 'accepted')"
+                class="accept-btn"
+                title="Accepter ce rendez-vous"
+              >
+                ✓ Accepter
+              </button>
+              <button 
+                @click="updateAppointmentStatus(appointment.id, 'declined')"
+                class="decline-btn"
+                title="Refuser ce rendez-vous"
+              >
+                ✗ Refuser
+              </button>
+            </div>
+            <div v-else class="appointment-status-waiting">
+              En attente de réponse...
+            </div>
+          </div>
+        </div><div class="chat-messages">
           <div v-for="msg in messages" :key="msg.id" :class="['chat-message', msg.fromMe ? 'me' : 'other', msg.isAppointment ? 'appointment-message' : '']">
             <span>{{ msg.text }}</span>
             <div v-if="msg.fromMe" class="message-status">
@@ -167,7 +203,8 @@ export default {
         time: '',
         location: '',
         description: ''
-      }
+      },
+      conversationAppointments: [] // Nouveau: rendez-vous de la conversation actuelle
     }
   },
   computed: {
@@ -179,6 +216,12 @@ export default {
       return this.appointmentForm.title.trim() && 
              this.appointmentForm.date && 
              this.appointmentForm.time;
+    },
+    // Nouveau: rendez-vous en attente pour la conversation actuelle
+    pendingAppointments() {
+      return this.conversationAppointments.filter(appointment => 
+        appointment.status === 'pending'
+      );
     }
   },
   async created() {
@@ -248,12 +291,14 @@ export default {
       } finally {
         this.loading = false;
       }
-    },
-    async selectConversation(conv) {
+    },    async selectConversation(conv) {
       try {
         this.selectedConversation = conv;
         this.error = '';
-        const response = await api.get(`/conversations/${conv.id}/messages`);        this.messages = response.data.map(msg => ({
+        
+        // Charger les messages
+        const messagesResponse = await api.get(`/conversations/${conv.id}/messages`);        
+        this.messages = messagesResponse.data.map(msg => ({
           id: msg.id,
           text: msg.content,
           fromMe: msg.fromMe,
@@ -261,6 +306,9 @@ export default {
           sender: msg.sender,
           status: msg.fromMe ? 'delivered' : null
         }));
+
+        // Charger les rendez-vous de la conversation
+        await this.loadConversationAppointments(conv.id);
         
         // Scroll to bottom after loading messages
         this.$nextTick(() => {
@@ -273,7 +321,7 @@ export default {
         this.error = 'Erreur lors du chargement des messages';
         console.error('Error loading messages:', error);
       }
-    },    async sendMessage() {
+    },async sendMessage() {
       if (this.newMessage.trim() && this.selectedConversation) {
         try {
           this.error = '';
@@ -488,6 +536,71 @@ export default {
       }
     },
     // Méthodes pour les rendez-vous
+    async loadConversationAppointments(conversationId) {
+      try {
+        const response = await api.get(`/appointments/conversation/${conversationId}`);
+        this.conversationAppointments = response.data;
+      } catch (error) {
+        console.error('Error loading conversation appointments:', error);
+        this.conversationAppointments = [];
+      }
+    },
+    async updateAppointmentStatus(appointmentId, status) {
+      try {
+        await api.patch(`/appointments/${appointmentId}/status`, { status });
+        
+        // Recharger les rendez-vous de la conversation
+        if (this.selectedConversation) {
+          await this.loadConversationAppointments(this.selectedConversation.id);
+        }
+        
+        // Ajouter un message de confirmation dans le chat
+        const statusMessages = {
+          accepted: 'a accepté',
+          declined: 'a refusé'
+        };
+        
+        const appointment = this.conversationAppointments.find(apt => apt.id === appointmentId);
+        if (appointment) {
+          const systemMessage = `📅 Vous avez ${statusMessages[status]} le rendez-vous "${appointment.title}"`;
+          
+          this.messages.push({
+            id: Date.now(),
+            text: systemMessage,
+            fromMe: true,
+            createdAt: new Date().toISOString(),
+            sender: { username: 'Système' },
+            status: 'delivered',
+            isAppointment: true
+          });
+
+          // Scroll to bottom
+          this.$nextTick(() => {
+            const messagesContainer = this.$el.querySelector('.chat-messages');
+            if (messagesContainer) {
+              messagesContainer.scrollTop = messagesContainer.scrollHeight;
+            }
+          });
+        }
+      } catch (error) {
+        this.error = 'Erreur lors de la mise à jour du rendez-vous';
+        console.error('Error updating appointment status:', error);
+      }
+    },
+    formatAppointmentDate(dateString) {
+      const date = new Date(dateString);
+      return date.toLocaleDateString('fr-FR', {
+        weekday: 'short',
+        month: 'short',
+        day: 'numeric',
+        hour: '2-digit',
+        minute: '2-digit'
+      });
+    },
+    isAppointmentReceiver(appointment) {
+      const currentUserId = this.$store?.state?.user?.id;
+      return appointment.receiverId === currentUserId;
+    },
     closeAppointmentModal() {
       this.showAppointmentModal = false;
       this.resetAppointmentForm();
@@ -500,8 +613,7 @@ export default {
         location: '',
         description: ''
       };
-    },
-    async createAppointment() {
+    },    async createAppointment() {
       if (!this.isAppointmentFormValid || !this.selectedConversation) {
         return;
       }
@@ -525,6 +637,9 @@ export default {
         
         // Fermer le modal et réinitialiser le formulaire
         this.closeAppointmentModal();
+
+        // Recharger les rendez-vous de la conversation
+        await this.loadConversationAppointments(this.selectedConversation.id);
         
         // Ajouter un message système dans la conversation pour informer du rendez-vous
         const systemMessage = `📅 Rendez-vous proposé: "${this.appointmentForm.title}" le ${new Date(appointmentDateTime).toLocaleDateString('fr-FR')} à ${this.appointmentForm.time}`;
@@ -991,6 +1106,123 @@ body, html, #app {
 
 .chat-message.appointment-message.me {
   background: linear-gradient(135deg, #4CAF50, #45a049) !important;
+}
+
+/* Styles pour les rendez-vous en attente */
+.pending-appointments {
+  background: #fff9e6;
+  border-bottom: 1px solid #f0d08a;
+  padding: 16px 24px;
+  max-height: 300px;
+  overflow-y: auto;
+}
+
+.pending-appointments-title {
+  font-weight: 600;
+  color: #b8860b;
+  margin-bottom: 12px;
+  font-size: 0.95rem;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.pending-appointment-card {
+  background: white;
+  border: 1px solid #e6cc80;
+  border-radius: 8px;
+  padding: 12px;
+  margin-bottom: 8px;
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 12px;
+}
+
+.pending-appointment-card:last-child {
+  margin-bottom: 0;
+}
+
+.appointment-info {
+  flex: 1;
+}
+
+.appointment-title {
+  font-weight: 600;
+  color: #28303F;
+  margin-bottom: 4px;
+  font-size: 1rem;
+}
+
+.appointment-date {
+  color: #b8860b;
+  font-weight: 500;
+  font-size: 0.9rem;
+  margin-bottom: 2px;
+}
+
+.appointment-location {
+  color: #666;
+  font-size: 0.85rem;
+  margin-bottom: 2px;
+}
+
+.appointment-description {
+  color: #666;
+  font-size: 0.85rem;
+  font-style: italic;
+  margin-bottom: 4px;
+}
+
+.appointment-requester {
+  color: #888;
+  font-size: 0.8rem;
+}
+
+.appointment-actions {
+  display: flex;
+  gap: 6px;
+  flex-shrink: 0;
+}
+
+.accept-btn {
+  background: #4CAF50;
+  color: white;
+  border: none;
+  border-radius: 6px;
+  padding: 6px 12px;
+  font-size: 0.85rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+
+.accept-btn:hover {
+  background: #45a049;
+}
+
+.decline-btn {
+  background: #f44336;
+  color: white;
+  border: none;
+  border-radius: 6px;
+  padding: 6px 12px;
+  font-size: 0.85rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+
+.decline-btn:hover {
+  background: #da190b;
+}
+
+.appointment-status-waiting {
+  color: #888;
+  font-size: 0.85rem;
+  font-style: italic;
+  align-self: center;
+  flex-shrink: 0;
 }
 
 @media (max-width: 900px) {

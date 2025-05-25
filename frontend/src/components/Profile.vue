@@ -21,66 +21,85 @@
         </div>
       </div>    </div>
     
-    <!-- Section Rendez-vous -->
-    <div class="profile-section" v-if="user?.profileToken === loggedInUser?.profileToken && appointments.length">
-      <h3>Mes rendez-vous</h3>
-      <div class="appointments-list">
-        <div v-for="appointment in appointments" :key="appointment.id" class="appointment-card">
-          <div class="appointment-header">
-            <h4>{{ appointment.title }}</h4>
-            <span :class="['appointment-status', appointment.status]">
-              {{ getStatusText(appointment.status) }}
-            </span>
-          </div>
-          <div class="appointment-details">
-            <div class="appointment-date">
-              📅 {{ formatAppointmentDate(appointment.appointmentDate) }}
+    <!-- Section avec onglets pour Posts et Rendez-vous -->
+    <div class="profile-section" v-if="userPosts.length || (user?.profileToken === loggedInUser?.profileToken && appointments.length)">
+      <div class="profile-tabs">
+        <button 
+          :class="['tab-button', { active: activeTab === 'posts' }]"
+          @click="activeTab = 'posts'"
+          v-if="userPosts.length"
+        >
+          Mes posts ({{ userPosts.length }})
+        </button>
+        <button 
+          :class="['tab-button', { active: activeTab === 'appointments' }]"
+          @click="activeTab = 'appointments'"
+          v-if="user?.profileToken === loggedInUser?.profileToken && appointments.length"
+        >
+          Mes rendez-vous ({{ appointments.length }})
+        </button>
+      </div>
+
+      <!-- Contenu de l'onglet Posts -->
+      <div v-if="activeTab === 'posts'" class="tab-content">
+        <ul class="profile-posts-list">
+          <li v-for="post in userPosts" :key="post.id" class="profile-post-item">
+            <div class="profile-post-title">{{ post.description }}</div>
+            <div class="profile-post-date">Publié le {{ new Date(post.createdAt).toLocaleDateString() }}</div>
+          </li>
+        </ul>
+      </div>
+
+      <!-- Contenu de l'onglet Rendez-vous -->
+      <div v-if="activeTab === 'appointments'" class="tab-content">
+        <div class="appointments-list">
+          <div v-for="appointment in appointments" :key="appointment.id" class="appointment-card">
+            <div class="appointment-header">
+              <h4>{{ appointment.title }}</h4>
+              <span :class="['appointment-status', appointment.status]">
+                {{ getStatusText(appointment.status) }}
+              </span>
             </div>
-            <div class="appointment-with">
-              👤 Avec {{ getOtherUserName(appointment) }}
+            <div class="appointment-details">
+              <div class="appointment-date">
+                📅 {{ formatAppointmentDate(appointment.appointmentDate) }}
+              </div>
+              <div class="appointment-with">
+                👤 Avec {{ getOtherUserName(appointment) }}
+              </div>
+              <div v-if="appointment.location" class="appointment-location">
+                📍 {{ appointment.location }}
+              </div>
+              <div v-if="appointment.description" class="appointment-description">
+                {{ appointment.description }}
+              </div>
             </div>
-            <div v-if="appointment.location" class="appointment-location">
-              📍 {{ appointment.location }}
+            <div v-if="appointment.status === 'pending'" class="appointment-actions">
+              <button 
+                v-if="appointment.receiverId === loggedInUser.id" 
+                @click="updateAppointmentStatus(appointment.id, 'accepted')"
+                class="appointment-btn accept"
+              >
+                Accepter
+              </button>
+              <button 
+                v-if="appointment.receiverId === loggedInUser.id" 
+                @click="updateAppointmentStatus(appointment.id, 'declined')"
+                class="appointment-btn decline"
+              >
+                Refuser
+              </button>
+              <button 
+                v-if="appointment.requesterId === loggedInUser.id" 
+                @click="updateAppointmentStatus(appointment.id, 'cancelled')"
+                class="appointment-btn cancel"
+              >
+                Annuler
+              </button>
             </div>
-            <div v-if="appointment.description" class="appointment-description">
-              {{ appointment.description }}
-            </div>
-          </div>
-          <div v-if="appointment.status === 'pending'" class="appointment-actions">
-            <button 
-              v-if="appointment.receiverId === loggedInUser.id" 
-              @click="updateAppointmentStatus(appointment.id, 'accepted')"
-              class="appointment-btn accept"
-            >
-              Accepter
-            </button>
-            <button 
-              v-if="appointment.receiverId === loggedInUser.id" 
-              @click="updateAppointmentStatus(appointment.id, 'declined')"
-              class="appointment-btn decline"
-            >
-              Refuser
-            </button>
-            <button 
-              v-if="appointment.requesterId === loggedInUser.id" 
-              @click="updateAppointmentStatus(appointment.id, 'cancelled')"
-              class="appointment-btn cancel"
-            >
-              Annuler
-            </button>
           </div>
         </div>
       </div>
-    </div>
-    
-    <div class="profile-section" v-if="userPosts.length">
-      <h3>Mes posts</h3>
-      <ul class="profile-posts-list">
-        <li v-for="post in userPosts" :key="post.id" class="profile-post-item">
-          <div class="profile-post-title">{{ post.description }}</div>
-          <div class="profile-post-date">Publié le {{ new Date(post.createdAt).toLocaleDateString() }}</div>
-        </li>
-      </ul>
     </div>
 
     <!-- MODALE EDITION PROFIL -->
@@ -128,6 +147,7 @@ export default {
       appointments: [],
       loggedInUser: null, // Store the logged-in user's data
       showEditModal: false,
+      activeTab: 'posts', // Onglet actif par défaut
       edit: {
         username: '',
         bio: '',
@@ -166,15 +186,29 @@ export default {
 
         // Fetch posts of the visited user
         const postsRes = await api.get(`/skills?profileToken=${profileToken}`);
-        this.userPosts = postsRes.data;
-
-        // Fetch appointments only if viewing own profile
+        this.userPosts = postsRes.data;        // Fetch appointments only if viewing own profile
         if (this.user?.profileToken === this.loggedInUser?.profileToken) {
           await this.loadAppointments();
         }
+
+        // Déterminer l'onglet par défaut
+        this.setDefaultTab();
       } catch (e) {
         this.user = null;
         this.$router.push('/login');
+      }    },
+    setDefaultTab() {
+      // Si on a des posts, afficher l'onglet posts par défaut
+      if (this.userPosts.length > 0) {
+        this.activeTab = 'posts';
+      }
+      // Sinon si on a des rendez-vous et c'est notre profil, afficher l'onglet rendez-vous
+      else if (this.user?.profileToken === this.loggedInUser?.profileToken && this.appointments.length > 0) {
+        this.activeTab = 'appointments';
+      }
+      // Par défaut, rester sur posts
+      else {
+        this.activeTab = 'posts';
       }
     },
     onAvatarChange(e) {
@@ -421,6 +455,50 @@ export default {
 .profile-section h3 {
   color: #E48700;
   margin-bottom: 0.7rem;
+}
+
+/* Styles pour les onglets */
+.profile-tabs {
+  display: flex;
+  border-bottom: 2px solid #ECBC76;
+  margin-bottom: 1.5rem;
+}
+
+.tab-button {
+  background: none;
+  border: none;
+  padding: 12px 20px;
+  font-size: 1rem;
+  font-weight: 600;
+  color: #666;
+  cursor: pointer;
+  border-bottom: 3px solid transparent;
+  transition: all 0.3s ease;
+  margin-right: 10px;
+}
+
+.tab-button:hover {
+  color: #E48700;
+}
+
+.tab-button.active {
+  color: #E48700;
+  border-bottom-color: #E48700;
+}
+
+.tab-content {
+  animation: fadeIn 0.3s ease;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
 .profile-about {
   color: #28303F;
@@ -784,6 +862,17 @@ export default {
   .modal-avatar-block {
     left: 1rem;
     top: 100px;
+  }
+  
+  /* Responsive pour les onglets */
+  .tab-button {
+    padding: 10px 15px;
+    font-size: 0.9rem;
+    margin-right: 5px;
+  }
+  
+  .profile-section {
+    padding: 1rem;
   }
 }
 </style>

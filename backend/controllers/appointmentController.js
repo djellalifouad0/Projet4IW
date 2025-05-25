@@ -222,3 +222,63 @@ exports.deleteAppointment = async (req, res) => {
     res.status(500).json({ error: 'Erreur serveur lors de la suppression du rendez-vous' });
   }
 };
+
+/**
+ * @swagger
+ * /api/appointments/conversation/{conversationId}:
+ *   get:
+ *     summary: Récupérer les rendez-vous d'une conversation
+ *     tags: [Appointments]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: conversationId
+ *         required: true
+ *         schema:
+ *           type: integer
+ *     responses:
+ *       200:
+ *         description: Liste des rendez-vous de la conversation
+ */
+exports.getAppointmentsByConversation = async (req, res) => {
+  try {
+    const { conversationId } = req.params;
+    const userId = req.user.id;
+
+    // Vérifier que l'utilisateur fait partie de cette conversation
+    const conversation = await Conversation.findOne({
+      where: {
+        id: conversationId,
+        [Op.or]: [
+          { user1Id: userId },
+          { user2Id: userId }
+        ]
+      }
+    });
+
+    if (!conversation) {
+      return res.status(404).json({ error: 'Conversation introuvable' });
+    }
+
+    const appointments = await Appointment.findAll({
+      where: {
+        conversationId: conversationId,
+        [Op.or]: [
+          { requesterId: userId },
+          { receiverId: userId }
+        ]
+      },
+      include: [
+        { model: User, as: 'requester', attributes: ['id', 'username', 'avatar'] },
+        { model: User, as: 'receiver', attributes: ['id', 'username', 'avatar'] }
+      ],
+      order: [['appointmentDate', 'ASC']]
+    });
+
+    res.json(appointments);
+  } catch (error) {
+    console.error('Erreur récupération rendez-vous conversation:', error);
+    res.status(500).json({ error: 'Erreur serveur lors de la récupération des rendez-vous' });
+  }
+};

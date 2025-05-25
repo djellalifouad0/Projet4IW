@@ -9,6 +9,7 @@ router.use(authenticate);
 // Routes pour les rendez-vous
 router.post('/', appointmentController.createAppointment);
 router.get('/', appointmentController.getUserAppointments);
+router.get('/conversation/:conversationId', appointmentController.getAppointmentsByConversation);
 router.patch('/:id/status', appointmentController.updateAppointmentStatus);
 router.delete('/:id', appointmentController.deleteAppointment);
 
