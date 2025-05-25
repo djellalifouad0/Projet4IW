@@ -401,10 +401,6 @@ export default {
 </script>
 
 <style scoped>
-body, html, #app {
-  height: 100vh;
-  overflow: hidden;
-}
 .discussions-page {
   display: flex;
   flex-direction: row;
@@ -413,7 +409,9 @@ body, html, #app {
   max-width: 1100px;
   margin: 0 auto;
   padding: 32px 0;
-  height: 93vh;
+  height: 85vh;
+  min-height: 600px;
+  overflow: hidden;
   min-height: 0;
 }
 .discussions-list {
