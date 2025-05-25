@@ -33,11 +33,12 @@
           :postId="post.postId"
           :likedByMe="post.likedByMe"
           :commentsCount="post.commentsCount || 0"
-          :profileToken="post.profileToken || ''"
-          @like="likePost"
+          :profileToken="post.profileToken || ''"          @like="likePost"
           @dislike="dislikePost"
           @addressClicked="centerMapOnAddress"
           @comment-posted="refreshPosts"
+          @post-updated="handlePostUpdated"
+          @post-deleted="handlePostDeleted"
         />
       </div>
       <div class="carte-map">
@@ -211,9 +212,24 @@ export default {
             this.mapUrl = `https://www.openstreetmap.org/export/embed.html?bbox=${bbox}&layer=mapnik&marker=${latNum},${lonNum}`;
           }
         })
-        .catch(() => {
-          // En cas d'erreur, ne change rien
+        .catch(() => {          // En cas d'erreur, ne change rien
         });
+    },
+    
+    // === GESTION DES MISES À JOUR DE POSTS ===
+    handlePostUpdated(updatedPost) {
+      // Mise à jour instantanée du post dans la liste
+      const postIndex = this.posts.findIndex(p => p.postId === updatedPost.postId);
+      if (postIndex !== -1) {
+        this.posts[postIndex].description = updatedPost.description;
+        // Forcer la réactivité
+        this.$forceUpdate();
+      }
+    },
+    
+    handlePostDeleted(postId) {
+      // Suppression instantanée du post de la liste
+      this.posts = this.posts.filter(p => p.postId !== postId);
     },
   },
 }

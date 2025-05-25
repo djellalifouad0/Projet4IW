@@ -70,3 +70,83 @@ exports.getComments = async (req, res) => {
     res.status(500).json({ error: 'Erreur récupération commentaires' });
   }
 };
+
+/**
+ * @swagger
+ * /comments/{id}:
+ *   patch:
+ *     summary: Met à jour un commentaire
+ *     tags: [Comments]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: integer
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               content:
+ *                 type: string
+ *     responses:
+ *       200:
+ *         description: Commentaire mis à jour avec succès
+ *       403:
+ *         description: Non autorisé
+ *       404:
+ *         description: Commentaire non trouvé
+ */
+exports.updateComment = async (req, res) => {
+  try {
+    const comment = await Comment.findByPk(req.params.id);
+    if (!comment) return res.status(404).json({ error: 'Commentaire non trouvé' });
+    if (comment.userId !== req.user.id) return res.status(403).json({ error: 'Non autorisé' });
+    
+    const { content } = req.body;
+    await comment.update({ content });
+    res.json(comment);
+  } catch (error) {
+    res.status(500).json({ error: 'Erreur mise à jour commentaire' });
+  }
+};
+
+/**
+ * @swagger
+ * /comments/{id}:
+ *   delete:
+ *     summary: Supprime un commentaire
+ *     tags: [Comments]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: integer
+ *     responses:
+ *       200:
+ *         description: Commentaire supprimé avec succès
+ *       403:
+ *         description: Non autorisé
+ *       404:
+ *         description: Commentaire non trouvé
+ */
+exports.deleteComment = async (req, res) => {
+  try {
+    const comment = await Comment.findByPk(req.params.id);
+    if (!comment) return res.status(404).json({ error: 'Commentaire non trouvé' });
+    if (comment.userId !== req.user.id) return res.status(403).json({ error: 'Non autorisé' });
+    
+    await comment.destroy();
+    res.json({ message: 'Commentaire supprimé' });
+  } catch (error) {
+    res.status(500).json({ error: 'Erreur suppression commentaire' });
+  }
+};

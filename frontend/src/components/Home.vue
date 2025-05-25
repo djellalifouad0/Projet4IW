@@ -32,10 +32,11 @@
         :postId="post.id"
         :likedByMe="post.likedByMe"
         :commentsCount="post.commentsCount || 0"
-        :profileToken="post.User?.profileToken || ''"
-        @like="likePost"
+        :profileToken="post.User?.profileToken || ''"        @like="likePost"
         @dislike="dislikePost"
         @comment-posted="fetchPosts"
+        @post-updated="handlePostUpdated"
+        @post-deleted="handlePostDeleted"
       />
     </div>
 
@@ -244,9 +245,24 @@ export default {
       this.form.location = city.nom + (city.codesPostaux && city.codesPostaux.length ? ` (${city.codesPostaux[0]})` : '');
       this.citySuggestions = [];
       this.showCitySuggestions = false;
-    },
-    hideCitySuggestions() {
+    },    hideCitySuggestions() {
       setTimeout(() => { this.showCitySuggestions = false; }, 120);
+    },
+    
+    // === GESTION DES MISES À JOUR DE POSTS ===
+    handlePostUpdated(updatedPost) {
+      // Mise à jour instantanée du post dans la liste
+      const postIndex = this.posts.findIndex(p => p.id === updatedPost.postId);
+      if (postIndex !== -1) {
+        this.posts[postIndex].description = updatedPost.description;
+        // Forcer la réactivité
+        this.$forceUpdate();
+      }
+    },
+    
+    handlePostDeleted(postId) {
+      // Suppression instantanée du post de la liste
+      this.posts = this.posts.filter(p => p.id !== postId);
     },
   }
 }

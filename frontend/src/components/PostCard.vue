@@ -1,8 +1,7 @@
 <template>
   <div>
     <!-- Post Card -->
-    <div :class="['card', paid ? 'card-paid' : 'card-orange']" @click="openModal">
-      <div class="card-header" @click.stop>
+    <div :class="['card', paid ? 'card-paid' : 'card-orange']" @click="openModal">      <div class="card-header" @click.stop>
         <img class="avatar" :src="avatar || 'https://randomuser.me/api/portraits/men/32.jpg'" alt="avatar" @click.stop />        <div>
           <div class="name" @click.stop="handleProfileClick" style="cursor:pointer;">
             {{ name }}
@@ -10,16 +9,37 @@
             <span v-if="postTimeAgo" class="post-time-ago-inline">{{ postTimeAgo }}</span>
           </div>
           <div class="address" @click.stop="handleAddressClick" style="cursor:pointer;text-decoration:underline;">{{ truncatedAddress }}</div>
+        </div>        <div class="header-actions">
+          <div
+            class="rate"
+            :class="paid ? 'rate-paid' : ''"
+            v-if="rate"
+            @click.stop
+          >{{ rate }}</div>          <!-- Actions pour le propriétaire du post -->
+          <div v-if="isOwnPost" class="post-actions">
+            <button class="post-action-btn" @click.stop.prevent="startInlineEdit" title="Édition rapide">✏️</button>
+            <button class="post-action-btn" @click.stop.prevent="startEditPost" title="Édition complète">📝</button>
+            <button class="post-action-btn delete" @click.stop.prevent="deletePost" title="Supprimer">🗑️</button>
+          </div>
         </div>
-        <div
-          class="rate"
-          :class="paid ? 'rate-paid' : ''"
-          v-if="rate"
-          @click.stop
-        >{{ rate }}</div>
-      </div>
-      <div class="card-body">
-        <p>
+      </div>      <div class="card-body">
+        <!-- Mode édition inline -->
+        <div v-if="isEditingInline" class="inline-edit-container">
+          <textarea 
+            v-model="editPostDescription" 
+            class="inline-edit-textarea"
+            @keydown.enter.ctrl="saveInlineEdit"
+            @keydown.escape="cancelInlineEdit"
+            ref="inlineTextarea"
+          ></textarea>
+          <div class="inline-edit-actions">
+            <button @click="saveInlineEdit" class="inline-save-btn">Sauvegarder</button>
+            <button @click="cancelInlineEdit" class="inline-cancel-btn">Annuler</button>
+            <span class="inline-edit-hint">Ctrl+Entrée pour sauvegarder</span>
+          </div>
+        </div>
+        <!-- Mode affichage normal -->
+        <p v-else>
           {{ truncatedDescription }}
           <span v-if="isTruncated" class="more">...afficher plus</span>
         </p>
@@ -43,8 +63,7 @@
 
     <!-- MODALE -->
     <div v-if="showModal" class="modal-overlay" @click="closeModal">
-      <div :class="['modal-card', paid ? 'card-paid' : 'card-orange']" @click.stop>
-        <div class="card-header">
+      <div :class="['modal-card', paid ? 'card-paid' : 'card-orange']" @click.stop>        <div class="card-header">
           <img class="avatar" :src="avatar || 'https://randomuser.me/api/portraits/men/32.jpg'" alt="avatar" />          <div>
             <div class="name" @click.stop="handleProfileClick" style="cursor:pointer;">
               {{ name }}
@@ -52,7 +71,14 @@
             </div>
             <div class="address">{{ truncatedAddress }}</div>
           </div>
-          <div class="rate" :class="paid ? 'rate-paid' : ''" v-if="rate">{{ rate }}</div>
+          <div class="header-actions">
+            <div class="rate" :class="paid ? 'rate-paid' : ''" v-if="rate">{{ rate }}</div>
+            <!-- Actions pour le propriétaire du post -->
+            <div v-if="isOwnPost" class="post-actions">
+              <button class="post-action-btn" @click.stop="startEditPost" title="Modifier">✏️</button>
+              <button class="post-action-btn delete" @click.stop="deletePost" title="Supprimer">🗑️</button>
+            </div>
+          </div>
         </div>
         <div class="card-body">
           <p>{{ description }}</p>
@@ -85,14 +111,19 @@
                   <div class="comment-header">
                     <span class="comment-author">{{ comment.author }}</span>
                     <span class="comment-time">• {{ comment.time || 'il y a 1 min' }}</span>
+                  </div>                  <div v-if="editingComment === comment.id" class="comment-edit">
+                    <input v-model="editCommentText" type="text" @keyup.enter="saveCommentEdit(comment.id)" />
+                    <button @click="saveCommentEdit(comment.id)">Sauvegarder</button>
+                    <button @click="cancelCommentEdit">Annuler</button>
                   </div>
-                  <div class="comment-text">{{ comment.text }}</div>
+                  <div v-else class="comment-text">{{ comment.text }}</div>
                   <div class="comment-actions">
                     <button class="comment-action" @click="replyTo(idx)">Répondre</button>
+                    <button v-if="isOwnComment(comment)" class="comment-action" @click="startEditComment(comment)">Modifier</button>
+                    <button v-if="isOwnComment(comment)" class="comment-action delete" @click="deleteComment(comment.id)">Supprimer</button>
                   </div>
                 </div>
-              </div>
-              <!-- Réponses -->
+              </div>              <!-- Réponses -->
               <ul v-if="comment.replies && comment.replies.length" class="replies-list">
                 <li v-for="(reply, rIdx) in comment.replies" :key="rIdx" class="reply-item">
                   <img class="comment-avatar" :src="reply.avatar || avatar" alt="avatar" />
@@ -101,7 +132,18 @@
                       <span class="comment-author">{{ reply.author }}</span>
                       <span class="comment-time">• {{ reply.time || 'il y a 1 min' }}</span>
                     </div>
-                    <div class="comment-text">{{ reply.text }}</div>
+                    <!-- Interface d'édition pour les réponses -->
+                    <div v-if="editingComment === reply.id" class="comment-edit">
+                      <input v-model="editCommentText" type="text" @keyup.enter="saveCommentEdit(reply.id)" />
+                      <button @click="saveCommentEdit(reply.id)">Sauvegarder</button>
+                      <button @click="cancelCommentEdit">Annuler</button>
+                    </div>
+                    <div v-else class="comment-text">{{ reply.text }}</div>
+                    <!-- Actions pour les réponses -->
+                    <div class="comment-actions" v-if="isOwnComment(reply)">
+                      <button class="comment-action" @click="startEditComment(reply)">Modifier</button>
+                      <button class="comment-action delete" @click="deleteComment(reply.id)">Supprimer</button>
+                    </div>
                   </div>
                 </li>
               </ul>
@@ -117,10 +159,31 @@
             <button @click="addComment" :disabled="!newComment.trim() || loadingComments">Envoyer</button>
           </div>
           <div v-if="errorComments" class="no-comments" style="color: #d00;">{{ errorComments }}</div>
-          <div v-if="successComment" class="no-comments" style="color: #4cd964;">{{ successComment }}</div>
+          <div v-if="successComment" class="no-comments" style="color: #4cd964;">{{ successComment }}        </div>
+      </div>
+    </div>
+
+    <!-- MODALE D'ÉDITION DE POST -->
+    <div v-if="showEditPostModal" class="modal-overlay" @click="showEditPostModal = false">
+      <div class="edit-post-modal" @click.stop>
+        <div class="edit-post-header">
+          <h3>Modifier le post</h3>
+          <button class="close-btn" @click="showEditPostModal = false">×</button>
+        </div>
+        <div class="edit-post-body">
+          <textarea 
+            v-model="editPostDescription" 
+            placeholder="Description du post..."
+            rows="6"
+          ></textarea>
+        </div>
+        <div class="edit-post-footer">
+          <button @click="showEditPostModal = false" class="cancel-btn">Annuler</button>
+          <button @click="savePost" class="save-btn">Sauvegarder</button>
         </div>
       </div>
     </div>
+  </div>
   </div>
 </template>
 
@@ -154,7 +217,14 @@ export default {
       replyText: '',
       loadingComments: false,
       errorComments: '',
-      successComment: ''
+      successComment: '',
+      loggedInUser: null,
+      editingComment: null,
+      editCommentText: '',      showEditPostModal: false,
+      editPostDescription: '',
+      editPostLocation: '',
+      editPostPrice: null,
+      isEditingInline: false
     }
   },
   computed: {
@@ -205,11 +275,14 @@ export default {
       const moisStr = mois[date.getMonth()];
       const annee = date.getFullYear();
       return `${heures}:${minutes} · ${jours} ${moisStr} ${annee}`;
-    },
-    totalCommentsCount() {
+    },    totalCommentsCount() {
       // Compte tous les commentaires et leurs réponses
       return this.comments.reduce((acc, c) => acc + 1 + (c.replies ? c.replies.length : 0), 0);
     },
+    isOwnPost() {
+      // Vérifie si l'utilisateur connecté est le propriétaire du post
+      return this.loggedInUser && this.loggedInUser.username === this.name;
+    }
   },
   methods: {
     async openModal() {
@@ -297,24 +370,156 @@ export default {
         this.$emit('dislike', this.postId);
       } else {
         this.$emit('like', this.postId);
-      }
-    },    handleAddressClick() {
-      // Si on est déjà sur /carte, émettre l'event, sinon router vers /carte avec query
-      if (this.$route && this.$route.path === '/carte') {
-        this.$emit('addressClicked', this.address);
-      } else {
-        this.$router.push({ path: '/carte', query: { address: this.address } });
-      }
-    },
+      }    },
+    
     handleProfileClick() {
       // Navigation vers la page de profil de l'utilisateur
       if (this.profileToken) {
         this.$router.push(`/profile/${this.profileToken}`);
       }
-    }
-  },
+    },
+    
+    // === MÉTHODES POUR LA GESTION DES POSTS ===
+    startInlineEdit() {
+      console.log('startInlineEdit appelé');
+      this.editPostDescription = this.description;
+      this.isEditingInline = true;
+      // Focus sur le textarea après que le DOM soit mis à jour
+      this.$nextTick(() => {
+        if (this.$refs.inlineTextarea) {
+          this.$refs.inlineTextarea.focus();
+          // Sélectionner tout le texte
+          this.$refs.inlineTextarea.select();
+        }
+      });
+    },
+    
+    async saveInlineEdit() {
+      try {
+        await api.patch(`/skills/${this.postId}`, {
+          description: this.editPostDescription
+        });
+        
+        // Émettre un événement pour que le composant parent mette à jour la liste
+        this.$emit('post-updated', {
+          postId: this.postId,
+          description: this.editPostDescription
+        });
+        
+        this.isEditingInline = false;
+        this.successComment = 'Post modifié avec succès !';
+        
+        // Effacer le message de succès après 3 secondes
+        setTimeout(() => {
+          this.successComment = '';
+        }, 3000);
+        
+      } catch (e) {
+        this.errorComments = 'Erreur lors de la modification du post.';
+      }
+    },
+    
+    cancelInlineEdit() {
+      this.isEditingInline = false;
+      this.editPostDescription = '';
+    },
+    
+    startEditPost() {
+      this.editPostDescription = this.description;
+      this.showEditPostModal = true;
+    },
+    
+    async savePost() {
+      try {
+        await api.patch(`/skills/${this.postId}`, {
+          description: this.editPostDescription
+        });
+        
+        // Émettre un événement pour que le composant parent mette à jour la liste
+        this.$emit('post-updated', {
+          postId: this.postId,
+          description: this.editPostDescription
+        });
+        
+        this.showEditPostModal = false;
+        this.successComment = 'Post modifié avec succès !';
+      } catch (e) {
+        this.errorComments = 'Erreur lors de la modification du post.';
+      }
+    },
+    
+    async deletePost() {
+      if (confirm('Êtes-vous sûr de vouloir supprimer ce post ?')) {
+        try {
+          await api.delete(`/skills/${this.postId}`);
+          
+          // Émettre un événement pour que le composant parent supprime le post de la liste
+          this.$emit('post-deleted', this.postId);
+          
+          this.closeModal();
+        } catch (e) {
+          this.errorComments = 'Erreur lors de la suppression du post.';
+        }
+      }
+    },
+    
+    // === MÉTHODES POUR LA GESTION DES COMMENTAIRES ===
+    isOwnComment(comment) {
+      return this.loggedInUser && comment.author === this.loggedInUser.username;
+    },
+    
+    startEditComment(comment) {
+      this.editingComment = comment.id;
+      this.editCommentText = comment.text;
+    },
+    
+    async saveCommentEdit(commentId) {
+      try {
+        await api.patch(`/skills/comments/${commentId}`, {
+          content: this.editCommentText
+        });
+        
+        this.editingComment = null;
+        this.editCommentText = '';
+        this.successComment = 'Commentaire modifié !';
+        await this.fetchComments();
+      } catch (e) {
+        this.errorComments = 'Erreur lors de la modification du commentaire.';
+      }
+    },
+    
+    cancelCommentEdit() {
+      this.editingComment = null;
+      this.editCommentText = '';
+    },
+    
+    async deleteComment(commentId) {
+      if (confirm('Êtes-vous sûr de vouloir supprimer ce commentaire ?')) {
+        try {
+          await api.delete(`/skills/comments/${commentId}`);
+          this.successComment = 'Commentaire supprimé !';
+          await this.fetchComments();
+          this.$emit('comment-deleted'); // Pour mettre à jour le compteur
+        } catch (e) {
+          this.errorComments = 'Erreur lors de la suppression du commentaire.';
+        }
+      }
+    },
+      // === MÉTHODE POUR CHARGER L'UTILISATEUR CONNECTÉ ===
+    async loadLoggedInUser() {
+      try {
+        const token = localStorage.getItem('token');
+        if (token) {
+          const response = await api.get('/auth/me');
+          this.loggedInUser = response.data;
+        }
+      } catch (e) {
+        console.error('Erreur lors du chargement de l\'utilisateur:', e);
+      }
+    }},
   mounted() {
     console.log('Avatar prop:', this.avatar);
+    this.loadLoggedInUser();
   }
 }
 </script>
@@ -349,6 +554,43 @@ export default {
   display: flex;
   align-items: center;
   gap: 12px;
+}
+
+.header-actions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-left: auto;
+}
+
+.post-actions {
+  display: flex;
+  gap: 4px;
+}
+
+.post-action-btn {
+  background: rgba(245, 156, 26, 0.1);
+  border: 1px solid rgba(245, 156, 26, 0.3);
+  border-radius: 6px;
+  padding: 4px 6px;
+  cursor: pointer;
+  font-size: 14px;
+  transition: all 0.2s;
+}
+
+.post-action-btn:hover {
+  background: rgba(245, 156, 26, 0.2);
+  border-color: rgba(245, 156, 26, 0.5);
+}
+
+.post-action-btn.delete {
+  background: rgba(220, 53, 69, 0.1);
+  border-color: rgba(220, 53, 69, 0.3);
+}
+
+.post-action-btn.delete:hover {
+  background: rgba(220, 53, 69, 0.2);
+  border-color: rgba(220, 53, 69, 0.5);
 }
 .avatar {
   width: 42px;
@@ -570,6 +812,54 @@ export default {
 .comment-action:hover {
   background: #fff4e3;
 }
+.comment-action.delete {
+  color: #dc3545;
+}
+.comment-action.delete:hover {
+  background: rgba(220, 53, 69, 0.1);
+}
+
+.comment-edit {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+  margin: 4px 0;
+}
+
+.comment-edit input {
+  flex: 1;
+  padding: 6px 10px;
+  border: 1px solid #e4a94f;
+  border-radius: 6px;
+  font-size: 0.95rem;
+}
+
+.comment-edit button {
+  padding: 6px 12px;
+  border: none;
+  border-radius: 6px;
+  font-size: 0.9rem;
+  cursor: pointer;
+  transition: background 0.15s;
+}
+
+.comment-edit button:first-of-type {
+  background: #f59c1a;
+  color: white;
+}
+
+.comment-edit button:first-of-type:hover {
+  background: #e4a94f;
+}
+
+.comment-edit button:last-of-type {
+  background: #6c757d;
+  color: white;
+}
+
+.comment-edit button:last-of-type:hover {
+  background: #5a6268;
+}
 .replies-list {
   list-style: none;
   padding-left: 44px;
@@ -780,5 +1070,216 @@ export default {
 }
 .liked .icon-number {
   color: #fff !important;
+}
+
+/* === STYLES POUR LA MODAL D'ÉDITION DE POST === */
+.edit-post-modal {
+  background: white;
+  border-radius: 12px;
+  padding: 0;
+  width: 500px;
+  max-width: 90vw;
+  box-shadow: 0 4px 28px rgba(0,0,0,0.15);
+  overflow: hidden;
+}
+
+.edit-post-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 20px 24px;
+  border-bottom: 1px solid #e9ecef;
+  background: #f8f9fa;
+}
+
+.edit-post-header h3 {
+  margin: 0;
+  color: #333;
+  font-size: 1.2rem;
+}
+
+.close-btn {
+  background: none;
+  border: none;
+  font-size: 24px;
+  cursor: pointer;
+  color: #6c757d;
+  padding: 0;
+  width: 30px;
+  height: 30px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: background 0.2s;
+}
+
+.close-btn:hover {
+  background: rgba(0,0,0,0.1);
+}
+
+.edit-post-body {
+  padding: 24px;
+}
+
+.edit-post-body textarea {
+  width: 100%;
+  min-height: 120px;
+  padding: 12px;
+  border: 1px solid #ddd;
+  border-radius: 8px;
+  font-size: 1rem;
+  resize: vertical;
+  font-family: inherit;
+  box-sizing: border-box;
+}
+
+.edit-post-body textarea:focus {
+  outline: none;
+  border-color: #f59c1a;
+  box-shadow: 0 0 0 2px rgba(245, 156, 26, 0.2);
+}
+
+.edit-post-footer {
+  display: flex;
+  gap: 12px;
+  justify-content: flex-end;
+  padding: 20px 24px;
+  border-top: 1px solid #e9ecef;
+  background: #f8f9fa;
+}
+
+.cancel-btn {
+  background: #6c757d;
+  color: white;
+  border: none;
+  border-radius: 6px;
+  padding: 10px 20px;
+  cursor: pointer;
+  font-size: 0.95rem;
+  transition: background 0.15s;
+}
+
+.cancel-btn:hover {
+  background: #5a6268;
+}
+
+.save-btn {
+  background: #f59c1a;
+  color: white;
+  border: none;
+  border-radius: 6px;
+  padding: 10px 20px;
+  cursor: pointer;
+  font-size: 0.95rem;
+  font-weight: 600;
+  transition: background 0.15s;
+}
+
+.save-btn:hover {
+  background: #e4a94f;
+}
+
+/* === STYLES POUR L'ÉDITION INLINE === */
+.inline-edit-container {
+  background: #f8f9fa;
+  border: 2px solid #f59c1a;
+  border-radius: 8px;
+  padding: 12px;
+  margin: 4px 0;
+}
+
+.inline-edit-textarea {
+  width: 100%;
+  min-height: 80px;
+  padding: 10px;
+  border: 1px solid #ddd;
+  border-radius: 6px;
+  font-size: 1rem;
+  font-family: inherit;
+  resize: vertical;
+  background: white;
+  box-sizing: border-box;
+  margin-bottom: 8px;
+}
+
+.inline-edit-textarea:focus {
+  outline: none;
+  border-color: #f59c1a;
+  box-shadow: 0 0 0 2px rgba(245, 156, 26, 0.2);
+}
+
+.inline-edit-actions {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+  flex-wrap: wrap;
+}
+
+.inline-save-btn {
+  background: #f59c1a;
+  color: white;
+  border: none;
+  border-radius: 6px;
+  padding: 8px 16px;
+  cursor: pointer;
+  font-size: 0.9rem;
+  font-weight: 600;
+  transition: background 0.15s;
+}
+
+.inline-save-btn:hover {
+  background: #e4a94f;
+}
+
+.inline-cancel-btn {
+  background: #6c757d;
+  color: white;
+  border: none;
+  border-radius: 6px;
+  padding: 8px 16px;
+  cursor: pointer;
+  font-size: 0.9rem;
+  transition: background 0.15s;
+}
+
+.inline-cancel-btn:hover {
+  background: #5a6268;
+}
+
+.inline-edit-hint {
+  color: #888;
+  font-size: 0.8rem;
+  margin-left: auto;
+  font-style: italic;
+}
+
+@media (max-width: 600px) {
+  .inline-edit-container {
+    padding: 8px;
+  }
+  
+  .inline-edit-textarea {
+    min-height: 60px;
+    padding: 8px;
+    font-size: 0.95rem;
+  }
+  
+  .inline-edit-actions {
+    gap: 6px;
+  }
+  
+  .inline-save-btn,
+  .inline-cancel-btn {
+    padding: 6px 12px;
+    font-size: 0.85rem;
+  }
+  
+  .inline-edit-hint {
+    font-size: 0.75rem;
+    margin-left: 0;
+    margin-top: 4px;
+    width: 100%;
+  }
 }
 </style>
