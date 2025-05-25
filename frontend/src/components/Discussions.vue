@@ -8,6 +8,8 @@
         <button @click="createDiscussion">Créer</button>
         <button @click="showNewDiscussion = false">Annuler</button>
       </div>
+      <div v-if="loading" class="loading">Chargement...</div>
+      <div v-if="error" class="error">{{ error }}</div>
       <div v-for="conv in conversations" :key="conv.id" class="discussion-item" :class="{ active: selectedConversation && selectedConversation.id === conv.id }" @click="selectConversation(conv)">
         <img :src="conv.avatar" class="avatar" />
         <div class="info">
@@ -23,7 +25,7 @@
           <span class="name">{{ selectedConversation.name }}</span>
         </div>
         <div class="chat-messages">
-          <div v-for="(msg, idx) in selectedConversation.messages" :key="idx" :class="['chat-message', msg.fromMe ? 'me' : 'other']">
+          <div v-for="msg in messages" :key="msg.id" :class="['chat-message', msg.fromMe ? 'me' : 'other']">
             <span>{{ msg.text }}</span>
           </div>
         </div>
@@ -42,72 +44,142 @@
 </template>
 
 <script>
+import api from '../services/api'
+
 export default {
   name: 'Discussions',
   data() {
     return {
-      conversations: [
-        {
-          id: 1,
-          name: 'Laurane Dupont',
-          avatar: 'https://randomuser.me/api/portraits/women/44.jpg',
-          lastMessage: 'À tout à l’heure !',
-          messages: [
-            { text: 'Salut Laurane !', fromMe: true },
-            { text: 'Coucou Fouad !', fromMe: false },
-            { text: 'À tout à l’heure !', fromMe: false }
-          ]
-        },
-        {
-          id: 2,
-          name: 'Fouad Andrieu',
-          avatar: 'https://randomuser.me/api/portraits/men/32.jpg',
-          lastMessage: 'On se retrouve demain ?',
-          messages: [
-            { text: 'On se retrouve demain ?', fromMe: false },
-            { text: 'Oui, à 14h !', fromMe: true }
-          ]
-        }
-      ],
+      conversations: [],
       selectedConversation: null,
+      messages: [],
       newMessage: '',
       showNewDiscussion: false,
       newDiscussionName: '',
-      newDiscussionMessage: ''
+      newDiscussionMessage: '',
+      loading: false,
+      error: ''
     }
+  },  async created() {
+    await this.loadConversations();
   },
-  created() {
-    // Sélectionner la première conversation par défaut si elle existe
-    if (this.conversations.length > 0) {
-      this.selectedConversation = this.conversations[0];
+  async activated() {
+    // Recharger les conversations quand le composant devient actif (utile avec keep-alive)
+    await this.loadConversations();
+  },
+  watch: {
+    // Surveiller les changements de route pour recharger les conversations
+    '$route'() {
+      this.loadConversations();
     }
   },
   methods: {
-    selectConversation(conv) {
-      this.selectedConversation = conv
-    },
-    sendMessage() {
-      if (this.newMessage.trim() && this.selectedConversation) {
-        this.selectedConversation.messages.push({ text: this.newMessage, fromMe: true })
-        this.newMessage = ''
+    async loadConversations() {
+      try {
+        this.loading = true;
+        this.error = '';
+        const response = await api.get('/conversations');
+        this.conversations = response.data.map(conv => ({
+          id: conv.id,
+          name: conv.otherUser.username,
+          avatar: conv.otherUser.avatar || 'https://randomuser.me/api/portraits/lego/1.jpg',
+          profileToken: conv.otherUser.profileToken,
+          lastMessage: conv.lastMessage ? conv.lastMessage.content : 'Aucun message',
+          lastMessageAt: conv.lastMessageAt
+        }));
+          // Sélectionner la première conversation par défaut si elle existe
+        if (this.conversations.length > 0) {
+          // Si on revient de la création d'une conversation, sélectionner la plus récente
+          const mostRecentConv = this.conversations.sort((a, b) => 
+            new Date(b.lastMessageAt) - new Date(a.lastMessageAt)
+          )[0];
+          await this.selectConversation(mostRecentConv);
+        }
+      } catch (error) {
+        this.error = 'Erreur lors du chargement des conversations';
+        console.error('Error loading conversations:', error);
+      } finally {
+        this.loading = false;
       }
     },
-    createDiscussion() {
-      if (this.newDiscussionName.trim() && this.newDiscussionMessage.trim()) {
-        const newConv = {
-          id: Date.now(),
-          name: this.newDiscussionName,
-          avatar: 'https://randomuser.me/api/portraits/lego/1.jpg',
-          lastMessage: this.newDiscussionMessage,
-          messages: [
-            { text: this.newDiscussionMessage, fromMe: true }
-          ]
+    async selectConversation(conv) {
+      try {
+        this.selectedConversation = conv;
+        this.error = '';
+        const response = await api.get(`/conversations/${conv.id}/messages`);
+        this.messages = response.data.map(msg => ({
+          id: msg.id,
+          text: msg.content,
+          fromMe: msg.fromMe,
+          createdAt: msg.createdAt,
+          sender: msg.sender
+        }));
+        
+        // Scroll to bottom after loading messages
+        this.$nextTick(() => {
+          const messagesContainer = this.$el.querySelector('.chat-messages');
+          if (messagesContainer) {
+            messagesContainer.scrollTop = messagesContainer.scrollHeight;
+          }
+        });
+      } catch (error) {
+        this.error = 'Erreur lors du chargement des messages';
+        console.error('Error loading messages:', error);
+      }
+    },
+    async sendMessage() {
+      if (this.newMessage.trim() && this.selectedConversation) {
+        try {
+          this.error = '';
+          const response = await api.post(`/conversations/${this.selectedConversation.id}/messages`, {
+            content: this.newMessage
+          });
+          
+          // Ajouter le nouveau message à la liste
+          this.messages.push({
+            id: response.data.id,
+            text: response.data.content,
+            fromMe: true,
+            createdAt: response.data.createdAt,
+            sender: response.data.sender
+          });
+          
+          // Mettre à jour le dernier message dans la liste des conversations
+          const convIndex = this.conversations.findIndex(c => c.id === this.selectedConversation.id);
+          if (convIndex !== -1) {
+            this.conversations[convIndex].lastMessage = this.newMessage;
+          }
+          
+          this.newMessage = '';
+          
+          // Scroll to bottom
+          this.$nextTick(() => {
+            const messagesContainer = this.$el.querySelector('.chat-messages');
+            if (messagesContainer) {
+              messagesContainer.scrollTop = messagesContainer.scrollHeight;
+            }
+          });
+        } catch (error) {
+          this.error = 'Erreur lors de l\'envoi du message';
+          console.error('Error sending message:', error);
         }
-        this.conversations.unshift(newConv)
-        this.selectedConversation = newConv
-        this.showNewDiscussion = false
-        this.newDiscussionName = ''
-        this.newDiscussionMessage = ''
+      }
+    },
+    async createDiscussion() {
+      if (this.newDiscussionName.trim() && this.newDiscussionMessage.trim()) {
+        try {
+          this.error = '';
+          // Ici on devrait chercher l'utilisateur par nom d'abord
+          // Pour simplifier, on va juste fermer le modal pour l'instant
+          this.showNewDiscussion = false;
+          this.newDiscussionName = '';
+          this.newDiscussionMessage = '';
+          // Recharger les conversations
+          await this.loadConversations();
+        } catch (error) {
+          this.error = 'Erreur lors de la création de la discussion';
+          console.error('Error creating discussion:', error);
+        }
       }
     }
   }
@@ -186,6 +258,19 @@ body, html, #app {
   color: #28303F;
   margin-top: 2px;
 }
+.loading {
+  text-align: center;
+  color: #888;
+  padding: 20px;
+}
+.error {
+  color: #d00;
+  text-align: center;
+  padding: 10px;
+  margin: 0 18px;
+  background: #fee;
+  border-radius: 8px;
+}
 .discussion-item {
   display: flex;
   align-items: center;
@@ -220,6 +305,9 @@ body, html, #app {
   color: #888;
   font-size: 0.97rem;
   margin-top: 2px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 .chat-window {
   flex: 1;

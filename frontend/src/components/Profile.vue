@@ -11,9 +11,14 @@
         </div>
         <div class="profile-infos-v2">
           <div class="profile-address-v2">{{ user?.address || '' }}</div>
+        </div>        <!-- Show 'Edit Profile' button only if the profile belongs to the logged-in user -->
+        <div v-if="user?.profileToken === loggedInUser?.profileToken" class="profile-actions">
+          <button class="profile-btn-v2" @click="showEditModal = true">Modifier le profil</button>
         </div>
-        <!-- Show 'Edit Profile' button only if the profile belongs to the logged-in user -->
-        <button v-if="user?.profileToken === loggedInUser?.profileToken" class="profile-btn-v2" @click="showEditModal = true">Modifier le profil</button>
+        <!-- Show 'Send Message' button if viewing someone else's profile -->
+        <div v-else class="profile-actions">
+          <button class="profile-btn-v2 profile-btn-message" @click="startConversation">Envoyer un message</button>
+        </div>
       </div>
     </div>
     <div class="profile-section" v-if="userPosts.length">
@@ -156,10 +161,32 @@ export default {
           this.user.avatar = this.edit.avatar;
           this.user.cover = this.edit.cover;
           this.showEditModal = false;
-        })
-        .catch((error) => {
+        })        .catch((error) => {
           console.error('Error updating profile:', error);
         });
+    },    async startConversation() {
+      try {
+        // Créer une conversation avec l'utilisateur visité
+        const response = await api.post('/conversations', {
+          profileToken: this.user.profileToken,
+          initialMessage: `Bonjour ${this.user.username} !`
+        });
+        
+        // Rediriger vers la page des discussions avec un délai pour s'assurer que la conversation est bien créée
+        this.$router.push('/discussions');
+        
+        // Optionnel : afficher un message de succès
+        console.log('Conversation créée avec succès !');
+      } catch (error) {
+        console.error('Error creating conversation:', error);
+        if (error.response && error.response.status === 404) {
+          alert('Utilisateur introuvable');
+        } else if (error.response && error.response.status === 400) {
+          alert(error.response.data.error || 'Vous ne pouvez pas créer une conversation avec vous-même');
+        } else {
+          alert('Erreur lors de la création de la conversation');
+        }
+      }
     }
   }
 }
@@ -270,6 +297,17 @@ export default {
 .profile-btn-v2:hover {
   background: #c76d00;
   color: #fff;
+}
+.profile-btn-message {
+  background: #4CAF50;
+}
+.profile-btn-message:hover {
+  background: #45a049;
+}
+.profile-actions {
+  display: flex;
+  gap: 0.5rem;
+  margin-left: auto;
 }
 .profile-section {
   background: #FFF4E3;
