@@ -19,8 +19,60 @@
         <div v-else class="profile-actions">
           <button class="profile-btn-v2 profile-btn-message" @click="startConversation">Envoyer un message</button>
         </div>
+      </div>    </div>
+    
+    <!-- Section Rendez-vous -->
+    <div class="profile-section" v-if="user?.profileToken === loggedInUser?.profileToken && appointments.length">
+      <h3>Mes rendez-vous</h3>
+      <div class="appointments-list">
+        <div v-for="appointment in appointments" :key="appointment.id" class="appointment-card">
+          <div class="appointment-header">
+            <h4>{{ appointment.title }}</h4>
+            <span :class="['appointment-status', appointment.status]">
+              {{ getStatusText(appointment.status) }}
+            </span>
+          </div>
+          <div class="appointment-details">
+            <div class="appointment-date">
+              📅 {{ formatAppointmentDate(appointment.appointmentDate) }}
+            </div>
+            <div class="appointment-with">
+              👤 Avec {{ getOtherUserName(appointment) }}
+            </div>
+            <div v-if="appointment.location" class="appointment-location">
+              📍 {{ appointment.location }}
+            </div>
+            <div v-if="appointment.description" class="appointment-description">
+              {{ appointment.description }}
+            </div>
+          </div>
+          <div v-if="appointment.status === 'pending'" class="appointment-actions">
+            <button 
+              v-if="appointment.receiverId === loggedInUser.id" 
+              @click="updateAppointmentStatus(appointment.id, 'accepted')"
+              class="appointment-btn accept"
+            >
+              Accepter
+            </button>
+            <button 
+              v-if="appointment.receiverId === loggedInUser.id" 
+              @click="updateAppointmentStatus(appointment.id, 'declined')"
+              class="appointment-btn decline"
+            >
+              Refuser
+            </button>
+            <button 
+              v-if="appointment.requesterId === loggedInUser.id" 
+              @click="updateAppointmentStatus(appointment.id, 'cancelled')"
+              class="appointment-btn cancel"
+            >
+              Annuler
+            </button>
+          </div>
+        </div>
       </div>
     </div>
+    
     <div class="profile-section" v-if="userPosts.length">
       <h3>Mes posts</h3>
       <ul class="profile-posts-list">
@@ -69,11 +121,11 @@
 import api from '../services/api'
 
 export default {
-  name: 'Profile',
-  data() {
+  name: 'Profile',  data() {
     return {
       user: null,
       userPosts: [],
+      appointments: [],
       loggedInUser: null, // Store the logged-in user's data
       showEditModal: false,
       edit: {
@@ -95,8 +147,7 @@ export default {
       }
     }
   },
-  methods: {
-    async loadProfileData() {
+  methods: {    async loadProfileData() {
       try {
         const profileToken = this.$route.params.profileToken; // Get profileToken from the URL
 
@@ -116,6 +167,11 @@ export default {
         // Fetch posts of the visited user
         const postsRes = await api.get(`/skills?profileToken=${profileToken}`);
         this.userPosts = postsRes.data;
+
+        // Fetch appointments only if viewing own profile
+        if (this.user?.profileToken === this.loggedInUser?.profileToken) {
+          await this.loadAppointments();
+        }
       } catch (e) {
         this.user = null;
         this.$router.push('/login');
@@ -187,7 +243,52 @@ export default {
           alert('Erreur lors de la création de la conversation');
         }
       }
-    }
+    },
+    // Méthodes pour les rendez-vous
+    async loadAppointments() {
+      try {
+        const response = await api.get('/appointments');
+        this.appointments = response.data.sort((a, b) => new Date(a.appointmentDate) - new Date(b.appointmentDate));
+      } catch (error) {
+        console.error('Error loading appointments:', error);
+      }
+    },
+    async updateAppointmentStatus(appointmentId, status) {
+      try {
+        await api.patch(`/appointments/${appointmentId}/status`, { status });
+        // Recharger les rendez-vous après mise à jour
+        await this.loadAppointments();
+      } catch (error) {
+        console.error('Error updating appointment status:', error);
+      }
+    },
+    getStatusText(status) {
+      const statusTexts = {
+        pending: 'En attente',
+        accepted: 'Accepté',
+        declined: 'Refusé',
+        cancelled: 'Annulé'
+      };
+      return statusTexts[status] || status;
+    },
+    formatAppointmentDate(dateString) {
+      const date = new Date(dateString);
+      return date.toLocaleDateString('fr-FR', {
+        weekday: 'long',
+        year: 'numeric',
+        month: 'long',
+        day: 'numeric',
+        hour: '2-digit',
+        minute: '2-digit'
+      });
+    },
+    getOtherUserName(appointment) {
+      if (appointment.requesterId === this.loggedInUser?.id) {
+        return appointment.receiver?.username || 'Utilisateur inconnu';
+      } else {
+        return appointment.requester?.username || 'Utilisateur inconnu';
+      }
+    },
   }
 }
 </script>
@@ -504,6 +605,129 @@ export default {
   min-height: 70px;
   max-height: 180px;
 }
+
+/* Styles pour les rendez-vous */
+.appointments-list {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.appointment-card {
+  background: #fff;
+  border: 1px solid #ecbc76;
+  border-radius: 12px;
+  padding: 20px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.appointment-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: 12px;
+}
+
+.appointment-header h4 {
+  margin: 0;
+  color: #28303F;
+  font-size: 1.2rem;
+}
+
+.appointment-status {
+  padding: 4px 12px;
+  border-radius: 20px;
+  font-size: 0.85rem;
+  font-weight: 600;
+  text-transform: uppercase;
+}
+
+.appointment-status.pending {
+  background: #fff3cd;
+  color: #856404;
+}
+
+.appointment-status.accepted {
+  background: #d4edda;
+  color: #155724;
+}
+
+.appointment-status.declined {
+  background: #f8d7da;
+  color: #721c24;
+}
+
+.appointment-status.cancelled {
+  background: #f1f1f1;
+  color: #6c757d;
+}
+
+.appointment-details {
+  margin-bottom: 16px;
+}
+
+.appointment-details > div {
+  margin-bottom: 8px;
+  color: #666;
+  font-size: 0.95rem;
+}
+
+.appointment-date {
+  font-weight: 600;
+  color: #28303F;
+}
+
+.appointment-description {
+  font-style: italic;
+  margin-top: 12px;
+  padding: 12px;
+  background: #f9f9f9;
+  border-radius: 8px;
+}
+
+.appointment-actions {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.appointment-btn {
+  padding: 8px 16px;
+  border: none;
+  border-radius: 6px;
+  font-size: 0.9rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background-color 0.2s;
+}
+
+.appointment-btn.accept {
+  background: #4CAF50;
+  color: white;
+}
+
+.appointment-btn.accept:hover {
+  background: #45a049;
+}
+
+.appointment-btn.decline {
+  background: #f44336;
+  color: white;
+}
+
+.appointment-btn.decline:hover {
+  background: #da190b;
+}
+
+.appointment-btn.cancel {
+  background: #ff9800;
+  color: white;
+}
+
+.appointment-btn.cancel:hover {
+  background: #e68900;
+}
+
 @media (min-width: 601px) {
   .profile-card-bottom-v2 {
     flex-direction: row;

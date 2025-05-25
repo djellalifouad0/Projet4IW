@@ -8,6 +8,7 @@ const skillRoutes = require('./routes/skillRoutes');
 const notificationRoutes = require('./routes/notificationRoutes')
 const likeRoutes = require('./routes/likeRoutes')
 const conversationRoutes = require('./routes/conversationRoutes')
+const appointmentRoutes = require('./routes/appointmentRoutes')
 // Importer les associations pour s'assurer qu'elles sont définies
 require('./models/associations');
 const app = express();
@@ -25,6 +26,7 @@ app.use('/api/skills', skillRoutes);
 app.use('/api/notifications', notificationRoutes);
 app.use('/api/likes', likeRoutes);
 app.use('/api/conversations', conversationRoutes);
+app.use('/api/appointments', appointmentRoutes);
 // ➕ Swagger (dispo sur /api-docs)
 setupSwagger(app);
 

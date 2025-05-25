@@ -1,0 +1,142 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Test API Rendez-vous</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        .test-section {
+            margin-bottom: 30px;
+            padding: 20px;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+        }
+        button {
+            background: #4CAF50;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 4px;
+            cursor: pointer;
+            margin: 5px;
+        }
+        button:hover {
+            background: #45a049;
+        }
+        .result {
+            background: #f5f5f5;
+            padding: 10px;
+            border-radius: 4px;
+            margin-top: 10px;
+            white-space: pre-wrap;
+        }
+        input, textarea {
+            width: 100%;
+            padding: 8px;
+            margin: 5px 0;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+        }
+    </style>
+</head>
+<body>
+    <h1>Test API Rendez-vous</h1>
+    
+    <div class="test-section">
+        <h3>1. Test de connexion</h3>
+        <button onclick="testConnection()">Tester la connexion API</button>
+        <div id="connection-result" class="result"></div>
+    </div>
+
+    <div class="test-section">
+        <h3>2. Créer un rendez-vous de test</h3>
+        <input type="text" id="title" placeholder="Titre du rendez-vous" value="Test Rendez-vous">
+        <input type="datetime-local" id="appointmentDate" value="2025-05-26T14:00">
+        <input type="text" id="location" placeholder="Lieu (optionnel)" value="En ligne">
+        <textarea id="description" placeholder="Description" rows="3">Ceci est un test de création de rendez-vous</textarea>
+        <button onclick="createTestAppointment()">Créer Rendez-vous Test</button>
+        <div id="create-result" class="result"></div>
+    </div>
+
+    <div class="test-section">
+        <h3>3. Récupérer les rendez-vous</h3>
+        <button onclick="getAppointments()">Récupérer mes rendez-vous</button>
+        <div id="appointments-result" class="result"></div>
+    </div>
+
+    <script>
+        const API_BASE = 'http://localhost:5000/api';
+        
+        // Simuler un token pour les tests (remplacer par un vrai token)
+        const TEST_TOKEN = localStorage.getItem('token') || 'test-token';
+
+        async function apiRequest(endpoint, options = {}) {
+            try {
+                const response = await fetch(`${API_BASE}${endpoint}`, {
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${TEST_TOKEN}`,
+                        ...options.headers
+                    },
+                    ...options
+                });
+                
+                const data = await response.json();
+                return { status: response.status, data };
+            } catch (error) {
+                return { error: error.message };
+            }
+        }
+
+        async function testConnection() {
+            const result = document.getElementById('connection-result');
+            result.textContent = 'Test en cours...';
+            
+            const response = await apiRequest('/auth/me');
+            result.textContent = JSON.stringify(response, null, 2);
+        }
+
+        async function createTestAppointment() {
+            const result = document.getElementById('create-result');
+            result.textContent = 'Création en cours...';
+            
+            const appointmentData = {
+                receiverId: 2, // ID de test - à adapter selon votre DB
+                conversationId: 1, // ID de test - à adapter selon votre DB
+                title: document.getElementById('title').value,
+                appointmentDate: new Date(document.getElementById('appointmentDate').value).toISOString(),
+                location: document.getElementById('location').value,
+                description: document.getElementById('description').value
+            };
+
+            const response = await apiRequest('/appointments', {
+                method: 'POST',
+                body: JSON.stringify(appointmentData)
+            });
+            
+            result.textContent = JSON.stringify(response, null, 2);
+        }
+
+        async function getAppointments() {
+            const result = document.getElementById('appointments-result');
+            result.textContent = 'Récupération en cours...';
+            
+            const response = await apiRequest('/appointments');
+            result.textContent = JSON.stringify(response, null, 2);
+        }
+
+        // Vérifier si un token existe au chargement
+        window.onload = function() {
+            if (!localStorage.getItem('token')) {
+                alert('Aucun token trouvé. Connectez-vous d\'abord dans l\'application principale.');
+            }
+        }
+    </script>
+</body>
+</html>

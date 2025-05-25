@@ -32,7 +32,7 @@
             <span v-else class="status offline">Hors ligne</span>
           </div>
         </div>        <div class="chat-messages">
-          <div v-for="msg in messages" :key="msg.id" :class="['chat-message', msg.fromMe ? 'me' : 'other']">
+          <div v-for="msg in messages" :key="msg.id" :class="['chat-message', msg.fromMe ? 'me' : 'other', msg.isAppointment ? 'appointment-message' : '']">
             <span>{{ msg.text }}</span>
             <div v-if="msg.fromMe" class="message-status">
               <span v-if="msg.status === 'sent'" class="status-icon">📤</span>
@@ -57,14 +57,86 @@
             :placeholder="getInputPlaceholder()" 
             :disabled="false"
           />
+          <button 
+            @click="showAppointmentModal = true" 
+            class="appointment-btn"
+            :disabled="!selectedConversation"
+            title="Proposer un rendez-vous"
+          >
+            📅
+          </button>
           <button @click="sendMessage" :disabled="!newMessage.trim()">Envoyer</button>
         </div>
       </template>
       <template v-else>
         <div class="chat-placeholder">
           <p>Sélectionnez une discussion pour commencer à échanger !</p>
-        </div>
-      </template>
+        </div>      </template>
+    </div>
+
+    <!-- Modal pour créer un rendez-vous -->
+    <div v-if="showAppointmentModal" class="modal-overlay" @click="closeAppointmentModal">
+      <div class="appointment-modal" @click.stop>
+        <h3>Proposer un rendez-vous</h3>
+        <form @submit.prevent="createAppointment">
+          <div class="form-group">
+            <label for="appointment-title">Titre du rendez-vous *</label>
+            <input 
+              id="appointment-title"
+              v-model="appointmentForm.title" 
+              type="text" 
+              placeholder="Ex: Échange sur le développement web"
+              required
+            />
+          </div>
+          
+          <div class="form-group">
+            <label for="appointment-date">Date *</label>
+            <input 
+              id="appointment-date"
+              v-model="appointmentForm.date" 
+              type="date" 
+              :min="minDate"
+              required
+            />
+          </div>
+          
+          <div class="form-group">
+            <label for="appointment-time">Heure *</label>
+            <input 
+              id="appointment-time"
+              v-model="appointmentForm.time" 
+              type="time" 
+              required
+            />
+          </div>
+          
+          <div class="form-group">
+            <label for="appointment-location">Lieu (optionnel)</label>
+            <input 
+              id="appointment-location"
+              v-model="appointmentForm.location" 
+              type="text" 
+              placeholder="Ex: En ligne, Café du centre, etc."
+            />
+          </div>
+          
+          <div class="form-group">
+            <label for="appointment-description">Description (optionnel)</label>
+            <textarea 
+              id="appointment-description"
+              v-model="appointmentForm.description" 
+              placeholder="Décrivez l'objet du rendez-vous..."
+              rows="3"
+            ></textarea>
+          </div>
+          
+          <div class="modal-actions">
+            <button type="button" @click="closeAppointmentModal" class="cancel-btn">Annuler</button>
+            <button type="submit" class="submit-btn" :disabled="!isAppointmentFormValid">Proposer</button>
+          </div>
+        </form>
+      </div>
     </div>
   </div>
 </template>
@@ -74,8 +146,7 @@ import api from '../services/api'
 import socketService from '../services/socket'
 
 export default {
-  name: 'Discussions',
-  data() {    return {
+  name: 'Discussions',  data() {    return {
       conversations: [],
       selectedConversation: null,
       messages: [],
@@ -88,9 +159,29 @@ export default {
       typingUsers: new Set(),
       typingTimeout: null,
       onlineUsers: new Set(),
-      reconnecting: false
+      reconnecting: false,
+      showAppointmentModal: false,
+      appointmentForm: {
+        title: '',
+        date: '',
+        time: '',
+        location: '',
+        description: ''
+      }
     }
-  },  async created() {
+  },
+  computed: {
+    minDate() {
+      const today = new Date();
+      return today.toISOString().split('T')[0];
+    },
+    isAppointmentFormValid() {
+      return this.appointmentForm.title.trim() && 
+             this.appointmentForm.date && 
+             this.appointmentForm.time;
+    }
+  },
+  async created() {
     await this.initializeWebSocket();
     await this.loadConversations();
   },
@@ -396,6 +487,72 @@ export default {
         this.messages[messageIndex].status = status;
       }
     },
+    // Méthodes pour les rendez-vous
+    closeAppointmentModal() {
+      this.showAppointmentModal = false;
+      this.resetAppointmentForm();
+    },
+    resetAppointmentForm() {
+      this.appointmentForm = {
+        title: '',
+        date: '',
+        time: '',
+        location: '',
+        description: ''
+      };
+    },
+    async createAppointment() {
+      if (!this.isAppointmentFormValid || !this.selectedConversation) {
+        return;
+      }
+
+      try {
+        this.error = '';
+        
+        // Combiner date et heure
+        const appointmentDateTime = new Date(`${this.appointmentForm.date}T${this.appointmentForm.time}`);
+        
+        const appointmentData = {
+          receiverId: this.selectedConversation.userId,
+          conversationId: this.selectedConversation.id,
+          title: this.appointmentForm.title,
+          description: this.appointmentForm.description,
+          appointmentDate: appointmentDateTime.toISOString(),
+          location: this.appointmentForm.location
+        };
+
+        const response = await api.post('/appointments', appointmentData);
+        
+        // Fermer le modal et réinitialiser le formulaire
+        this.closeAppointmentModal();
+        
+        // Ajouter un message système dans la conversation pour informer du rendez-vous
+        const systemMessage = `📅 Rendez-vous proposé: "${this.appointmentForm.title}" le ${new Date(appointmentDateTime).toLocaleDateString('fr-FR')} à ${this.appointmentForm.time}`;
+        
+        this.messages.push({
+          id: Date.now(), // ID temporaire
+          text: systemMessage,
+          fromMe: true,
+          createdAt: new Date().toISOString(),
+          sender: { username: 'Système' },
+          status: 'sent',
+          isAppointment: true
+        });
+
+        // Scroll to bottom
+        this.$nextTick(() => {
+          const messagesContainer = this.$el.querySelector('.chat-messages');
+          if (messagesContainer) {
+            messagesContainer.scrollTop = messagesContainer.scrollHeight;
+          }
+        });
+
+        console.log('Rendez-vous créé:', response.data);
+      } catch (error) {
+        this.error = 'Erreur lors de la création du rendez-vous';
+        console.error('Error creating appointment:', error);
+      }
+    },
   }
 }
 </script>
@@ -698,6 +855,144 @@ body, html, #app {
 .status-icon {
   opacity: 0.7;
 }
+/* Bouton calendrier */
+.appointment-btn {
+  background: #4CAF50 !important;
+  color: #fff !important;
+  min-width: 40px !important;
+  padding: 10px !important;
+  font-size: 1.2rem !important;
+  border-radius: 50% !important;
+}
+
+.appointment-btn:hover:not(:disabled) {
+  background: #45a049 !important;
+}
+
+.appointment-btn:disabled {
+  background: #ccc !important;
+  cursor: not-allowed !important;
+}
+
+/* Modal styles */
+.modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.5);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+}
+
+.appointment-modal {
+  background: white;
+  border-radius: 16px;
+  padding: 24px;
+  width: 90%;
+  max-width: 500px;
+  max-height: 90vh;
+  overflow-y: auto;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
+}
+
+.appointment-modal h3 {
+  margin: 0 0 20px 0;
+  color: #28303F;
+  font-size: 1.4rem;
+}
+
+.form-group {
+  margin-bottom: 16px;
+}
+
+.form-group label {
+  display: block;
+  margin-bottom: 6px;
+  font-weight: 600;
+  color: #28303F;
+}
+
+.form-group input,
+.form-group textarea {
+  width: 100%;
+  padding: 10px 12px;
+  border: 1.5px solid #ecbc76;
+  border-radius: 8px;
+  font-size: 1rem;
+  box-sizing: border-box;
+}
+
+.form-group input:focus,
+.form-group textarea:focus {
+  outline: none;
+  border-color: #d4a562;
+}
+
+.form-group textarea {
+  resize: vertical;
+  min-height: 80px;
+}
+
+.modal-actions {
+  display: flex;
+  gap: 12px;
+  justify-content: flex-end;
+  margin-top: 24px;
+}
+
+.cancel-btn {
+  background: #f5f5f5;
+  color: #28303F;
+  border: none;
+  border-radius: 8px;
+  padding: 10px 20px;
+  font-size: 1rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.15s;
+}
+
+.cancel-btn:hover {
+  background: #e0e0e0;
+}
+
+.submit-btn {
+  background: #4CAF50;
+  color: white;
+  border: none;
+  border-radius: 8px;
+  padding: 10px 20px;
+  font-size: 1rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.15s;
+}
+
+.submit-btn:hover:not(:disabled) {
+  background: #45a049;
+}
+
+.submit-btn:disabled {
+  background: #ccc;
+  cursor: not-allowed;
+}
+
+/* Message de rendez-vous */
+.chat-message.appointment-message {
+  background: linear-gradient(135deg, #4CAF50, #45a049) !important;
+  color: white !important;
+  border-left: 4px solid #2e7d32;
+  font-weight: 500;
+}
+
+.chat-message.appointment-message.me {
+  background: linear-gradient(135deg, #4CAF50, #45a049) !important;
+}
+
 @media (max-width: 900px) {
   .discussions-page {
     flex-direction: column;
