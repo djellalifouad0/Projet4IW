@@ -22,7 +22,18 @@ const Like = require('../models/like'); // Import du modèle Like
 exports.getAllSkills = async (req, res) => {
   try {
     const userId = req.user ? req.user.id : null;
+    const { profileToken } = req.query; // Get profileToken from query parameters
+
+    const whereClause = {};
+    if (profileToken) {
+      const user = await User.findOne({ where: { profileToken } });
+      if (user) {
+        whereClause.userId = user.id; // Filter posts by userId corresponding to the profileToken
+      }
+    }
+
     const skills = await Skill.findAll({
+      where: whereClause,
       include: [
         {
           model: User,

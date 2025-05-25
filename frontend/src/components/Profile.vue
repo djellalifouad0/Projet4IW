@@ -12,7 +12,8 @@
         <div class="profile-infos-v2">
           <div class="profile-address-v2">{{ user?.address || '' }}</div>
         </div>
-        <button class="profile-btn-v2" @click="showEditModal = true">Modifier le profil</button>
+        <!-- Show 'Edit Profile' button only if the profile belongs to the logged-in user -->
+        <button v-if="user?.profileToken === loggedInUser?.profileToken" class="profile-btn-v2" @click="showEditModal = true">Modifier le profil</button>
       </div>
     </div>
     <div class="profile-section" v-if="userPosts.length">
@@ -68,6 +69,7 @@ export default {
     return {
       user: null,
       userPosts: [],
+      loggedInUser: null, // Store the logged-in user's data
       showEditModal: false,
       edit: {
         username: '',
@@ -81,14 +83,21 @@ export default {
   async mounted() {
     try {
       const profileToken = this.$route.params.profileToken; // Get profileToken from the URL
-      const res = await api.get(`/users/profile/${profileToken}`); // Fetch profile data using profileToken
+
+      // Fetch the logged-in user's data
+      const loggedInRes = await api.get('/auth/me');
+      this.loggedInUser = loggedInRes.data;
+
+      // Fetch the visited user's profile data
+      const res = await api.get(`/users/profile/${profileToken}`);
       this.user = res.data;
       this.edit.username = this.user.username;
       this.edit.bio = this.user.bio || '';
       this.edit.address = this.user.address || '';
       this.edit.avatar = this.user.avatar || '';
       this.edit.cover = this.user.cover || '';
-      // Fetch posts of the user
+
+      // Fetch posts of the visited user
       const postsRes = await api.get(`/skills?profileToken=${profileToken}`);
       this.userPosts = postsRes.data;
     } catch (e) {
