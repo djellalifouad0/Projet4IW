@@ -15,14 +15,14 @@
         <div v-if="user?.profileToken === loggedInUser?.profileToken" class="profile-actions">
           <button class="profile-btn-v2" @click="showEditModal = true">Modifier le profil</button>
         </div>
-        <!-- Show 'Send Message' button if viewing someone else's profile -->
-        <div v-else class="profile-actions">
+        <!-- Show 'Send Message' button if viewing someone else's profile -->        <div v-else class="profile-actions">
           <button class="profile-btn-v2 profile-btn-message" @click="startConversation">Envoyer un message</button>
         </div>
-      </div>    </div>
+      </div>
+    </div>
     
     <!-- Section avec onglets pour Posts et Rendez-vous -->
-    <div class="profile-section" v-if="userPosts.length || (user?.profileToken === loggedInUser?.profileToken && appointments.length)">
+    <div class="profile-section" v-if="userPosts.length || (user?.profileToken === loggedInUser?.profileToken)">
       <div class="profile-tabs">
         <button 
           :class="['tab-button', { active: activeTab === 'posts' }]"
@@ -37,6 +37,12 @@
           v-if="user?.profileToken === loggedInUser?.profileToken && appointments.length"
         >
           Mes rendez-vous ({{ appointments.length }})
+        </button>        <button 
+          :class="['tab-button', { active: activeTab === 'calendar' }]"
+          @click="activeTab = 'calendar'"
+          v-if="user?.profileToken === loggedInUser?.profileToken"
+        >
+          📅 Calendrier ({{ appointments.length }})
         </button>
       </div>
 
@@ -88,8 +94,7 @@
                 class="appointment-btn decline"
               >
                 Refuser
-              </button>
-              <button 
+              </button>              <button 
                 v-if="appointment.requesterId === loggedInUser.id" 
                 @click="updateAppointmentStatus(appointment.id, 'cancelled')"
                 class="appointment-btn cancel"
@@ -99,6 +104,71 @@
             </div>
           </div>
         </div>
+      </div>
+
+      <!-- Contenu de l'onglet Calendrier -->
+      <div v-if="activeTab === 'calendar'" class="tab-content">
+        <div class="calendar-container">
+          <div class="calendar-header">
+            <button @click="previousMonth" class="calendar-nav-btn">‹</button>
+            <h3 class="calendar-title">{{ formatCalendarTitle(currentDate) }}</h3>
+            <button @click="nextMonth" class="calendar-nav-btn">›</button>
+          </div>
+          
+          <div class="calendar-grid">
+            <div class="calendar-day-header" v-for="day in dayHeaders" :key="day">
+              {{ day }}
+            </div>
+            
+            <div 
+              v-for="day in calendarDays" 
+              :key="day.date"
+              :class="['calendar-day', { 
+                'other-month': !day.isCurrentMonth, 
+                'today': day.isToday,
+                'has-appointment': day.hasAppointment
+              }]"
+            >
+              <span class="calendar-day-number">{{ day.day }}</span>
+              <div v-if="day.appointments.length" class="calendar-appointments">
+                <div 
+                  v-for="appointment in day.appointments" 
+                  :key="appointment.id"
+                  :class="['calendar-appointment', appointment.status]"
+                  :title="`${appointment.title} - ${formatAppointmentTime(appointment.appointmentDate)}`"
+                >
+                  <span class="appointment-time">{{ formatAppointmentTime(appointment.appointmentDate) }}</span>
+                  <span class="appointment-title">{{ appointment.title }}</span>
+                </div>
+              </div>
+            </div>
+          </div>
+          
+          <!-- Liste des rendez-vous du mois -->
+          <div class="calendar-appointments-list">
+            <h4>Rendez-vous de {{ formatCalendarTitle(currentDate) }}</h4>
+            <div v-if="monthAppointments.length === 0" class="no-appointments">
+              Aucun rendez-vous ce mois-ci
+            </div>
+            <div v-else class="month-appointments">
+              <div 
+                v-for="appointment in monthAppointments" 
+                :key="appointment.id" 
+                class="month-appointment-card"
+              >
+                <div class="appointment-date-time">
+                  📅 {{ formatAppointmentDateShort(appointment.appointmentDate) }}
+                </div>
+                <div class="appointment-info">
+                  <h5>{{ appointment.title }}</h5>
+                  <p>👤 Avec {{ getOtherUserName(appointment) }}</p>
+                  <span :class="['appointment-status', appointment.status]">
+                    {{ getStatusText(appointment.status) }}
+                  </span>
+                </div>
+              </div>
+            </div>
+          </div>        </div>
       </div>
     </div>
 
@@ -130,8 +200,7 @@
           <textarea v-model="edit.bio" placeholder="Bio"></textarea>
           <input v-model="edit.address" placeholder="Localisation" />
         </div>
-      </div>
-    </div>
+      </div>    </div>
     <!-- FIN MODALE -->
   </div>
 </template>
@@ -148,6 +217,8 @@ export default {
       loggedInUser: null, // Store the logged-in user's data
       showEditModal: false,
       activeTab: 'posts', // Onglet actif par défaut
+      currentDate: new Date(), // Date actuelle pour le calendrier
+      dayHeaders: ['Dim', 'Lun', 'Mar', 'Mer', 'Jeu', 'Ven', 'Sam'],
       edit: {
         username: '',
         bio: '',
@@ -155,6 +226,63 @@ export default {
         avatar: '',
         cover: ''
       }
+    }  },
+  computed: {
+    upcomingAppointments() {
+      const now = new Date();
+      return this.appointments.filter(appointment => {
+        const appointmentDate = new Date(appointment.appointmentDate);
+        return appointmentDate >= now && appointment.status === 'accepted';
+      });
+    },    calendarDays() {
+      console.log('Calculating calendar days for:', this.currentDate);
+      console.log('Appointments available:', this.appointments);
+      
+      const year = this.currentDate.getFullYear();
+      const month = this.currentDate.getMonth();
+      
+      // Premier jour du mois
+      const firstDay = new Date(year, month, 1);
+      // Dernier jour du mois
+      const lastDay = new Date(year, month + 1, 0);
+      
+      // Premier jour de la semaine à afficher (peut être du mois précédent)
+      const firstCalendarDay = new Date(firstDay);
+      firstCalendarDay.setDate(firstDay.getDate() - firstDay.getDay());
+      
+      // Dernier jour de la semaine à afficher (peut être du mois suivant)
+      const lastCalendarDay = new Date(lastDay);
+      lastCalendarDay.setDate(lastDay.getDate() + (6 - lastDay.getDay()));
+      
+      const days = [];
+      const today = new Date();
+      
+      for (let d = new Date(firstCalendarDay); d <= lastCalendarDay; d.setDate(d.getDate() + 1)) {
+        const dayAppointments = this.appointments.filter(appointment => {
+          const appointmentDate = new Date(appointment.appointmentDate);
+          return appointmentDate.toDateString() === d.toDateString();
+        });
+        
+        days.push({
+          date: d.toISOString(),
+          day: d.getDate(),
+          isCurrentMonth: d.getMonth() === month,
+          isToday: d.toDateString() === today.toDateString(),
+          hasAppointment: dayAppointments.length > 0,
+          appointments: dayAppointments
+        });
+      }
+      
+      return days;
+    },
+    monthAppointments() {
+      const year = this.currentDate.getFullYear();
+      const month = this.currentDate.getMonth();
+      
+      return this.appointments.filter(appointment => {
+        const appointmentDate = new Date(appointment.appointmentDate);
+        return appointmentDate.getFullYear() === year && appointmentDate.getMonth() === month;
+      }).sort((a, b) => new Date(a.appointmentDate) - new Date(b.appointmentDate));
     }
   },
   async mounted() {
@@ -196,8 +324,11 @@ export default {
       } catch (e) {
         this.user = null;
         this.$router.push('/login');
-      }    },
-    setDefaultTab() {
+      }    },    setDefaultTab() {
+      console.log('Posts:', this.userPosts.length);
+      console.log('Appointments:', this.appointments.length);
+      console.log('Is own profile:', this.user?.profileToken === this.loggedInUser?.profileToken);
+      
       // Si on a des posts, afficher l'onglet posts par défaut
       if (this.userPosts.length > 0) {
         this.activeTab = 'posts';
@@ -210,6 +341,8 @@ export default {
       else {
         this.activeTab = 'posts';
       }
+      
+      console.log('Active tab:', this.activeTab);
     },
     onAvatarChange(e) {
       const file = e.target.files[0]
@@ -318,10 +451,39 @@ export default {
     },
     getOtherUserName(appointment) {
       if (appointment.requesterId === this.loggedInUser?.id) {
-        return appointment.receiver?.username || 'Utilisateur inconnu';
-      } else {
+        return appointment.receiver?.username || 'Utilisateur inconnu';      } else {
         return appointment.requester?.username || 'Utilisateur inconnu';
       }
+    },
+    // Méthodes pour le calendrier
+    previousMonth() {
+      this.currentDate = new Date(this.currentDate.getFullYear(), this.currentDate.getMonth() - 1, 1);
+    },
+    nextMonth() {
+      this.currentDate = new Date(this.currentDate.getFullYear(), this.currentDate.getMonth() + 1, 1);
+    },
+    formatCalendarTitle(date) {
+      return date.toLocaleDateString('fr-FR', {
+        year: 'numeric',
+        month: 'long'
+      });
+    },
+    formatAppointmentTime(dateString) {
+      const date = new Date(dateString);
+      return date.toLocaleTimeString('fr-FR', {
+        hour: '2-digit',
+        minute: '2-digit'
+      });
+    },
+    formatAppointmentDateShort(dateString) {
+      const date = new Date(dateString);
+      return date.toLocaleDateString('fr-FR', {
+        weekday: 'short',
+        day: 'numeric',
+        month: 'short',
+        hour: '2-digit',
+        minute: '2-digit'
+      });
     },
   }
 }
@@ -804,6 +966,245 @@ export default {
 
 .appointment-btn.cancel:hover {
   background: #e68900;
+}
+
+/* Styles pour le calendrier */
+.calendar-container {
+  width: 100%;
+}
+
+.calendar-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 20px;
+  padding: 0 10px;
+}
+
+.calendar-title {
+  margin: 0;
+  color: #E48700;
+  font-size: 1.5rem;
+  font-weight: 600;
+  text-transform: capitalize;
+}
+
+.calendar-nav-btn {
+  background: #E48700;
+  color: white;
+  border: none;
+  border-radius: 50%;
+  width: 40px;
+  height: 40px;
+  font-size: 1.5rem;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: background-color 0.2s;
+}
+
+.calendar-nav-btn:hover {
+  background: #c76d00;
+}
+
+.calendar-grid {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  gap: 1px;
+  background: #ddd;
+  border: 1px solid #ddd;
+  border-radius: 8px;
+  overflow: hidden;
+  margin-bottom: 30px;
+}
+
+.calendar-day-header {
+  background: #E48700;
+  color: white;
+  padding: 12px 8px;
+  text-align: center;
+  font-weight: 600;
+  font-size: 0.9rem;
+}
+
+.calendar-day {
+  background: white;
+  min-height: 80px;
+  padding: 8px;
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  transition: background-color 0.2s;
+}
+
+.calendar-day:hover {
+  background: #f9f9f9;
+}
+
+.calendar-day.other-month {
+  background: #f5f5f5;
+  color: #ccc;
+}
+
+.calendar-day.today {
+  background: #fff3e0;
+  border: 2px solid #E48700;
+}
+
+.calendar-day.has-appointment {
+  background: #e8f5e8;
+}
+
+.calendar-day-number {
+  font-weight: 600;
+  font-size: 0.9rem;
+  margin-bottom: 4px;
+}
+
+.calendar-appointments {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.calendar-appointment {
+  background: #E48700;
+  color: white;
+  padding: 2px 4px;
+  border-radius: 3px;
+  font-size: 0.7rem;
+  line-height: 1.2;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.calendar-appointment.pending {
+  background: #ff9800;
+}
+
+.calendar-appointment.accepted {
+  background: #4CAF50;
+}
+
+.calendar-appointment.declined {
+  background: #f44336;
+}
+
+.calendar-appointment.cancelled {
+  background: #9e9e9e;
+}
+
+.appointment-time {
+  display: block;
+  font-weight: 600;
+}
+
+.appointment-title {
+  display: block;
+  opacity: 0.9;
+}
+
+.calendar-appointments-list {
+  margin-top: 30px;
+}
+
+.calendar-appointments-list h4 {
+  color: #E48700;
+  margin-bottom: 15px;
+  font-size: 1.2rem;
+}
+
+.no-appointments {
+  text-align: center;
+  color: #666;
+  font-style: italic;
+  padding: 20px;
+  background: #f9f9f9;
+  border-radius: 8px;
+}
+
+.month-appointments {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.month-appointment-card {
+  background: white;
+  border: 1px solid #ecbc76;
+  border-radius: 8px;
+  padding: 15px;
+  display: flex;
+  align-items: center;
+  gap: 15px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+}
+
+.appointment-date-time {
+  font-size: 0.9rem;
+  color: #666;
+  font-weight: 600;
+  min-width: 120px;
+}
+
+.appointment-info {
+  flex: 1;
+}
+
+.appointment-info h5 {
+  margin: 0 0 5px 0;
+  color: #28303F;
+  font-size: 1rem;
+}
+
+.appointment-info p {
+  margin: 0 0 8px 0;
+  color: #666;
+  font-size: 0.9rem;
+}
+
+@media (max-width: 600px) {
+  .calendar-grid {
+    gap: 0;
+  }
+  
+  .calendar-day {
+    min-height: 60px;
+    padding: 4px;
+  }
+  
+  .calendar-day-header {
+    padding: 8px 4px;
+    font-size: 0.8rem;
+  }
+  
+  .calendar-appointment {
+    font-size: 0.6rem;
+    padding: 1px 2px;
+  }
+  
+  .calendar-title {
+    font-size: 1.2rem;
+  }
+  
+  .calendar-nav-btn {
+    width: 35px;
+    height: 35px;
+    font-size: 1.2rem;
+  }
+  
+  .month-appointment-card {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 10px;
+  }
+  
+  .appointment-date-time {
+    min-width: auto;
+  }
 }
 
 @media (min-width: 601px) {
