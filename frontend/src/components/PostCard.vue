@@ -334,6 +334,11 @@ export default {
   cursor: pointer;
   transition: box-shadow 0.18s;
 }
+
+/* Classe spéciale pour la page carte */
+.carte-page .card {
+  width: 100%;
+}
 .card-orange {
   background: #FFF4E3;
 }

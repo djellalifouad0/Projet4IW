@@ -325,6 +325,7 @@ export default {
   cursor: pointer;
   box-shadow: 0 2px 8px #0001;
   transition: background 0.18s, color 0.18s;
+  width: 100%;
 }
 .btn-retour:hover {
   background: #ECBC76;
