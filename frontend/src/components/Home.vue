@@ -38,7 +38,22 @@
         <div class="modal-separator"></div>
         <form @submit.prevent="handlePublish">
           <textarea v-model="form.description" placeholder="Description" required></textarea>
-          <input v-model="form.location" type="text" placeholder="Adresse (optionnel)" />
+          <div style="position: relative;">
+            <input
+              v-model="form.location"
+              type="text"
+              placeholder="Ville (auto-complétion)"
+              @input="searchCities"
+              @focus="showCitySuggestions = true"
+              @blur="hideCitySuggestions"
+              autocomplete="off"
+            />
+            <ul v-if="showCitySuggestions && citySuggestions.length" class="city-suggestions">
+              <li v-for="city in citySuggestions" :key="city.code" @mousedown.prevent="selectCity(city)">
+                {{ city.nom }} <span v-if="city.codesPostaux && city.codesPostaux.length">({{ city.codesPostaux[0] }})</span>
+              </li>
+            </ul>
+          </div>
           <input v-model.number="form.pricePerHour" type="number" min="0" step="1" placeholder="Tarif horaire (€) (optionnel)" />
           <div class="modal-actions">
             <button type="submit">Publier</button>
@@ -68,7 +83,10 @@ export default {
         pricePerHour: null
       },
       publishError: '', // Erreur pour la publication
-      likeError: ''     // Erreur pour les likes
+      likeError: '',     // Erreur pour les likes
+      citySuggestions: [],
+      showCitySuggestions: false,
+      citySearchTimeout: null
     }
   },
   async mounted() {
@@ -137,7 +155,32 @@ export default {
       } catch (e) {
         this.likeError = 'Erreur lors du dislike.';
       }
-    }
+    },
+    async searchCities() {
+      clearTimeout(this.citySearchTimeout);
+      const query = this.form.location.trim();
+      if (!query) {
+        this.citySuggestions = [];
+        return;
+      }
+      this.citySearchTimeout = setTimeout(async () => {
+        try {
+          const res = await fetch(`https://geo.api.gouv.fr/communes?nom=${encodeURIComponent(query)}&fields=nom,codesPostaux,code&boost=population&limit=5`);
+          const data = await res.json();
+          this.citySuggestions = data;
+        } catch {
+          this.citySuggestions = [];
+        }
+      }, 250);
+    },
+    selectCity(city) {
+      this.form.location = city.nom + (city.codesPostaux && city.codesPostaux.length ? ` (${city.codesPostaux[0]})` : '');
+      this.citySuggestions = [];
+      this.showCitySuggestions = false;
+    },
+    hideCitySuggestions() {
+      setTimeout(() => { this.showCitySuggestions = false; }, 120);
+    },
   }
 }
 </script>
@@ -384,6 +427,30 @@ export default {
   border-radius: 8px;
   padding: 7px 0;
   border: 1px solid #ffd6d6;
+}
+.city-suggestions {
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: 100%;
+  background: #fff;
+  border: 1px solid #e6cfa1;
+  border-radius: 0 0 10px 10px;
+  box-shadow: 0 2px 8px #e4870033;
+  z-index: 10;
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  max-height: 180px;
+  overflow-y: auto;
+}
+.city-suggestions li {
+  padding: 10px 16px;
+  cursor: pointer;
+  transition: background 0.15s;
+}
+.city-suggestions li:hover {
+  background: #ffe1a1;
 }
 
 @media (max-width: 600px) {
