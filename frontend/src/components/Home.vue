@@ -1,7 +1,17 @@
 <template>
   <div class="home-content">
     <div class="filters-bar">
-      <button class="filter-btn">Filtrer par <span>▼</span></button>
+      <div class="filter-dropdown-wrapper">
+        <button class="filter-btn" @click="toggleFilterMenu">Filtrer par <span>▼</span></button>
+        <div v-if="showFilterMenu" class="filter-dropdown">
+          <button @click="setSort('recent')">Plus récent</button>
+          <button @click="setSort('ancien')">Plus ancien</button>
+          <button @click="setSort('proche')">Plus proche</button>
+          <button @click="setSort('loin')">Plus loin</button>
+          <button @click="setSort('plusCher')">Plus cher</button>
+          <button @click="setSort('moinsCher')">Moins cher</button>
+        </div>
+      </div>
       <button class="publish-btn" @click="showForm = true">+ Publier</button>
     </div>
 
@@ -86,13 +96,32 @@ export default {
       likeError: '',     // Erreur pour les likes
       citySuggestions: [],
       showCitySuggestions: false,
-      citySearchTimeout: null
+      citySearchTimeout: null,
+      showFilterMenu: false,
+      sortBy: 'recent',
+      userPosition: null
     }
   },
   async mounted() {
-    await this.fetchPosts();
+    navigator.geolocation.getCurrentPosition((pos) => {
+      this.userPosition = {
+        lat: pos.coords.latitude,
+        lon: pos.coords.longitude
+      };
+      this.fetchPosts();
+    }, () => {
+      this.fetchPosts();
+    });
   },
   methods: {
+    toggleFilterMenu() {
+      this.showFilterMenu = !this.showFilterMenu;
+    },
+    setSort(type) {
+      this.sortBy = type;
+      this.showFilterMenu = false;
+      this.sortPosts();
+    },
     async fetchPosts() {
       try {
         const res = await api.get('/skills');
@@ -109,8 +138,45 @@ export default {
           }
         }));
         this.posts = postsWithComments;
+        await this.sortPosts();
       } catch (e) {
         this.publishError = "Erreur lors du chargement des posts.";
+      }
+    },
+    async sortPosts() {
+      if (this.sortBy === 'recent') {
+        this.posts.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
+      } else if (this.sortBy === 'ancien') {
+        this.posts.sort((a, b) => new Date(a.createdAt) - new Date(b.createdAt));
+      } else if ((this.sortBy === 'proche' || this.sortBy === 'loin') && this.userPosition) {
+        for (const post of this.posts) {
+          post.distance = null;
+          if (post.location) {
+            const geoRes = await fetch(`https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(post.location)}`);
+            const geoData = await geoRes.json();
+            if (geoData && geoData.length > 0) {
+              const lat = parseFloat(geoData[0].lat);
+              const lon = parseFloat(geoData[0].lon);
+              const R = 6371;
+              const dLat = (lat - this.userPosition.lat) * Math.PI / 180;
+              const dLon = (lon - this.userPosition.lon) * Math.PI / 180;
+              const a = Math.sin(dLat/2) * Math.sin(dLat/2) +
+                        Math.cos(this.userPosition.lat * Math.PI / 180) * Math.cos(lat * Math.PI / 180) *
+                        Math.sin(dLon/2) * Math.sin(dLon/2);
+              const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
+              post.distance = R * c;
+            }
+          }
+        }
+        this.posts.sort((a, b) => {
+          if (a.distance === null) return 1;
+          if (b.distance === null) return -1;
+          return this.sortBy === 'proche' ? a.distance - b.distance : b.distance - a.distance;
+        });
+      } else if (this.sortBy === 'plusCher') {
+        this.posts.sort((a, b) => (b.pricePerHour || 0) - (a.pricePerHour || 0));
+      } else if (this.sortBy === 'moinsCher') {
+        this.posts.sort((a, b) => (a.pricePerHour || 0) - (b.pricePerHour || 0));
       }
     },
     async handlePublish() {
@@ -477,5 +543,40 @@ export default {
 /* Empêche tout débordement horizontal sur la page, même si un enfant déborde */
 :global(body) {
   overflow-x: hidden;
+}
+.filter-dropdown-wrapper {
+  position: relative;
+  display: inline-block;
+}
+.filter-dropdown {
+  position: absolute;
+  top: 110%;
+  left: 0;
+  background: #fffbe6;
+  border: 1.5px solid #e6cfa1;
+  border-radius: 10px;
+  box-shadow: 0 2px 12px #e4870033;
+  z-index: 20;
+  min-width: 160px;
+  padding: 8px 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+}
+.filter-dropdown button {
+  background: none;
+  border: none;
+  width: 100%;
+  text-align: left;
+  padding: 12px 18px;
+  font-size: 1.05rem;
+  color: #C6553B;
+  cursor: pointer;
+  transition: background 0.15s, color 0.15s;
+  border-radius: 0;
+}
+.filter-dropdown button:hover {
+  background: #ECBC76;
+  color: #fff;
 }
 </style>
