@@ -68,6 +68,11 @@ export default {
     }
   },
   async mounted() {
+    // Si une adresse est passée en query, centrer la carte dessus
+    const address = this.$route?.query?.address;
+    if (address) {
+      this.centerMapOnAddress(address);
+    }
     try {
       const res = await api.get('/skills')
       // Adapter les données pour PostCard

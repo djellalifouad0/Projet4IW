@@ -10,7 +10,7 @@
             <span v-if="online" class="status-dot"></span>
             <span v-if="postTimeAgo" class="post-time-ago-inline">{{ postTimeAgo }}</span>
           </div>
-          <div class="address" @click.stop="$emit('addressClicked', address)" style="cursor:pointer;text-decoration:underline;">{{ truncatedAddress }}</div>
+          <div class="address" @click.stop="handleAddressClick" style="cursor:pointer;text-decoration:underline;">{{ truncatedAddress }}</div>
         </div>
         <div
           class="rate"
@@ -298,6 +298,14 @@ export default {
         this.$emit('dislike', this.postId);
       } else {
         this.$emit('like', this.postId);
+      }
+    },
+    handleAddressClick() {
+      // Si on est déjà sur /carte, émettre l'event, sinon router vers /carte avec query
+      if (this.$route && this.$route.path === '/carte') {
+        this.$emit('addressClicked', this.address);
+      } else {
+        this.$router.push({ path: '/carte', query: { address: this.address } });
       }
     }
   },
