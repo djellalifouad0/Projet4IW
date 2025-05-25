@@ -36,6 +36,7 @@
           :commentsCount="post.commentsCount || 0"
           @like="likePost"
           @dislike="dislikePost"
+          @addressClicked="centerMapOnAddress"
         />
       </div>
       <div class="carte-map">
@@ -141,7 +142,26 @@ export default {
       } catch (e) {
         // Optionnel : gestion d'erreur
       }
-    }
+    },
+    centerMapOnAddress(address) {
+      // Utilise l'API de géocodage pour trouver la position de la ville/adresse
+      fetch(`https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(address)}`)
+        .then(res => res.json())
+        .then(data => {
+          if (data && data.length > 0) {
+            const { lat, lon } = data[0];
+            // Correction : s'assurer que lon et lat sont bien des nombres
+            const latNum = parseFloat(lat);
+            const lonNum = parseFloat(lon);
+            // Correction du calcul du bbox (évite NaN)
+            const bbox = `${lonNum-0.01}%2C${latNum-0.01}%2C${lonNum+0.01}%2C${latNum+0.01}`;
+            this.mapUrl = `https://www.openstreetmap.org/export/embed.html?bbox=${bbox}&layer=mapnik&marker=${latNum},${lonNum}`;
+          }
+        })
+        .catch(() => {
+          // En cas d'erreur, ne change rien
+        });
+    },
   },
 }
 </script>

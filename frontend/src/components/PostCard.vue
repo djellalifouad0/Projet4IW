@@ -10,7 +10,7 @@
             <span v-if="online" class="status-dot"></span>
             <span v-if="postTimeAgo" class="post-time-ago-inline">{{ postTimeAgo }}</span>
           </div>
-          <div class="address" @click.stop>{{ truncatedAddress }}</div>
+          <div class="address" @click.stop="$emit('addressClicked', address)" style="cursor:pointer;text-decoration:underline;">{{ truncatedAddress }}</div>
         </div>
         <div
           class="rate"
