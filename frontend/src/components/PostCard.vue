@@ -36,7 +36,7 @@
         </span>
         <span :class="['icon', 'pastille', paid ? 'pastille-paid' : '']" @click.stop="openModal">
           <img src="@/assets/icons/comment.svg" alt="views" class="icon-svg" />
-          <span class="icon-number">{{ views }}</span>
+          <span class="icon-number">{{ comments.length }}</span>
         </span>
         <!-- Suppression de l'heure ici -->
       </div>
@@ -73,7 +73,7 @@
           </span>
           <span :class="['icon', 'pastille', paid ? 'pastille-paid' : '']">
             <img src="@/assets/icons/comment.svg" alt="views" class="icon-svg" />
-            <span class="icon-number">{{ views }}</span>
+            <span class="icon-number">{{ comments.length }}</span>
           </span>
         </div>
         <!-- Section Commentaires -->
@@ -115,9 +115,11 @@
             </li>
           </ul>
           <div class="add-comment">
-            <input v-model="newComment" type="text" placeholder="Écrire un commentaire..." @keyup.enter="addComment" />
-            <button @click="addComment">Envoyer</button>
+            <input v-model="newComment" type="text" placeholder="Écrire un commentaire..." @keyup.enter="addComment" :disabled="loadingComments" />
+            <button @click="addComment" :disabled="!newComment.trim() || loadingComments">Envoyer</button>
           </div>
+          <div v-if="errorComments" class="no-comments" style="color: #d00;">{{ errorComments }}</div>
+          <div v-if="successComment" class="no-comments" style="color: #4cd964;">{{ successComment }}</div>
         </div>
       </div>
     </div>
@@ -125,6 +127,8 @@
 </template>
 
 <script>
+import api from '../services/api'
+
 export default {
   name: 'PostCard',
   props: {
@@ -145,27 +149,13 @@ export default {
     return {
       showModal: false,
       charLimit: 270,
-      comments: [
-        {
-          author: 'Alice',
-          avatar: '',
-          time: 'il y a 2 min',
-          text: 'Super post !',
-          replies: [
-            { author: 'Bob', avatar: '', time: 'il y a 1 min', text: 'Merci Alice !' }
-          ]
-        },
-        {
-          author: 'Bob',
-          avatar: '',
-          time: 'il y a 5 min',
-          text: 'Merci pour le partage.',
-          replies: []
-        }
-      ],
+      comments: [], // On vide le tableau par défaut
       newComment: '',
       replyingTo: null,
-      replyText: ''
+      replyText: '',
+      loadingComments: false,
+      errorComments: '',
+      successComment: ''
     }
   },
   computed: {
@@ -219,24 +209,53 @@ export default {
     }
   },
   methods: {
-    openModal() {
+    async openModal() {
       this.showModal = true;
+      await this.fetchComments();
     },
     closeModal() {
       this.showModal = false;
       this.replyingTo = null;
       this.replyText = '';
+      this.comments = [];
+      this.errorComments = '';
     },
-    addComment() {
+    async fetchComments() {
+      this.loadingComments = true;
+      this.errorComments = '';
+      try {
+        const res = await api.get(`/skills/${this.postId}/comments`);
+        // On adapte le format pour l'affichage
+        this.comments = res.data.map(c => ({
+          author: c.User?.username || 'Utilisateur',
+          avatar: c.User?.avatar || '',
+          time: c.createdAt ? new Date(c.createdAt).toLocaleString('fr-FR', { day: '2-digit', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit' }) : '',
+          text: c.content,
+          replies: [] // Pas de gestion des réponses côté back
+        }));
+      } catch (e) {
+        this.errorComments = "Erreur lors du chargement des commentaires.";
+        this.comments = [];
+      } finally {
+        this.loadingComments = false;
+      }
+    },
+    async addComment() {
       if (this.newComment.trim() !== '') {
-        this.comments.push({
-          author: 'Moi',
-          avatar: '',
-          time: 'à l’instant',
-          text: this.newComment,
-          replies: []
-        });
-        this.newComment = '';
+        this.errorComments = '';
+        this.successComment = '';
+        try {
+          await api.post(`/skills/${this.postId}/comments`, { content: this.newComment });
+          this.successComment = 'Commentaire envoyé !';
+          this.newComment = '';
+          await this.fetchComments();
+        } catch (e) {
+          if (e.response && e.response.status === 401) {
+            this.errorComments = "Vous devez être connecté pour commenter.";
+          } else {
+            this.errorComments = "Erreur lors de l'envoi du commentaire.";
+          }
+        }
       }
     },
     replyTo(idx) {
@@ -244,6 +263,7 @@ export default {
       this.replyText = '';
     },
     sendReply(idx) {
+      // Réponses locales uniquement (pas de gestion back)
       if (this.replyText.trim() !== '') {
         this.comments[idx].replies.push({
           author: 'Moi',

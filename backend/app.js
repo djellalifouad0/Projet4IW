@@ -5,7 +5,6 @@ const authRoutes = require('./routes/authRoutes');
 const userRoutes = require('./routes/userRoutes');
 const setupSwagger = require('./swagger/swagger');
 const skillRoutes = require('./routes/skillRoutes');
-const commentRoutes = require('./routes/commentRoutes')
 const notificationRoutes = require('./routes/notificationRoutes')
 const likeRoutes = require('./routes/likeRoutes')
 const app = express();
@@ -19,7 +18,7 @@ app.use(express.urlencoded({ limit: '10mb', extended: true }));
 app.use('/api/auth', authRoutes);
 app.use('/api', userRoutes);
 app.use('/api/skills', skillRoutes);
-app.use('/api/comments', commentRoutes);
+// app.use('/api/comments', commentRoutes); // Désactivé car les routes sont maintenant dans /api/skills/:id/comments
 app.use('/api/notifications', notificationRoutes);
 app.use('/api/likes', likeRoutes);
 // ➕ Swagger (dispo sur /api-docs)

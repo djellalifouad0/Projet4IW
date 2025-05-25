@@ -1,4 +1,5 @@
 const Comment = require('../models/comment');
+const User = require('../models/user');
 
 /**
  * @swagger
@@ -61,7 +62,7 @@ exports.getComments = async (req, res) => {
   try {
     const comments = await Comment.findAll({
       where: { skillId: req.params.id },
-      include: ['userId']
+      include: [{ model: User, attributes: ['username', 'avatar'] }]
     });
     res.json(comments);
   } catch (error) {
