@@ -329,7 +329,8 @@ export default {
   flex-direction: column;
   gap: 12px;
   position: relative;
-  width: 100%;
+  width: 700px;
+  max-width: 100%;
   cursor: pointer;
   transition: box-shadow 0.18s;
 }
