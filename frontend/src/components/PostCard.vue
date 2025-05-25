@@ -225,14 +225,21 @@ export default {
       this.errorComments = '';
       try {
         const res = await api.get(`/skills/${this.postId}/comments`);
-        // On adapte le format pour l'affichage
-        this.comments = res.data.map(c => ({
+        // On sépare commentaires racine et réponses
+        const all = res.data.map(c => ({
+          id: c.id,
           author: c.User?.username || 'Utilisateur',
           avatar: c.User?.avatar || '',
           time: c.createdAt ? new Date(c.createdAt).toLocaleString('fr-FR', { day: '2-digit', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit' }) : '',
           text: c.content,
-          replies: [] // Pas de gestion des réponses côté back
+          parentId: c.parentId || null,
         }));
+        // Regroupement : commentaires racine + réponses imbriquées
+        const comments = all.filter(c => !c.parentId).map(parent => ({
+          ...parent,
+          replies: all.filter(r => r.parentId === parent.id)
+        }));
+        this.comments = comments;
       } catch (e) {
         this.errorComments = "Erreur lors du chargement des commentaires.";
         this.comments = [];
@@ -262,17 +269,23 @@ export default {
       this.replyingTo = idx;
       this.replyText = '';
     },
-    sendReply(idx) {
-      // Réponses locales uniquement (pas de gestion back)
+    async sendReply(idx) {
+      // Envoi la réponse au back (parentId = id du commentaire parent)
       if (this.replyText.trim() !== '') {
-        this.comments[idx].replies.push({
-          author: 'Moi',
-          avatar: '',
-          time: 'à l’instant',
-          text: this.replyText
-        });
-        this.replyText = '';
-        this.replyingTo = null;
+        this.errorComments = '';
+        try {
+          const parentId = this.comments[idx].id;
+          await api.post(`/skills/${this.postId}/comments`, { content: this.replyText, parentId });
+          this.replyText = '';
+          this.replyingTo = null;
+          await this.fetchComments();
+        } catch (e) {
+          if (e.response && e.response.status === 401) {
+            this.errorComments = "Vous devez être connecté pour répondre.";
+          } else {
+            this.errorComments = "Erreur lors de l'envoi de la réponse.";
+          }
+        }
       }
     },
     toggleLike() {

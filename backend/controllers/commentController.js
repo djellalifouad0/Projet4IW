@@ -30,11 +30,12 @@ const User = require('../models/user');
  */
 exports.addComment = async (req, res) => {
   try {
-    const { content } = req.body;
+    const { content, parentId } = req.body;
     const comment = await Comment.create({
       userId: req.user.id,
       skillId: req.params.id,
-      content
+      content,
+      parentId: parentId || null
     });
     res.status(201).json(comment);
   } catch (error) {

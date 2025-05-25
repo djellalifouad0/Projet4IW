@@ -20,6 +20,15 @@ const Comment = sequelize.define('Comment', {
   skillId: {
     type: DataTypes.INTEGER,
     allowNull: false
+  },
+  parentId: {
+    type: DataTypes.INTEGER,
+    allowNull: true,
+    references: {
+      model: 'Comments',
+      key: 'id'
+    },
+    onDelete: 'CASCADE'
   }
 });
 
@@ -27,5 +36,9 @@ Skill.hasMany(Comment, { foreignKey: 'skillId', onDelete: 'CASCADE' });
 Comment.belongsTo(Skill, { foreignKey: 'skillId' });
 User.hasMany(Comment, { foreignKey: 'userId' });
 Comment.belongsTo(User, { foreignKey: 'userId' });
+
+// Association pour les réponses imbriquées
+Comment.hasMany(Comment, { as: 'replies', foreignKey: 'parentId' });
+Comment.belongsTo(Comment, { as: 'parent', foreignKey: 'parentId' });
 
 module.exports = Comment;
