@@ -17,24 +17,24 @@
             @click.stop
           >{{ rate }}</div>          <!-- Actions pour le propriétaire du post -->
           <div v-if="isOwnPost" class="post-actions">
-            <button class="post-action-btn" @click.stop.prevent="startInlineEdit" title="Édition rapide">✏️</button>
-            <button class="post-action-btn" @click.stop.prevent="startEditPost" title="Édition complète">📝</button>
+            <button class="post-action-btn" @click.stop.prevent="startInlineEdit" title="Modifier">✏️</button>
             <button class="post-action-btn delete" @click.stop.prevent="deletePost" title="Supprimer">🗑️</button>
           </div>
         </div>
       </div>      <div class="card-body">
         <!-- Mode édition inline -->
-        <div v-if="isEditingInline" class="inline-edit-container">
+        <div v-if="isEditingInline" class="inline-edit-container" @click.stop>
           <textarea 
             v-model="editPostDescription" 
             class="inline-edit-textarea"
             @keydown.enter.ctrl="saveInlineEdit"
             @keydown.escape="cancelInlineEdit"
+            @click.stop
             ref="inlineTextarea"
           ></textarea>
-          <div class="inline-edit-actions">
-            <button @click="saveInlineEdit" class="inline-save-btn">Sauvegarder</button>
-            <button @click="cancelInlineEdit" class="inline-cancel-btn">Annuler</button>
+          <div class="inline-edit-actions" @click.stop>
+            <button @click.stop="saveInlineEdit" class="inline-save-btn">Sauvegarder</button>
+            <button @click.stop="cancelInlineEdit" class="inline-cancel-btn">Annuler</button>
             <span class="inline-edit-hint">Ctrl+Entrée pour sauvegarder</span>
           </div>
         </div>
@@ -72,10 +72,8 @@
             <div class="address" @click.stop="handleAddressClick" style="cursor:pointer;text-decoration:underline;">{{ truncatedAddress }}</div>
           </div>
           <div class="header-actions">
-            <div class="rate" :class="paid ? 'rate-paid' : ''" v-if="rate">{{ rate }}</div>
-            <!-- Actions pour le propriétaire du post -->
+            <div class="rate" :class="paid ? 'rate-paid' : ''" v-if="rate">{{ rate }}</div>            <!-- Actions pour le propriétaire du post -->
             <div v-if="isOwnPost" class="post-actions">
-              <button class="post-action-btn" @click.stop="startEditPost" title="Modifier">✏️</button>
               <button class="post-action-btn delete" @click.stop="deletePost" title="Supprimer">🗑️</button>
             </div>
           </div>
@@ -158,32 +156,10 @@
             <input v-model="newComment" type="text" placeholder="Écrire un commentaire..." @keyup.enter="addComment" :disabled="loadingComments" />
             <button @click="addComment" :disabled="!newComment.trim() || loadingComments">Envoyer</button>
           </div>
-          <div v-if="errorComments" class="no-comments" style="color: #d00;">{{ errorComments }}</div>
-          <div v-if="successComment" class="no-comments" style="color: #4cd964;">{{ successComment }}        </div>
-      </div>
-    </div>
-
-    <!-- MODALE D'ÉDITION DE POST -->
-    <div v-if="showEditPostModal" class="modal-overlay" @click="showEditPostModal = false">
-      <div class="edit-post-modal" @click.stop>
-        <div class="edit-post-header">
-          <h3>Modifier le post</h3>
-          <button class="close-btn" @click="showEditPostModal = false">×</button>
-        </div>
-        <div class="edit-post-body">
-          <textarea 
-            v-model="editPostDescription" 
-            placeholder="Description du post..."
-            rows="6"
-          ></textarea>
-        </div>
-        <div class="edit-post-footer">
-          <button @click="showEditPostModal = false" class="cancel-btn">Annuler</button>
-          <button @click="savePost" class="save-btn">Sauvegarder</button>
+          <div v-if="errorComments" class="no-comments" style="color: #d00;">{{ errorComments }}</div>          <div v-if="successComment" class="no-comments" style="color: #4cd964;">{{ successComment }}</div>
         </div>
       </div>
     </div>
-  </div>
   </div>
 </template>
 
@@ -218,12 +194,9 @@ export default {
       loadingComments: false,
       errorComments: '',
       successComment: '',
-      loggedInUser: null,
-      editingComment: null,
-      editCommentText: '',      showEditPostModal: false,
+      loggedInUser: null,      editingComment: null,
+      editCommentText: '',
       editPostDescription: '',
-      editPostLocation: '',
-      editPostPrice: null,
       isEditingInline: false
     }
   },
@@ -425,34 +398,9 @@ export default {
         this.errorComments = 'Erreur lors de la modification du post.';
       }
     },
-    
-    cancelInlineEdit() {
+      cancelInlineEdit() {
       this.isEditingInline = false;
       this.editPostDescription = '';
-    },
-    
-    startEditPost() {
-      this.editPostDescription = this.description;
-      this.showEditPostModal = true;
-    },
-    
-    async savePost() {
-      try {
-        await api.patch(`/skills/${this.postId}`, {
-          description: this.editPostDescription
-        });
-        
-        // Émettre un événement pour que le composant parent mette à jour la liste
-        this.$emit('post-updated', {
-          postId: this.postId,
-          description: this.editPostDescription
-        });
-        
-        this.showEditPostModal = false;
-        this.successComment = 'Post modifié avec succès !';
-      } catch (e) {
-        this.errorComments = 'Erreur lors de la modification du post.';
-      }
     },
     
     async deletePost() {
@@ -1077,114 +1025,6 @@ export default {
 }
 .liked .icon-number {
   color: #fff !important;
-}
-
-/* === STYLES POUR LA MODAL D'ÉDITION DE POST === */
-.edit-post-modal {
-  background: white;
-  border-radius: 12px;
-  padding: 0;
-  width: 500px;
-  max-width: 90vw;
-  box-shadow: 0 4px 28px rgba(0,0,0,0.15);
-  overflow: hidden;
-}
-
-.edit-post-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  padding: 20px 24px;
-  border-bottom: 1px solid #e9ecef;
-  background: #f8f9fa;
-}
-
-.edit-post-header h3 {
-  margin: 0;
-  color: #333;
-  font-size: 1.2rem;
-}
-
-.close-btn {
-  background: none;
-  border: none;
-  font-size: 24px;
-  cursor: pointer;
-  color: #6c757d;
-  padding: 0;
-  width: 30px;
-  height: 30px;
-  border-radius: 50%;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  transition: background 0.2s;
-}
-
-.close-btn:hover {
-  background: rgba(0,0,0,0.1);
-}
-
-.edit-post-body {
-  padding: 24px;
-}
-
-.edit-post-body textarea {
-  width: 100%;
-  min-height: 120px;
-  padding: 12px;
-  border: 1px solid #ddd;
-  border-radius: 8px;
-  font-size: 1rem;
-  resize: vertical;
-  font-family: inherit;
-  box-sizing: border-box;
-}
-
-.edit-post-body textarea:focus {
-  outline: none;
-  border-color: #f59c1a;
-  box-shadow: 0 0 0 2px rgba(245, 156, 26, 0.2);
-}
-
-.edit-post-footer {
-  display: flex;
-  gap: 12px;
-  justify-content: flex-end;
-  padding: 20px 24px;
-  border-top: 1px solid #e9ecef;
-  background: #f8f9fa;
-}
-
-.cancel-btn {
-  background: #6c757d;
-  color: white;
-  border: none;
-  border-radius: 6px;
-  padding: 10px 20px;
-  cursor: pointer;
-  font-size: 0.95rem;
-  transition: background 0.15s;
-}
-
-.cancel-btn:hover {
-  background: #5a6268;
-}
-
-.save-btn {
-  background: #f59c1a;
-  color: white;
-  border: none;
-  border-radius: 6px;
-  padding: 10px 20px;
-  cursor: pointer;
-  font-size: 0.95rem;
-  font-weight: 600;
-  transition: background 0.15s;
-}
-
-.save-btn:hover {
-  background: #e4a94f;
 }
 
 /* === STYLES POUR L'ÉDITION INLINE === */
