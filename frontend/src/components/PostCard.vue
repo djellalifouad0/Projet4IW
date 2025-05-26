@@ -97,66 +97,75 @@
             <img src="@/assets/icons/comment.svg" alt="views" class="icon-svg" />
             <span class="icon-number">{{ totalCommentsCount }}</span>
           </span>
-        </div>
-        <!-- Section Commentaires -->
+        </div>        <!-- Section Commentaires -->
         <div class="modal-comments">
-          <div v-if="comments.length === 0" class="no-comments">Aucun commentaire pour l'instant.</div>
-          <ul v-else class="comments-list">
-            <li v-for="(comment, idx) in comments" :key="idx" class="comment-item">
-              <div class="comment-main">
-                <img class="comment-avatar" :src="comment.avatar || avatar" alt="avatar" />
-                <div class="comment-content">
-                  <div class="comment-header">
-                    <span class="comment-author">{{ comment.author }}</span>
-                    <span class="comment-time">• {{ comment.time || 'il y a 1 min' }}</span>
-                  </div>                  <div v-if="editingComment === comment.id" class="comment-edit">
-                    <input v-model="editCommentText" type="text" @keyup.enter="saveCommentEdit(comment.id)" />
-                    <button @click="saveCommentEdit(comment.id)">Sauvegarder</button>
-                    <button @click="cancelCommentEdit">Annuler</button>
-                  </div>
-                  <div v-else class="comment-text">{{ comment.text }}</div>
-                  <div class="comment-actions">
-                    <button class="comment-action" @click="replyTo(idx)">Répondre</button>
-                    <button v-if="isOwnComment(comment)" class="comment-action" @click="startEditComment(comment)">Modifier</button>
-                    <button v-if="isOwnComment(comment)" class="comment-action delete" @click="deleteComment(comment.id)">Supprimer</button>
-                  </div>
-                </div>
-              </div>              <!-- Réponses -->
-              <ul v-if="comment.replies && comment.replies.length" class="replies-list">
-                <li v-for="(reply, rIdx) in comment.replies" :key="rIdx" class="reply-item">
-                  <img class="comment-avatar" :src="reply.avatar || avatar" alt="avatar" />
+          <!-- Zone de scroll pour les commentaires -->
+          <div class="comments-scroll-area">
+            <div v-if="comments.length === 0" class="no-comments">Aucun commentaire pour l'instant.</div>
+            <ul v-else class="comments-list">
+              <li v-for="(comment, idx) in comments" :key="idx" class="comment-item" :id="`comment-${comment.id}`">
+                <div class="comment-main">
+                  <img class="comment-avatar" :src="comment.avatar || avatar" alt="avatar" />
                   <div class="comment-content">
                     <div class="comment-header">
-                      <span class="comment-author">{{ reply.author }}</span>
-                      <span class="comment-time">• {{ reply.time || 'il y a 1 min' }}</span>
+                      <span class="comment-author">{{ comment.author }}</span>
+                      <span class="comment-time">• {{ comment.time || 'il y a 1 min' }}</span>
                     </div>
-                    <!-- Interface d'édition pour les réponses -->
-                    <div v-if="editingComment === reply.id" class="comment-edit">
-                      <input v-model="editCommentText" type="text" @keyup.enter="saveCommentEdit(reply.id)" />
-                      <button @click="saveCommentEdit(reply.id)">Sauvegarder</button>
+                    <div v-if="editingComment === comment.id" class="comment-edit">
+                      <input v-model="editCommentText" type="text" @keyup.enter="saveCommentEdit(comment.id)" />
+                      <button @click="saveCommentEdit(comment.id)">Sauvegarder</button>
                       <button @click="cancelCommentEdit">Annuler</button>
                     </div>
-                    <div v-else class="comment-text">{{ reply.text }}</div>
-                    <!-- Actions pour les réponses -->
-                    <div class="comment-actions" v-if="isOwnComment(reply)">
-                      <button class="comment-action" @click="startEditComment(reply)">Modifier</button>
-                      <button class="comment-action delete" @click="deleteComment(reply.id)">Supprimer</button>
+                    <div v-else class="comment-text">{{ comment.text }}</div>
+                    <div class="comment-actions">
+                      <button class="comment-action" @click="replyTo(idx)">Répondre</button>
+                      <button v-if="isOwnComment(comment)" class="comment-action" @click="startEditComment(comment)">✏️ Modifier</button>
+                      <button v-if="isOwnComment(comment)" class="comment-action delete" @click="deleteComment(comment.id)">🗑️ Supprimer</button>
                     </div>
                   </div>
-                </li>
-              </ul>
-              <!-- Champ de réponse -->
-              <div v-if="replyingTo === idx" class="add-reply">
-                <input v-model="replyText" type="text" placeholder="Votre réponse..." @keyup.enter="sendReply(idx)" />
-                <button @click="sendReply(idx)">Envoyer</button>
-              </div>
-            </li>
-          </ul>
-          <div class="add-comment">
-            <input v-model="newComment" type="text" placeholder="Écrire un commentaire..." @keyup.enter="addComment" :disabled="loadingComments" />
-            <button @click="addComment" :disabled="!newComment.trim() || loadingComments">Envoyer</button>
+                </div>
+                <!-- Réponses -->
+                <ul v-if="comment.replies && comment.replies.length" class="replies-list">
+                  <li v-for="(reply, rIdx) in comment.replies" :key="rIdx" class="reply-item" :id="`comment-${reply.id}`">
+                    <img class="comment-avatar" :src="reply.avatar || avatar" alt="avatar" />
+                    <div class="comment-content">
+                      <div class="comment-header">
+                        <span class="comment-author">{{ reply.author }}</span>
+                        <span class="comment-time">• {{ reply.time || 'il y a 1 min' }}</span>
+                      </div>
+                      <!-- Interface d'édition pour les réponses -->
+                      <div v-if="editingComment === reply.id" class="comment-edit">
+                        <input v-model="editCommentText" type="text" @keyup.enter="saveCommentEdit(reply.id)" />
+                        <button @click="saveCommentEdit(reply.id)">Sauvegarder</button>
+                        <button @click="cancelCommentEdit">Annuler</button>
+                      </div>
+                      <div v-else class="comment-text">{{ reply.text }}</div>
+                      <!-- Actions pour les réponses -->
+                      <div class="comment-actions" v-if="isOwnComment(reply)">
+                        <button class="comment-action" @click="startEditComment(reply)">✏️ Modifier</button>
+                        <button class="comment-action delete" @click="deleteComment(reply.id)">🗑️ Supprimer</button>
+                      </div>
+                    </div>
+                  </li>
+                </ul>
+                <!-- Champ de réponse -->
+                <div v-if="replyingTo === idx" class="add-reply">
+                  <input v-model="replyText" type="text" placeholder="Votre réponse..." @keyup.enter="sendReply(idx)" />
+                  <button @click="sendReply(idx)">Envoyer</button>
+                </div>
+              </li>
+            </ul>
           </div>
-          <div v-if="errorComments" class="no-comments" style="color: #d00;">{{ errorComments }}</div>          <div v-if="successComment" class="no-comments" style="color: #4cd964;">{{ successComment }}</div>
+          
+          <!-- Footer fixe pour l'ajout de commentaire -->
+          <div class="comments-footer">
+            <div v-if="errorComments" class="message error">{{ errorComments }}</div>
+            <div v-if="successComment" class="message success">{{ successComment }}</div>
+            <div class="add-comment">
+              <input v-model="newComment" type="text" placeholder="Écrire un commentaire..." @keyup.enter="addComment" :disabled="loadingComments" />
+              <button @click="addComment" :disabled="!newComment.trim() || loadingComments">Envoyer</button>
+            </div>
+          </div>
         </div>
       </div>
     </div>
@@ -295,17 +304,23 @@ export default {
       } finally {
         this.loadingComments = false;
       }
-    },
-    async addComment() {
+    },    async addComment() {
       if (this.newComment.trim() !== '') {
         this.errorComments = '';
         this.successComment = '';
         try {
-          await api.post(`/skills/${this.postId}/comments`, { content: this.newComment });
+          const response = await api.post(`/skills/${this.postId}/comments`, { content: this.newComment });
           this.successComment = 'Commentaire envoyé !';
           this.newComment = '';
           await this.fetchComments();
           this.$emit('comment-posted'); // Ajout : notifie le parent
+          
+          // Scroll vers le nouveau commentaire après un petit délai
+          this.$nextTick(() => {
+            setTimeout(() => {
+              this.scrollToNewComment(response.data.id);
+            }, 100);
+          });
         } catch (e) {
           if (e.response && e.response.status === 401) {
             this.errorComments = "Vous devez être connecté pour commenter.";
@@ -318,17 +333,23 @@ export default {
     replyTo(idx) {
       this.replyingTo = idx;
       this.replyText = '';
-    },
-    async sendReply(idx) {
+    },    async sendReply(idx) {
       // Envoi la réponse au back (parentId = id du commentaire parent)
       if (this.replyText.trim() !== '') {
         this.errorComments = '';
         try {
           const parentId = this.comments[idx].id;
-          await api.post(`/skills/${this.postId}/comments`, { content: this.replyText, parentId });
+          const response = await api.post(`/skills/${this.postId}/comments`, { content: this.replyText, parentId });
           this.replyText = '';
           this.replyingTo = null;
           await this.fetchComments();
+          
+          // Scroll vers la nouvelle réponse après un petit délai
+          this.$nextTick(() => {
+            setTimeout(() => {
+              this.scrollToNewComment(response.data.id);
+            }, 100);
+          });
         } catch (e) {
           if (e.response && e.response.status === 401) {
             this.errorComments = "Vous devez être connecté pour répondre.";
@@ -467,9 +488,25 @@ export default {
         if (token) {
           const response = await api.get('/auth/me');
           this.loggedInUser = response.data;
-        }
-      } catch (e) {
+        }      } catch (e) {
         console.error('Erreur lors du chargement de l\'utilisateur:', e);
+      }
+    },
+    
+    // === MÉTHODE POUR SCROLL VERS UN COMMENTAIRE ===
+    scrollToNewComment(commentId) {
+      const commentElement = document.getElementById(`comment-${commentId}`);
+      if (commentElement) {
+        commentElement.scrollIntoView({ 
+          behavior: 'smooth', 
+          block: 'center' 
+        });
+        // Ajouter un effet de surbrillance temporaire
+        commentElement.style.backgroundColor = '#fff4e3';
+        commentElement.style.transition = 'background-color 0.3s ease';
+        setTimeout(() => {
+          commentElement.style.backgroundColor = '';
+        }, 2000);
       }
     }},
   mounted() {
@@ -689,9 +726,68 @@ export default {
   margin-top: 28px;
   background: none;
   border-radius: 12px;
-  padding: 18px 0 12px 0;
+  padding: 0;
   box-shadow: none;
-  width: 100%; /* occupe toute la largeur de la modale */
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  min-height: 250px;
+  max-height: 50vh;
+}
+
+/* Zone de scroll pour les commentaires */
+.comments-scroll-area {
+  flex: 1;
+  overflow-y: auto;
+  padding: 18px 0 12px 0;
+  max-height: calc(50vh - 80px);
+}
+
+.comments-scroll-area::-webkit-scrollbar {
+  width: 6px;
+}
+
+.comments-scroll-area::-webkit-scrollbar-track {
+  background: #f1f1f1;
+  border-radius: 3px;
+}
+
+.comments-scroll-area::-webkit-scrollbar-thumb {
+  background: #ddd;
+  border-radius: 3px;
+}
+
+.comments-scroll-area::-webkit-scrollbar-thumb:hover {
+  background: #bbb;
+}
+
+/* Footer fixe pour l'ajout de commentaire */
+.comments-footer {
+  background: white;
+  border-top: 1px solid #eee;
+  padding: 16px 0 0 0;
+  margin-top: auto;
+  position: sticky;
+  bottom: 0;
+}
+
+.comments-footer .message {
+  margin-bottom: 8px;
+  padding: 6px 10px;
+  border-radius: 6px;
+  font-size: 0.9rem;
+}
+
+.comments-footer .message.error {
+  background: rgba(220, 53, 69, 0.1);
+  color: #d00;
+  border: 1px solid rgba(220, 53, 69, 0.2);
+}
+
+.comments-footer .message.success {
+  background: rgba(76, 217, 100, 0.1);
+  color: #4cd964;
+  border: 1px solid rgba(76, 217, 100, 0.2);
 }
 .modal-comments h3 {
   margin: 0 0 10px 0;
@@ -702,12 +798,13 @@ export default {
   color: #888;
   font-size: 0.97rem;
   margin-bottom: 10px;
+  text-align: center;
+  padding: 20px 0;
 }
 .comments-list {
   list-style: none;
   padding: 0;
-  margin: 0 0 12px 0;
-  /* plus de scroll interne, prend toute la largeur */
+  margin: 0;
 }
 .comment-item {
   margin-bottom: 7px;
@@ -857,7 +954,6 @@ export default {
   display: flex;
   gap: 8px;
   align-items: center;
-  margin-top: 10px;
 }
 .add-comment input {
   flex: 1;
@@ -925,6 +1021,10 @@ export default {
     min-width: 0;
   }
   .modal-comments {
+    max-height: 45vh;
+  }
+  .comments-scroll-area {
+    max-height: calc(45vh - 80px);
     padding: 14px 0 10px 0;
   }
 }
@@ -938,6 +1038,16 @@ export default {
     box-shadow: 0 1px 10px #0001;
     box-sizing: border-box;
     margin-bottom: 10px;
+  }
+  .modal-comments {
+    max-height: 40vh;
+    min-height: 200px;
+  }
+  .comments-scroll-area {
+    max-height: calc(40vh - 70px);
+  }
+  .comments-footer {
+    padding: 12px 0 0 0;
   }
   .card-header,
   .modal-card .card-header {
