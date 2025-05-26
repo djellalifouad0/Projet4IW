@@ -69,7 +69,7 @@
               {{ name }}
               <span v-if="online" class="status-dot"></span>
             </div>
-            <div class="address">{{ truncatedAddress }}</div>
+            <div class="address" @click.stop="handleAddressClick" style="cursor:pointer;text-decoration:underline;">{{ truncatedAddress }}</div>
           </div>
           <div class="header-actions">
             <div class="rate" :class="paid ? 'rate-paid' : ''" v-if="rate">{{ rate }}</div>
@@ -377,6 +377,13 @@ export default {
       if (this.profileToken) {
         this.$router.push(`/profile/${this.profileToken}`);
       }
+    },
+      handleAddressClick() {
+      // Émet un événement pour centrer la carte sur cette adresse (si on est sur la page Carte)
+      this.$emit('addressClicked', this.address);
+      
+      // Navigation vers la page carte avec l'adresse
+      this.$router.push(`/carte?address=${encodeURIComponent(this.address)}`);
     },
     
     // === MÉTHODES POUR LA GESTION DES POSTS ===

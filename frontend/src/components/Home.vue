@@ -34,6 +34,7 @@
         :commentsCount="post.commentsCount || 0"
         :profileToken="post.User?.profileToken || ''"        @like="likePost"
         @dislike="dislikePost"
+        @addressClicked="handleAddressClick"
         @comment-posted="fetchPosts"
         @post-updated="handlePostUpdated"
         @post-deleted="handlePostDeleted"
@@ -247,6 +248,11 @@ export default {
       this.showCitySuggestions = false;
     },    hideCitySuggestions() {
       setTimeout(() => { this.showCitySuggestions = false; }, 120);
+    },
+    
+    handleAddressClick(address) {
+      // Navigation vers la page carte avec l'adresse sélectionnée
+      this.$router.push(`/carte?address=${encodeURIComponent(address)}`);
     },
     
     // === GESTION DES MISES À JOUR DE POSTS ===
