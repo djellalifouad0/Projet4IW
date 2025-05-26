@@ -14,9 +14,25 @@
         </div>        <!-- Show 'Edit Profile' button only if the profile belongs to the logged-in user -->
         <div v-if="user?.profileToken === loggedInUser?.profileToken" class="profile-actions">
           <button class="profile-btn-v2" @click="showEditModal = true">Modifier le profil</button>
-        </div>
-        <!-- Show 'Send Message' button if viewing someone else's profile -->        <div v-else class="profile-actions">
+        </div>        <!-- Show 'Send Message' button if viewing someone else's profile -->        <div v-else class="profile-actions">
           <button class="profile-btn-v2 profile-btn-message" @click="startConversation">Envoyer un message</button>
+          <button class="profile-btn-v2 profile-btn-rate" @click="showRatingModal = true">Noter cet utilisateur</button>
+        </div>
+      </div>
+      
+      <!-- Section des notes/avis -->
+      <div class="ratings-section">
+        <div class="ratings-summary" v-if="user?.ratingStats">
+          <div class="rating-average">
+            <div class="stars-display">
+              <span v-for="star in 5" :key="star" 
+                    :class="['star', { filled: star <= Math.round(user.ratingStats.averageRating) }]">
+                ⭐
+              </span>
+            </div>
+            <span class="rating-number">{{ user.ratingStats.averageRating || 0 }}/5</span>
+            <span class="rating-count">({{ user.ratingStats.totalRatings }} avis)</span>
+          </div>
         </div>
       </div>
     </div>
@@ -43,6 +59,12 @@
           v-if="user?.profileToken === loggedInUser?.profileToken"
         >
           📅 Calendrier ({{ appointments.length }})
+        </button>
+        <button 
+          :class="['tab-button', { active: activeTab === 'ratings' }]"
+          @click="activeTab = 'ratings'; loadUserRatings()"
+        >
+          ⭐ Avis ({{ user?.ratingStats?.totalRatings || 0 }})
         </button>
       </div>
 
@@ -167,8 +189,45 @@
                   </span>
                 </div>
               </div>
+            </div>          </div>        </div>
+      </div>
+
+      <!-- Contenu de l'onglet Avis -->
+      <div v-if="activeTab === 'ratings'" class="tab-content">
+        <div class="ratings-container">
+          <div v-if="!userRatings.length" class="no-ratings">
+            Aucun avis pour le moment
+          </div>
+          <div v-else class="ratings-list">
+            <div v-for="rating in userRatings" :key="rating.id" class="rating-card">
+              <div class="rating-header">
+                <div class="rating-user">
+                  <img 
+                    :src="rating.rater?.avatar || 'https://randomuser.me/api/portraits/men/32.jpg'" 
+                    :alt="rating.rater?.username"
+                    class="rating-avatar"
+                  />
+                  <span class="rating-username">{{ rating.rater?.username }}</span>
+                </div>
+                <div class="rating-score">
+                  <div class="stars-display">
+                    <span v-for="star in 5" :key="star" 
+                          :class="['star', { filled: star <= rating.rating }]">
+                      ⭐
+                    </span>
+                  </div>
+                  <span class="rating-value">{{ rating.rating }}/5</span>
+                </div>
+              </div>
+              <div v-if="rating.comment" class="rating-comment">
+                {{ rating.comment }}
+              </div>
+              <div class="rating-date">
+                {{ formatRatingDate(rating.createdAt) }}
+              </div>
             </div>
-          </div>        </div>
+          </div>
+        </div>
       </div>
     </div>
 
@@ -199,9 +258,47 @@
           <input v-model="edit.username" placeholder="Nom" />
           <textarea v-model="edit.bio" placeholder="Bio"></textarea>
           <input v-model="edit.address" placeholder="Localisation" />
+        </div>      </div>    </div>
+    <!-- FIN MODALE EDITION -->
+
+    <!-- MODALE NOTATION UTILISATEUR -->
+    <div v-if="showRatingModal" class="modal-overlay" @click.self="showRatingModal = false">
+      <div class="modal-rating">
+        <button class="modal-close" @click="showRatingModal = false">×</button>
+        <div class="modal-header">
+          <h2>Noter {{ user?.username }}</h2>
         </div>
-      </div>    </div>
-    <!-- FIN MODALE -->
+        <div class="modal-body">
+          <div class="rating-form">
+            <div class="rating-stars">
+              <label>Note :</label>
+              <div class="stars-input">
+                <span v-for="star in 5" :key="star" 
+                      :class="['star-input', { active: star <= newRating.rating }]"
+                      @click="newRating.rating = star">
+                  ⭐
+                </span>
+              </div>
+            </div>
+            <div class="rating-comment">
+              <label>Commentaire (optionnel) :</label>
+              <textarea 
+                v-model="newRating.comment" 
+                placeholder="Partagez votre expérience avec cet utilisateur..."
+                rows="4"
+              ></textarea>
+            </div>
+          </div>
+          <div class="modal-actions">
+            <button @click="showRatingModal = false" class="btn btn-cancel">Annuler</button>
+            <button @click="submitRating" class="btn btn-primary" :disabled="!newRating.rating">
+              Publier l'avis
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+    <!-- FIN MODALE NOTATION -->
   </div>
 </template>
 
@@ -216,6 +313,12 @@ export default {
       appointments: [],
       loggedInUser: null, // Store the logged-in user's data
       showEditModal: false,
+      showRatingModal: false,
+      userRatings: [],
+      newRating: {
+        rating: 0,
+        comment: ''
+      },
       activeTab: 'posts', // Onglet actif par défaut
       currentDate: new Date(), // Date actuelle pour le calendrier
       dayHeaders: ['Dim', 'Lun', 'Mar', 'Mer', 'Jeu', 'Ven', 'Sam'],
@@ -474,8 +577,7 @@ export default {
         hour: '2-digit',
         minute: '2-digit'
       });
-    },
-    formatAppointmentDateShort(dateString) {
+    },    formatAppointmentDateShort(dateString) {
       const date = new Date(dateString);
       return date.toLocaleDateString('fr-FR', {
         weekday: 'short',
@@ -483,6 +585,62 @@ export default {
         month: 'short',
         hour: '2-digit',
         minute: '2-digit'
+      });
+    },    // Méthodes pour les avis
+    async loadUser() {
+      try {
+        const profileToken = this.$route.params.profileToken;
+        const res = await api.get(`/users/profile/${profileToken}`);
+        this.user = res.data;
+      } catch (error) {
+        console.error('Error reloading user data:', error);
+      }
+    },
+
+    async loadUserRatings() {
+      try {
+        const response = await api.get(`/ratings/user/${this.user.id}`);
+        this.userRatings = response.data.ratings;
+      } catch (error) {
+        console.error('Error loading user ratings:', error);
+      }
+    },
+
+    async submitRating() {
+      try {
+        await api.post('/ratings', {
+          ratedUserId: this.user.id,
+          rating: this.newRating.rating,
+          comment: this.newRating.comment
+        });
+
+        // Réinitialiser le formulaire
+        this.newRating = { rating: 0, comment: '' };
+        this.showRatingModal = false;
+
+        // Recharger les avis et les stats
+        await this.loadUserRatings();
+        await this.loadUser(); // Pour mettre à jour les stats
+
+        alert('Votre avis a été publié avec succès !');
+      } catch (error) {
+        console.error('Error submitting rating:', error);
+        if (error.response?.status === 409) {
+          alert('Vous avez déjà noté cet utilisateur');
+        } else if (error.response?.status === 400) {
+          alert('Vous ne pouvez pas vous noter vous-même');
+        } else {
+          alert('Erreur lors de la publication de l\'avis');
+        }
+      }
+    },
+
+    formatRatingDate(dateString) {
+      const date = new Date(dateString);
+      return date.toLocaleDateString('fr-FR', {
+        year: 'numeric',
+        month: 'long',
+        day: 'numeric'
       });
     },
   }
@@ -1271,9 +1429,252 @@ export default {
     font-size: 0.9rem;
     margin-right: 5px;
   }
-  
-  .profile-section {
+    .profile-section {
     padding: 1rem;
   }
+}
+
+/* Styles pour le système d'avis */
+.ratings-section {
+  background: white;
+  border-radius: 12px;
+  padding: 1.5rem;
+  margin: 1rem 0;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.ratings-summary {
+  text-align: center;
+}
+
+.rating-average {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 1rem;
+  margin-bottom: 1rem;
+}
+
+.stars-display {
+  display: flex;
+  gap: 2px;
+}
+
+.star {
+  font-size: 1.2rem;
+  color: #ddd;
+  transition: color 0.2s;
+}
+
+.star.filled {
+  color: #ffc107;
+}
+
+.rating-number {
+  font-size: 1.5rem;
+  font-weight: bold;
+  color: #333;
+}
+
+.rating-count {
+  color: #666;
+  font-size: 0.9rem;
+}
+
+.ratings-container {
+  max-width: 800px;
+  margin: 0 auto;
+}
+
+.no-ratings {
+  text-align: center;
+  color: #666;
+  padding: 2rem;
+  font-style: italic;
+}
+
+.ratings-list {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.rating-card {
+  background: white;
+  border: 1px solid #e0e0e0;
+  border-radius: 8px;
+  padding: 1.5rem;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+}
+
+.rating-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 1rem;
+}
+
+.rating-user {
+  display: flex;
+  align-items: center;
+  gap: 0.8rem;
+}
+
+.rating-avatar {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  object-fit: cover;
+}
+
+.rating-username {
+  font-weight: 600;
+  color: #333;
+}
+
+.rating-score {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.rating-value {
+  font-weight: 600;
+  color: #333;
+}
+
+.rating-comment {
+  background: #f8f9fa;
+  padding: 1rem;
+  border-radius: 6px;
+  margin-bottom: 0.5rem;
+  font-style: italic;
+  color: #555;
+}
+
+.rating-date {
+  font-size: 0.85rem;
+  color: #888;
+}
+
+/* Styles pour la modale de notation */
+.modal-rating {
+  background: white;
+  border-radius: 12px;
+  max-width: 500px;
+  width: 90%;
+  max-height: 90vh;
+  overflow-y: auto;
+  position: relative;
+}
+
+.modal-rating .modal-header {
+  padding: 1.5rem 1.5rem 1rem 1.5rem;
+  border-bottom: 1px solid #e0e0e0;
+}
+
+.modal-rating .modal-header h2 {
+  margin: 0;
+  color: #333;
+  font-size: 1.3rem;
+}
+
+.modal-rating .modal-body {
+  padding: 1.5rem;
+}
+
+.rating-form {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+}
+
+.rating-stars label {
+  display: block;
+  margin-bottom: 0.5rem;
+  font-weight: 600;
+  color: #333;
+}
+
+.stars-input {
+  display: flex;
+  gap: 5px;
+}
+
+.star-input {
+  font-size: 2rem;
+  color: #ddd;
+  cursor: pointer;
+  transition: color 0.2s;
+}
+
+.star-input:hover,
+.star-input.active {
+  color: #ffc107;
+}
+
+.rating-comment label {
+  display: block;
+  margin-bottom: 0.5rem;
+  font-weight: 600;
+  color: #333;
+}
+
+.rating-comment textarea {
+  width: 100%;
+  padding: 0.8rem;
+  border: 1px solid #ddd;
+  border-radius: 6px;
+  resize: vertical;
+  font-family: inherit;
+}
+
+.modal-actions {
+  display: flex;
+  gap: 1rem;
+  justify-content: flex-end;
+  margin-top: 1.5rem;
+}
+
+.btn {
+  padding: 0.8rem 1.5rem;
+  border-radius: 6px;
+  border: none;
+  cursor: pointer;
+  font-weight: 600;
+  transition: background-color 0.2s;
+}
+
+.btn-cancel {
+  background: #f8f9fa;
+  color: #666;
+}
+
+.btn-cancel:hover {
+  background: #e9ecef;
+}
+
+.btn-primary {
+  background: #E48700;
+  color: white;
+}
+
+.btn-primary:hover:not(:disabled) {
+  background: #cc7700;
+}
+
+.btn-primary:disabled {
+  background: #ccc;
+  cursor: not-allowed;
+}
+
+.profile-btn-rate {
+  background: #28a745;
+  color: white;
+  margin-left: 0.5rem;
+}
+
+.profile-btn-rate:hover {
+  background: #218838;
 }
 </style>
