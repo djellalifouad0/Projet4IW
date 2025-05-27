@@ -200,12 +200,74 @@ exports.updateSkill = async (req, res) => {
  *         description: Non autorisé
  */
 exports.deleteSkill = async (req, res) => {
+  const sequelize = require('../config/db');
+  const Comment = require('../models/comment');
+  const Like = require('../models/like');
+  const transaction = await sequelize.transaction();
+  
   try {
+    console.log('Tentative de suppression du skill ID:', req.params.id);
+    console.log('Utilisateur connecté:', req.user.id);
+    
     const skill = await Skill.findByPk(req.params.id);
-    if (!skill || skill.userId !== req.user.id) return res.status(403).json({ error: 'Non autorisé' });
-    await skill.destroy();
+    console.log('Skill trouvé:', skill ? skill.id : 'non trouvé');
+    
+    if (!skill) {
+      console.log('Skill non trouvé');
+      await transaction.rollback();
+      return res.status(404).json({ error: 'Compétence non trouvée' });
+    }
+    
+    if (skill.userId !== req.user.id) {
+      console.log('Utilisateur non autorisé. Propriétaire:', skill.userId, 'Utilisateur connecté:', req.user.id);
+      await transaction.rollback();
+      return res.status(403).json({ error: 'Non autorisé' });
+    }
+    
+    console.log('Suppression manuelle des enregistrements liés...');
+    
+    // Supprimer manuellement tous les enregistrements liés dans l'ordre approprié
+    
+    // 1. Supprimer les commentaires enfants (réponses) d'abord
+    await Comment.destroy({
+      where: { 
+        skillId: req.params.id,
+        parentId: { [require('sequelize').Op.ne]: null }
+      },
+      transaction
+    });
+    console.log('Commentaires enfants supprimés');
+    
+    // 2. Supprimer les commentaires parents
+    await Comment.destroy({
+      where: { 
+        skillId: req.params.id,
+        parentId: null
+      },
+      transaction
+    });
+    console.log('Commentaires parents supprimés');
+    
+    // 3. Supprimer tous les likes
+    await Like.destroy({
+      where: { skillId: req.params.id },
+      transaction
+    });
+    console.log('Likes supprimés');
+    
+    // 4. Enfin, supprimer le skill
+    await skill.destroy({ transaction });
+    console.log('Skill supprimé');
+    
+    console.log('Committing transaction...');
+    await transaction.commit();
+    console.log('Suppression réussie');
+    
     res.json({ message: 'Compétence supprimée' });
   } catch (error) {
-    res.status(500).json({ error: 'Erreur suppression' });
+    console.error('Erreur lors de la suppression du skill:', error);
+    console.error('Stack trace:', error.stack);
+    await transaction.rollback();
+    res.status(500).json({ error: 'Erreur suppression', details: error.message });
   }
 };

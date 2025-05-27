@@ -1,14 +1,16 @@
 <template>
   <router-view />
+  <ToastContainer />
 </template>
 
 
 <script>
 import Navbar from './components/Navbar.vue'
+import ToastContainer from './components/ToastContainer.vue'
 import { useRoute } from 'vue-router'
 
 export default {
-  components: { Navbar },
+  components: { Navbar, ToastContainer },
   setup() {
     const route = useRoute()
     const isAuthPage = route.path === '/login' || route.path === '/register'

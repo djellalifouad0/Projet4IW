@@ -1,13 +1,5 @@
 <template>
   <div>
-    <!-- SYSTÈME DE NOTIFICATIONS -->
-    <div v-if="notification.show" :class="['notification-banner', notification.type]">
-      <div class="notification-content">
-        <span>{{ notification.message }}</span>
-        <button @click="hideNotification" class="notification-close">×</button>
-      </div>
-    </div>
-    
     <!-- Post Card -->
     <div :class="['card', paid ? 'card-paid' : 'card-orange']" @click="openModal"><div class="card-header" @click.stop>
         <img class="avatar" :src="avatar || 'https://randomuser.me/api/portraits/men/32.jpg'" alt="avatar" @click.stop />        <div>
@@ -164,11 +156,8 @@
               </li>
             </ul>
           </div>
-          
-          <!-- Footer fixe pour l'ajout de commentaire -->
+            <!-- Footer fixe pour l'ajout de commentaire -->
           <div class="comments-footer">
-            <div v-if="errorComments" class="message error">{{ errorComments }}</div>
-            <div v-if="successComment" class="message success">{{ successComment }}</div>
             <div class="add-comment">
               <input v-model="newComment" type="text" placeholder="Écrire un commentaire..." @keyup.enter="addComment" :disabled="loadingComments" />
               <button @click="addComment" :disabled="!newComment.trim() || loadingComments">Envoyer</button>
@@ -194,6 +183,7 @@
 
 <script>
 import api from '../services/api'
+import toast from '../services/toast'
 
 export default {
   name: 'PostCard',  props: {
@@ -216,23 +206,13 @@ export default {
       showModal: false,
       charLimit: 270,
       comments: [], // On vide le tableau par défaut
-      newComment: '',
-      replyingTo: null,
+      newComment: '',      replyingTo: null,
       replyText: '',
       loadingComments: false,
-      errorComments: '',
-      successComment: '',
-      loggedInUser: null,
-      editingComment: null,
+      loggedInUser: null,editingComment: null,
       editCommentText: '',
       editPostDescription: '',
       isEditingInline: false,
-      // Système de notifications
-      notification: {
-        show: false,
-        message: '',
-        type: 'success' // 'success' ou 'error'
-      },
       // Système de confirmation
       confirmDialog: {
         show: false,
@@ -438,17 +418,11 @@ export default {
           postId: this.postId,
           description: this.editPostDescription
         });
-        
-        this.isEditingInline = false;
-        this.successComment = 'Post modifié avec succès !';
-        
-        // Effacer le message de succès après 3 secondes
-        setTimeout(() => {
-          this.successComment = '';
-        }, 3000);
+          this.isEditingInline = false;
+        toast.success('Post modifié avec succès !');
         
       } catch (e) {
-        this.errorComments = 'Erreur lors de la modification du post.';
+        toast.error('Erreur lors de la modification du post.');
       }
     },
       cancelInlineEdit() {
@@ -462,11 +436,10 @@ export default {
           
           // Émettre un événement pour que le composant parent supprime le post de la liste
           this.$emit('post-deleted', this.postId);
-          
-          this.closeModal();
-          this.showNotification('Post supprimé avec succès !', 'success');
+            this.closeModal();
+          toast.success('Post supprimé avec succès !');
         } catch (e) {
-          this.showNotification('Erreur lors de la suppression du post.', 'error');
+          toast.error('Erreur lors de la suppression du post.');
         }
       });
     },
@@ -486,13 +459,12 @@ export default {
         await api.patch(`/skills/comments/${commentId}`, {
           content: this.editCommentText
         });
-        
-        this.editingComment = null;
+          this.editingComment = null;
         this.editCommentText = '';
-        this.successComment = 'Commentaire modifié !';
+        toast.success('Commentaire modifié !');
         await this.fetchComments();
       } catch (e) {
-        this.errorComments = 'Erreur lors de la modification du commentaire.';
+        toast.error('Erreur lors de la modification du commentaire.');
       }
     },
     
@@ -501,14 +473,13 @@ export default {
       this.editCommentText = '';
     },
       async deleteComment(commentId) {
-      this.showConfirmation('Êtes-vous sûr de vouloir supprimer ce commentaire ?', async () => {
-        try {
+      this.showConfirmation('Êtes-vous sûr de vouloir supprimer ce commentaire ?', async () => {        try {
           await api.delete(`/skills/comments/${commentId}`);
-          this.showNotification('Commentaire supprimé avec succès !', 'success');
+          toast.success('Commentaire supprimé avec succès !');
           await this.fetchComments();
           this.$emit('comment-deleted'); // Pour mettre à jour le compteur
         } catch (e) {
-          this.showNotification('Erreur lors de la suppression du commentaire.', 'error');
+          toast.error('Erreur lors de la suppression du commentaire.');
         }
       });
     },
@@ -537,24 +508,7 @@ export default {
         setTimeout(() => {
           commentElement.style.backgroundColor = '';
         }, 2000);
-      }
-    },
-
-    // === SYSTÈME DE NOTIFICATIONS ===
-    showNotification(message, type = 'success') {
-      this.notification.message = message;
-      this.notification.type = type;
-      this.notification.show = true;
-      
-      // Auto-hide après 5 secondes
-      setTimeout(() => {
-        this.hideNotification();
-      }, 5000);
-    },
-
-    hideNotification() {
-      this.notification.show = false;
-    },
+      }    },
 
     // === SYSTÈME DE CONFIRMATION ===
     showConfirmation(message, confirmCallback) {
@@ -1327,63 +1281,6 @@ export default {
 }
 
 /* Status dot colors updated */
-
-/* === STYLES POUR LES NOTIFICATIONS === */
-.notification-banner {
-  position: fixed;
-  top: 0;
-  left: 0;
-  right: 0;
-  z-index: 1000;
-  padding: 1rem;
-  color: white;
-  font-weight: 500;
-  animation: slideDown 0.3s ease-out;
-}
-
-.notification-banner.success {
-  background: linear-gradient(135deg, #28a745, #20c997);
-}
-
-.notification-banner.error {
-  background: linear-gradient(135deg, #dc3545, #fd7e14);
-}
-
-.notification-content {
-  max-width: 1200px;
-  margin: 0 auto;
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  padding: 0 1rem;
-}
-
-.notification-close {
-  background: none;
-  border: none;
-  color: white;
-  font-size: 1.5rem;
-  cursor: pointer;
-  padding: 0;
-  margin-left: 1rem;
-  opacity: 0.8;
-  transition: opacity 0.2s ease;
-}
-
-.notification-close:hover {
-  opacity: 1;
-}
-
-@keyframes slideDown {
-  from {
-    transform: translateY(-100%);
-    opacity: 0;
-  }
-  to {
-    transform: translateY(0);
-    opacity: 1;
-  }
-}
 
 /* === STYLES POUR LE DIALOGUE DE CONFIRMATION === */
 .confirmation-overlay {

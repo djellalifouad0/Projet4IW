@@ -1,12 +1,5 @@
 <template>
   <div class="profile-content">
-    <!-- Notification Banner -->
-    <div v-if="notification.show" :class="['notification-banner', notification.type]">
-      <div class="notification-content">
-        <span>{{ notification.message }}</span>
-        <button @click="hideNotification" class="notification-close">×</button>
-      </div>
-    </div>
     <div class="profile-card-v2">
       <div class="profile-cover">
         <img class="profile-cover-img" :src="user?.cover || 'https://images.unsplash.com/photo-1506744038136-46273834b3fb?auto=format&fit=crop&w=800&q=80'" alt="cover" />
@@ -342,6 +335,7 @@
 
 <script>
 import api from '../services/api'
+import toast from '../services/toast'
 
 export default {
   name: 'Profile',  data() {    return {
@@ -354,13 +348,7 @@ export default {
       userRatings: [],      newRating: {
         rating: 0,
         comment: ''
-      },
-      hoverRating: 0, // Pour l'effet de survol des étoiles
-      notification: {
-        show: false,
-        message: '',
-        type: 'success' // 'success' or 'error'
-      },
+      },      hoverRating: 0, // Pour l'effet de survol des étoiles
       confirmDialog: {
         show: false,
         message: '',
@@ -659,7 +647,7 @@ export default {
             rating: this.newRating.rating,
             comment: this.newRating.comment
           });
-          this.showNotification('Votre avis a été modifié avec succès !');
+          toast.success('Votre avis a été modifié avec succès !');
         } else {
           // Mode création
           await api.post('/ratings', {
@@ -667,7 +655,7 @@ export default {
             rating: this.newRating.rating,
             comment: this.newRating.comment
           });
-          this.showNotification('Votre avis a été publié avec succès !');
+          toast.success('Votre avis a été publié avec succès !');
         }
 
         // Réinitialiser le formulaire
@@ -676,18 +664,18 @@ export default {
         this.showRatingModal = false;        // Recharger les avis et les stats
         await this.loadUserRatings();
         await this.loadUser(); // Pour mettre à jour les stats
-
       } catch (error) {
         console.error('Error submitting rating:', error);
         if (error.response?.status === 409) {
-          this.showNotification('Vous avez déjà noté cet utilisateur', 'error');
+          toast.error('Vous avez déjà noté cet utilisateur');
         } else if (error.response?.status === 400) {
-          this.showNotification('Vous ne pouvez pas vous noter vous-même', 'error');
-        } else {
-          this.showNotification('Erreur lors de la publication de l\'avis', 'error');
+          toast.error('Vous ne pouvez pas vous noter vous-même');        } else {
+          toast.error('Erreur lors de la publication de l\'avis');
         }
       }
-    },formatRatingDate(dateString) {
+    },
+
+    formatRatingDate(dateString) {
       const date = new Date(dateString);
       return date.toLocaleDateString('fr-FR', {
         year: 'numeric',
@@ -705,18 +693,17 @@ export default {
       };
       this.showRatingModal = true;
     },    async deleteRating(ratingId) {
-      this.showConfirmation('Êtes-vous sûr de vouloir supprimer cet avis ?', async () => {
-        try {
+      this.showConfirmation('Êtes-vous sûr de vouloir supprimer cet avis ?', async () => {        try {
           await api.delete(`/ratings/${ratingId}`);
           
           // Recharger les avis et les stats
           await this.loadUserRatings();
           await this.loadUser();
           
-          this.showNotification('Votre avis a été supprimé avec succès !');
+          toast.success('Votre avis a été supprimé avec succès !');
         } catch (error) {
           console.error('Error deleting rating:', error);        
-          this.showNotification('Erreur lors de la suppression de l\'avis', 'error');
+          toast.error('Erreur lors de la suppression de l\'avis');
         }
       });
     },
@@ -736,23 +723,7 @@ export default {
       this.editingRating = null;
       this.showRatingModal = false;
       this.hoverRating = 0;
-    },
-
-    // Méthodes pour les notifications
-    showNotification(message, type = 'success') {
-      this.notification.message = message;
-      this.notification.type = type;
-      this.notification.show = true;
-      
-      // Auto-hide après 4 secondes
-      setTimeout(() => {
-        this.hideNotification();
-      }, 4000);
-    },    hideNotification() {
-      this.notification.show = false;
-    },
-
-    // Méthodes pour le dialog de confirmation
+    },    // Méthodes pour le dialog de confirmation
     showConfirmation(message, action) {
       this.confirmDialog.message = message;
       this.confirmDialog.action = action;
@@ -2144,65 +2115,7 @@ export default {
 
 .modal-remove-icon {
   width: 16px;
-  height: 16px;  vertical-align: middle;
-  filter: brightness(0) saturate(100%) invert(100%) sepia(0%) saturate(0%) hue-rotate(0deg) brightness(100%) contrast(100%);
-}
-
-/* Styles pour le système de notifications */
-.notification-banner {
-  position: fixed;
-  top: 0;
-  left: 0;
-  right: 0;
-  z-index: 1000;
-  padding: 1rem;
-  color: white;
-  font-weight: 500;
-  animation: slideDown 0.3s ease-out;
-}
-
-.notification-banner.success {
-  background: linear-gradient(135deg, #28a745, #20c997);
-}
-
-.notification-banner.error {
-  background: linear-gradient(135deg, #dc3545, #fd7e14);
-}
-
-.notification-content {
-  max-width: 1200px;
-  margin: 0 auto;
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  padding: 0 1rem;
-}
-
-.notification-close {
-  background: none;
-  border: none;
-  color: white;
-  font-size: 1.5rem;
-  cursor: pointer;
-  padding: 0;
-  margin-left: 1rem;
-  opacity: 0.8;
-  transition: opacity 0.2s ease;
-}
-
-.notification-close:hover {
-  opacity: 1;
-}
-
-@keyframes slideDown {
-  from {
-    transform: translateY(-100%);
-    opacity: 0;
-  }
-  to {
-    transform: translateY(0);
-    opacity: 1;
-  }
+  height: 16px;  vertical-align: middle;  filter: brightness(0) saturate(100%) invert(100%) sepia(0%) saturate(0%) hue-rotate(0deg) brightness(100%) contrast(100%);
 }
 
 /* Styles pour le dialog de confirmation */
