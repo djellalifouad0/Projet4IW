@@ -1,5 +1,9 @@
 <template>
   <div>
+    <!-- SYSTÈME DE NOTIFICATIONS -->
+    <div v-if="notification.show" :class="['notification-banner', notification.type]">
+      <div class="notification-content">
+        <span>{{ notification.message }}</span>
     <!-- Post Card -->
     <div :class="['card', paid ? 'card-paid' : 'card-orange']" @click="openModal">      <div class="card-header" @click.stop>
         <img class="avatar" :src="avatar || 'https://randomuser.me/api/portraits/men/32.jpg'" alt="avatar" @click.stop />        <div>
@@ -523,6 +527,8 @@ export default {
       } catch (e) {
         console.error('Erreur lors du chargement de l\'utilisateur:', e);
       }
+      this.confirmDialog.show = false;
+      this.confirmDialog.action = null;
     }},
   mounted() {
     console.log('Avatar prop:', this.avatar);

@@ -1,17 +1,32 @@
 <template>
   <div class="profile-content">
+    <!-- Notification Banner -->
+    <div v-if="notification.show" :class="['notification-banner', notification.type]">
+      <div class="notification-content">
+        <span>{{ notification.message }}</span>
+        <button @click="hideNotification" class="notification-close">×</button>
+      </div>
+    </div>
     <div class="profile-card-v2">
       <div class="profile-cover">
         <img class="profile-cover-img" :src="user?.cover || 'https://images.unsplash.com/photo-1506744038136-46273834b3fb?auto=format&fit=crop&w=800&q=80'" alt="cover" />
       </div>
-      <div class="profile-card-bottom-v2">
-        <div class="profile-avatar-block">
+      <div class="profile-card-bottom-v2">        <div class="profile-avatar-block">
           <img class="profile-avatar-v2" :src="user?.avatar || 'https://randomuser.me/api/portraits/men/32.jpg'" alt="Avatar utilisateur" />
           <div class="profile-name-v2">{{ user?.username || '' }}</div>
-        </div>
-        <div class="profile-infos-v2">
+          <!-- Moyenne des avis intégrée dans le profil -->
+          <div v-if="user?.ratingStats && user.ratingStats.totalRatings > 0" class="profile-rating-inline">
+            <div class="stars-display-inline">
+              <span v-for="star in 5" :key="star" 
+                    :class="['star-inline', getStarClass(star, user.ratingStats.averageRating)]">
+                ★
+              </span>
+            </div>
+            <span class="rating-text-inline">{{ user.ratingStats.averageRating.toFixed(1) }} • {{ user.ratingStats.totalRatings }} avis</span>
+          </div>
+        </div>        <div class="profile-infos-v2">
           <div class="profile-address-v2">{{ user?.address || '' }}</div>
-        </div>        <!-- Show 'Edit Profile' button only if the profile belongs to the logged-in user -->
+        </div><!-- Show 'Edit Profile' button only if the profile belongs to the logged-in user -->
         <div v-if="user?.profileToken === loggedInUser?.profileToken" class="profile-actions">
           <button class="profile-btn-icon" @click="showEditModal = true" title="Modifier le profil">
             <img src="@/assets/icons/edit.svg" alt="Modifier" class="btn-icon-only" />
@@ -22,25 +37,8 @@
           </button>
           <button class="profile-btn-icon profile-btn-rate" @click="showRatingModal = true" title="Noter cet utilisateur">
             <img src="@/assets/icons/star.svg" alt="Noter" class="btn-icon-only" />
-          </button>
-        </div>
-      </div>        <!-- Section des notes/avis -->
-        <div class="ratings-section" v-if="user?.ratingStats && user.ratingStats.totalRatings > 0">
-          <div class="ratings-summary">
-            <div class="rating-badge-subtle">
-              <div class="stars-display-main">
-                <span v-for="star in 5" :key="star" 
-                      :class="['star-main', getStarClass(star, user.ratingStats.averageRating)]">
-                  ★
-                </span>
-              </div>
-              <div class="rating-info-subtle">
-                <span class="rating-number-subtle">{{ user.ratingStats.averageRating.toFixed(1) }}</span>
-                <span class="rating-total-subtle">• {{ user.ratingStats.totalRatings }} avis</span>
-              </div>
-            </div>
-          </div>
-        </div>
+          </button>        </div>
+      </div>
     </div>
     
     <!-- Section avec onglets pour Posts et Rendez-vous -->
@@ -283,20 +281,23 @@
           <input v-model="edit.address" placeholder="Localisation" />
         </div>      </div>    </div>
     <!-- FIN MODALE EDITION -->    <!-- MODALE NOTATION UTILISATEUR -->
-    <div v-if="showRatingModal" class="modal-overlay" @click.self="resetRatingForm">
-      <div class="modal-rating">
+    <div v-if="showRatingModal" class="modal-overlay" @click.self="resetRatingForm">      <div class="modal-rating">
         <button class="modal-close" @click="resetRatingForm">×</button>
         <div class="modal-header">
           <h2>{{ editingRating ? 'Modifier votre avis' : 'Noter' }} {{ user?.username }}</h2>
         </div>
         <div class="modal-body">
-          <div class="rating-form">
-            <div class="rating-stars">
+          <div class="rating-form">            <div class="rating-stars">
               <label>Note :</label>
               <div class="stars-input">
                 <span v-for="star in 5" :key="star" 
-                      :class="['star-input', { active: star <= newRating.rating }]"
-                      @click="newRating.rating = star">
+                      :class="['star-input', { 
+                        active: star <= newRating.rating,
+                        hover: star <= hoverRating 
+                      }]"
+                      @click="newRating.rating = star"
+                      @mouseenter="hoverRating = star"
+                      @mouseleave="hoverRating = 0">
                   ★
                 </span>
               </div>
@@ -317,9 +318,25 @@
             </button>
           </div>
         </div>
+      </div>    </div>
+    <!-- FIN MODALE NOTATION -->
+
+    <!-- DIALOG DE CONFIRMATION -->
+    <div v-if="confirmDialog.show" class="modal-overlay" @click="cancelConfirmation">
+      <div class="confirm-dialog" @click.stop>
+        <div class="confirm-header">
+          <h3>Confirmation</h3>
+        </div>
+        <div class="confirm-body">
+          <p>{{ confirmDialog.message }}</p>
+        </div>
+        <div class="confirm-actions">
+          <button @click="cancelConfirmation" class="btn btn-cancel">Annuler</button>
+          <button @click="confirmAction" class="btn btn-danger">Supprimer</button>
+        </div>
       </div>
     </div>
-    <!-- FIN MODALE NOTATION -->
+    <!-- FIN DIALOG DE CONFIRMATION -->
   </div>
 </template>
 
@@ -327,18 +344,27 @@
 import api from '../services/api'
 
 export default {
-  name: 'Profile',  data() {
-    return {
+  name: 'Profile',  data() {    return {
       user: null,
       userPosts: [],
       appointments: [],
       loggedInUser: null, // Store the logged-in user's data
       showEditModal: false,      showRatingModal: false,
       editingRating: null, // Pour stocker l'avis en cours de modification
-      userRatings: [],
-      newRating: {
+      userRatings: [],      newRating: {
         rating: 0,
         comment: ''
+      },
+      hoverRating: 0, // Pour l'effet de survol des étoiles
+      notification: {
+        show: false,
+        message: '',
+        type: 'success' // 'success' or 'error'
+      },
+      confirmDialog: {
+        show: false,
+        message: '',
+        action: null
       },
       activeTab: 'posts', // Onglet actif par défaut
       currentDate: new Date(), // Date actuelle pour le calendrier
@@ -627,14 +653,13 @@ export default {
         console.error('Error loading user ratings:', error);
       }
     },    async submitRating() {
-      try {
-        if (this.editingRating) {
+      try {        if (this.editingRating) {
           // Mode modification
           await api.put(`/ratings/${this.editingRating.id}`, {
             rating: this.newRating.rating,
             comment: this.newRating.comment
           });
-          alert('Votre avis a été modifié avec succès !');
+          this.showNotification('Votre avis a été modifié avec succès !');
         } else {
           // Mode création
           await api.post('/ratings', {
@@ -642,26 +667,24 @@ export default {
             rating: this.newRating.rating,
             comment: this.newRating.comment
           });
-          alert('Votre avis a été publié avec succès !');
+          this.showNotification('Votre avis a été publié avec succès !');
         }
 
         // Réinitialiser le formulaire
         this.newRating = { rating: 0, comment: '' };
         this.editingRating = null;
-        this.showRatingModal = false;
-
-        // Recharger les avis et les stats
+        this.showRatingModal = false;        // Recharger les avis et les stats
         await this.loadUserRatings();
         await this.loadUser(); // Pour mettre à jour les stats
 
       } catch (error) {
         console.error('Error submitting rating:', error);
         if (error.response?.status === 409) {
-          alert('Vous avez déjà noté cet utilisateur');
+          this.showNotification('Vous avez déjà noté cet utilisateur', 'error');
         } else if (error.response?.status === 400) {
-          alert('Vous ne pouvez pas vous noter vous-même');
+          this.showNotification('Vous ne pouvez pas vous noter vous-même', 'error');
         } else {
-          alert('Erreur lors de la publication de l\'avis');
+          this.showNotification('Erreur lors de la publication de l\'avis', 'error');
         }
       }
     },formatRatingDate(dateString) {
@@ -681,24 +704,21 @@ export default {
         comment: rating.comment || ''
       };
       this.showRatingModal = true;
-    },
-
-    async deleteRating(ratingId) {
-      if (!confirm('Êtes-vous sûr de vouloir supprimer cet avis ?')) {
-        return;
-      }
-
-      try {
-        await api.delete(`/ratings/${ratingId}`);
-        
-        // Recharger les avis et les stats
-        await this.loadUserRatings();
-        await this.loadUser();
-        
-        alert('Votre avis a été supprimé avec succès !');
-      } catch (error) {
-        console.error('Error deleting rating:', error);        alert('Erreur lors de la suppression de l\'avis');
-      }
+    },    async deleteRating(ratingId) {
+      this.showConfirmation('Êtes-vous sûr de vouloir supprimer cet avis ?', async () => {
+        try {
+          await api.delete(`/ratings/${ratingId}`);
+          
+          // Recharger les avis et les stats
+          await this.loadUserRatings();
+          await this.loadUser();
+          
+          this.showNotification('Votre avis a été supprimé avec succès !');
+        } catch (error) {
+          console.error('Error deleting rating:', error);        
+          this.showNotification('Erreur lors de la suppression de l\'avis', 'error');
+        }
+      });
     },
 
     // Méthode pour déterminer la classe d'une étoile
@@ -710,13 +730,46 @@ export default {
       } else {
         return 'empty';
       }
-    },
-
-    // Réinitialiser le formulaire de notation quand on ferme la modale
+    },    // Réinitialiser le formulaire de notation quand on ferme la modale
     resetRatingForm() {
       this.newRating = { rating: 0, comment: '' };
       this.editingRating = null;
       this.showRatingModal = false;
+      this.hoverRating = 0;
+    },
+
+    // Méthodes pour les notifications
+    showNotification(message, type = 'success') {
+      this.notification.message = message;
+      this.notification.type = type;
+      this.notification.show = true;
+      
+      // Auto-hide après 4 secondes
+      setTimeout(() => {
+        this.hideNotification();
+      }, 4000);
+    },    hideNotification() {
+      this.notification.show = false;
+    },
+
+    // Méthodes pour le dialog de confirmation
+    showConfirmation(message, action) {
+      this.confirmDialog.message = message;
+      this.confirmDialog.action = action;
+      this.confirmDialog.show = true;
+    },
+
+    confirmAction() {
+      if (this.confirmDialog.action) {
+        this.confirmDialog.action();
+      }
+      this.cancelConfirmation();
+    },
+
+    cancelConfirmation() {
+      this.confirmDialog.show = false;
+      this.confirmDialog.message = '';
+      this.confirmDialog.action = null;
     },
   }
 }
@@ -811,6 +864,47 @@ export default {
   color: #888;
   text-align: left;
 }
+
+/* Styles pour la moyenne des avis intégrée dans le profil */
+.profile-rating-inline {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin-top: 0.3rem;
+}
+
+.stars-display-inline {
+  display: flex;
+  gap: 1px;
+}
+
+.star-inline {
+  font-size: 0.9rem;
+  transition: all 0.2s ease;
+}
+
+.star-inline.filled {
+  color: #ffc107;
+  text-shadow: 0 0 1px rgba(255, 193, 7, 0.3);
+}
+
+.star-inline.half-filled {
+  background: linear-gradient(90deg, #ffc107 50%, #e0e0e0 50%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+.star-inline.empty {
+  color: #e0e0e0;
+}
+
+.rating-text-inline {
+  font-size: 0.85rem;
+  color: #666;
+  font-weight: 500;
+}
+
 .profile-btn-v2 {
   background: #E48700;
   color: #fff;
@@ -1786,7 +1880,6 @@ export default {
   padding: 1rem;
   border-radius: 6px;
   margin-bottom: 0.5rem;
-  font-style: italic;
   color: #555;
 }
 
@@ -1806,8 +1899,33 @@ export default {
   position: relative;
 }
 
+.modal-rating .modal-close {
+  position: absolute;
+  left: auto !important;
+  right: 1rem !important;
+  top: 1rem;
+  background: none;
+  border: none;
+  font-size: 1.5rem;
+  color: #666;
+  cursor: pointer;
+  width: 2rem;
+  height: 2rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  transition: all 0.2s ease;
+  z-index: 10;
+}
+
+.modal-rating .modal-close:hover {
+  background: #f5f5f5;
+  color: #333;
+}
+
 .modal-rating .modal-header {
-  padding: 1.5rem 1.5rem 1rem 1.5rem;
+  padding: 1.5rem;
   border-bottom: 1px solid #e0e0e0;
 }
 
@@ -1815,6 +1933,7 @@ export default {
   margin: 0;
   color: #333;
   font-size: 1.3rem;
+  line-height: 1.4;
 }
 
 .modal-rating .modal-body {
@@ -1847,8 +1966,13 @@ export default {
 }
 
 .star-input:hover,
-.star-input.active {
+.star-input.active,
+.star-input.hover {
   color: #ffc107;
+}
+
+.star-input.hover {
+  color: #ffdd54;
 }
 
 .rating-comment label {
@@ -2020,8 +2144,129 @@ export default {
 
 .modal-remove-icon {
   width: 16px;
-  height: 16px;
-  vertical-align: middle;
+  height: 16px;  vertical-align: middle;
   filter: brightness(0) saturate(100%) invert(100%) sepia(0%) saturate(0%) hue-rotate(0deg) brightness(100%) contrast(100%);
+}
+
+/* Styles pour le système de notifications */
+.notification-banner {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  z-index: 1000;
+  padding: 1rem;
+  color: white;
+  font-weight: 500;
+  animation: slideDown 0.3s ease-out;
+}
+
+.notification-banner.success {
+  background: linear-gradient(135deg, #28a745, #20c997);
+}
+
+.notification-banner.error {
+  background: linear-gradient(135deg, #dc3545, #fd7e14);
+}
+
+.notification-content {
+  max-width: 1200px;
+  margin: 0 auto;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0 1rem;
+}
+
+.notification-close {
+  background: none;
+  border: none;
+  color: white;
+  font-size: 1.5rem;
+  cursor: pointer;
+  padding: 0;
+  margin-left: 1rem;
+  opacity: 0.8;
+  transition: opacity 0.2s ease;
+}
+
+.notification-close:hover {
+  opacity: 1;
+}
+
+@keyframes slideDown {
+  from {
+    transform: translateY(-100%);
+    opacity: 0;
+  }
+  to {
+    transform: translateY(0);
+    opacity: 1;
+  }
+}
+
+/* Styles pour le dialog de confirmation */
+.confirm-dialog {
+  background: white;
+  border-radius: 12px;
+  max-width: 400px;
+  width: 90%;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+  animation: fadeInScale 0.2s ease-out;
+}
+
+.confirm-header {
+  padding: 1.5rem 1.5rem 1rem;
+  border-bottom: 1px solid #e0e0e0;
+}
+
+.confirm-header h3 {
+  margin: 0;
+  color: #333;
+  font-size: 1.2rem;
+}
+
+.confirm-body {
+  padding: 1.5rem;
+}
+
+.confirm-body p {
+  margin: 0;
+  color: #666;
+  font-size: 1rem;
+  line-height: 1.5;
+}
+
+.confirm-actions {
+  display: flex;
+  gap: 1rem;
+  padding: 1rem 1.5rem 1.5rem;
+  justify-content: flex-end;
+}
+
+.btn-danger {
+  background: #dc3545;
+  color: white;
+  padding: 0.8rem 1.5rem;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  font-weight: 600;
+  transition: background-color 0.2s;
+}
+
+.btn-danger:hover {
+  background: #c82333;
+}
+
+@keyframes fadeInScale {
+  from {
+    transform: scale(0.9);
+    opacity: 0;
+  }
+  to {
+    transform: scale(1);
+    opacity: 1;
+  }
 }
 </style>
