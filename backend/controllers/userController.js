@@ -1,5 +1,7 @@
 const crypto = require('crypto');
 const User = require('../models/user');
+const { Rating } = require('../models/associations');
+const { Sequelize } = require('sequelize');
 
 // Generate a unique profile token for a user
 function generateProfileToken() {
@@ -84,12 +86,39 @@ exports.updateUserProfile = async (req, res) => {
 exports.getUserByProfileToken = async (req, res) => {
   try {
     const { profileToken } = req.params;
-    const user = await User.findOne({ where: { profileToken } });
+    const user = await User.findOne({ 
+      where: { profileToken },
+      attributes: { exclude: ['password'] }
+    });
+    
     if (!user) {
       return res.status(404).json({ error: 'Utilisateur non trouvé' });
     }
-    res.json(user);
+
+    // Récupérer les statistiques de notation
+    const ratingStats = await Rating.findOne({
+      where: { ratedUserId: user.id },
+      attributes: [
+        [Sequelize.fn('AVG', Sequelize.col('rating')), 'average'],
+        [Sequelize.fn('COUNT', Sequelize.col('id')), 'total']
+      ]
+    });
+
+    const averageRating = parseFloat(ratingStats?.dataValues?.average) || 0;
+    const totalRatings = parseInt(ratingStats?.dataValues?.total) || 0;
+
+    // Ajouter les statistiques au profil utilisateur
+    const userWithRatings = {
+      ...user.toJSON(),
+      ratingStats: {
+        averageRating: Math.round(averageRating * 10) / 10,
+        totalRatings
+      }
+    };
+
+    res.json(userWithRatings);
   } catch (error) {
+    console.error('Erreur lors de la récupération du profil:', error);
     res.status(500).json({ error: 'Erreur serveur' });
   }
 };

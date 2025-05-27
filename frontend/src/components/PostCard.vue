@@ -1,5 +1,9 @@
 <template>
   <div>
+    <!-- SYSTÈME DE NOTIFICATIONS -->
+    <div v-if="notification.show" :class="['notification-banner', notification.type]">
+      <div class="notification-content">
+        <span>{{ notification.message }}</span>
     <!-- Post Card -->
     <div :class="['card', paid ? 'card-paid' : 'card-orange']" @click="openModal">      <div class="card-header" @click.stop>
         <img class="avatar" :src="avatar || 'https://randomuser.me/api/portraits/men/32.jpg'" alt="avatar" @click.stop />        <div>
@@ -601,7 +605,7 @@ export default {
   display: inline-block;
   width: 8px;
   height: 8px;
-  background: #4cd964;
+  background: #4CAF50;
   border-radius: 50%;
   margin-left: 4px;
 }
@@ -1239,4 +1243,26 @@ export default {
     width: 100%;
   }
 }
+
+/* Action icon styles */
+.action-icon-small {
+  width: 14px;
+  height: 14px;
+  vertical-align: middle;
+  filter: brightness(0) saturate(100%) invert(47%) sepia(18%) saturate(1094%) hue-rotate(195deg) brightness(95%) contrast(87%);
+}
+
+.post-action-btn.delete .action-icon-small {
+  filter: brightness(0) saturate(100%) invert(27%) sepia(51%) saturate(2878%) hue-rotate(346deg) brightness(104%) contrast(97%);
+}
+
+.post-action-btn:hover .action-icon-small {
+  filter: brightness(0) saturate(100%) invert(56%) sepia(88%) saturate(2574%) hue-rotate(24deg) brightness(100%) contrast(91%);
+}
+
+.post-action-btn.delete:hover .action-icon-small {
+  filter: brightness(0) saturate(100%) invert(14%) sepia(93%) saturate(7495%) hue-rotate(4deg) brightness(98%) contrast(118%);
+}
+
+/* Status dot colors updated */
 </style>

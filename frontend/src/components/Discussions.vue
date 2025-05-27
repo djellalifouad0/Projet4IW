@@ -35,32 +35,36 @@
         <!-- Section Rendez-vous en attente -->
         <div v-if="pendingAppointments.length > 0" class="pending-appointments">
           <div class="pending-appointments-title">
-            <span>📅 Rendez-vous en attente ({{ pendingAppointments.length }})</span>
+            <img src="../assets/icons/agenda.svg" class="pending-icon" alt="Calendar">
+            <span>Rendez-vous en attente ({{ pendingAppointments.length }})</span>
           </div>
           <div v-for="appointment in pendingAppointments" :key="appointment.id" class="pending-appointment-card">
             <div class="appointment-info">
               <div class="appointment-title">{{ appointment.title }}</div>
               <div class="appointment-date">{{ formatAppointmentDate(appointment.appointmentDate) }}</div>
-              <div v-if="appointment.location" class="appointment-location">📍 {{ appointment.location }}</div>
+              <div v-if="appointment.location" class="appointment-location">
+                <img src="../assets/icons/carte.svg" class="location-icon" alt="Location"> {{ appointment.location }}
+              </div>
               <div v-if="appointment.description" class="appointment-description">{{ appointment.description }}</div>
               <div class="appointment-requester">
                 Proposé par {{ appointment.requester.username }}
               </div>
             </div>
-            <div v-if="isAppointmentReceiver(appointment)" class="appointment-actions">
-              <button 
+            <div v-if="isAppointmentReceiver(appointment)" class="appointment-actions">              <button 
                 @click="updateAppointmentStatus(appointment.id, 'accepted')"
                 class="accept-btn"
                 title="Accepter ce rendez-vous"
               >
-                ✓ Accepter
+                <img src="../assets/icons/star.svg" class="btn-action-icon" alt="Accept">
+                Accepter
               </button>
               <button 
                 @click="updateAppointmentStatus(appointment.id, 'declined')"
                 class="decline-btn"
                 title="Refuser ce rendez-vous"
               >
-                ✗ Refuser
+                <img src="../assets/icons/trash.svg" class="btn-action-icon" alt="Decline">
+                Refuser
               </button>
             </div>
             <div v-else class="appointment-status-waiting">
@@ -71,7 +75,7 @@
           <div v-for="msg in messages" :key="msg.id" :class="['chat-message', msg.fromMe ? 'me' : 'other', msg.isAppointment ? 'appointment-message' : '']">
             <span>{{ msg.text }}</span>
             <div v-if="msg.fromMe" class="message-status">
-              <span v-if="msg.status === 'sent'" class="status-icon">📤</span>
+              <span v-if="msg.status === 'sent'" class="status-icon">•</span>
               <span v-else-if="msg.status === 'delivered'" class="status-icon">✓</span>
               <span v-else-if="msg.status === 'read'" class="status-icon">✓✓</span>
             </div>
@@ -92,14 +96,13 @@
             @input="handleTyping"
             :placeholder="getInputPlaceholder()" 
             :disabled="false"
-          />
-          <button 
+          />          <button 
             @click="showAppointmentModal = true" 
             class="appointment-btn"
             :disabled="!selectedConversation"
             title="Proposer un rendez-vous"
           >
-            📅
+            <img src="../assets/icons/agenda.svg" class="appointment-icon" alt="Calendar">
           </button>
           <button @click="sendMessage" :disabled="!newMessage.trim()">Envoyer</button>
         </div>
@@ -390,20 +393,20 @@ export default {
       }    },    async initializeWebSocket() {
       const token = localStorage.getItem('token');
       if (!token) {
-        console.error('❌ Aucun token trouvé pour l\'authentification WebSocket');
+        console.error('Aucun token trouvé pour l\'authentification WebSocket');
         this.error = 'Vous devez être connecté pour utiliser le chat';
         return;
       }
 
-      console.log('🔌 Initialisation de la connexion WebSocket...');
+      console.log('Initialisation de la connexion WebSocket...');
       
       try {
         await socketService.connect(token);
-        console.log('✅ WebSocket initialisé avec succès');
+        console.log('WebSocket initialisé avec succès');
         this.setupSocketListeners();
         this.error = ''; // Effacer les erreurs précédentes
       } catch (error) {
-        console.error('❌ Erreur lors de l\'initialisation WebSocket:', error);
+        console.error('Erreur lors de l\'initialisation WebSocket:', error);
         if (error.message.includes('Token invalide')) {
           this.error = 'Session expirée, veuillez vous reconnecter';
           // Optionnel : rediriger vers la page de connexion
@@ -562,7 +565,7 @@ export default {
         
         const appointment = this.conversationAppointments.find(apt => apt.id === appointmentId);
         if (appointment) {
-          const systemMessage = `📅 Vous avez ${statusMessages[status]} le rendez-vous "${appointment.title}"`;
+          const systemMessage = `Vous avez ${statusMessages[status]} le rendez-vous "${appointment.title}"`;
           
           this.messages.push({
             id: Date.now(),
@@ -642,7 +645,7 @@ export default {
         await this.loadConversationAppointments(this.selectedConversation.id);
         
         // Ajouter un message système dans la conversation pour informer du rendez-vous
-        const systemMessage = `📅 Rendez-vous proposé: "${this.appointmentForm.title}" le ${new Date(appointmentDateTime).toLocaleDateString('fr-FR')} à ${this.appointmentForm.time}`;
+        const systemMessage = `Rendez-vous proposé: "${this.appointmentForm.title}" le ${new Date(appointmentDateTime).toLocaleDateString('fr-FR')} à ${this.appointmentForm.time}`;
         
         this.messages.push({
           id: Date.now(), // ID temporaire
@@ -972,16 +975,25 @@ body, html, #app {
 }
 /* Bouton calendrier */
 .appointment-btn {
-  background: #4CAF50 !important;
-  color: #fff !important;
-  min-width: 40px !important;
-  padding: 10px !important;
+  background: #ECBC76 !important;
+  color: #28303F !important;
+  width: 48px !important;
+  height: 48px !important;
+  padding: 0 !important;
   font-size: 1.2rem !important;
   border-radius: 50% !important;
+  border: none;
+  cursor: pointer;
+  transition: all 0.2s;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  align-self: center !important;
 }
 
 .appointment-btn:hover:not(:disabled) {
-  background: #45a049 !important;
+  background: #e4a94f !important;
+  transform: scale(1.05);
 }
 
 .appointment-btn:disabled {
@@ -1076,7 +1088,7 @@ body, html, #app {
 }
 
 .submit-btn {
-  background: #4CAF50;
+  background: #4A90E2;
   color: white;
   border: none;
   border-radius: 8px;
@@ -1088,7 +1100,7 @@ body, html, #app {
 }
 
 .submit-btn:hover:not(:disabled) {
-  background: #45a049;
+  background: #357ABD;
 }
 
 .submit-btn:disabled {
@@ -1098,14 +1110,14 @@ body, html, #app {
 
 /* Message de rendez-vous */
 .chat-message.appointment-message {
-  background: linear-gradient(135deg, #4CAF50, #45a049) !important;
+  background: linear-gradient(135deg, #4A90E2, #357ABD) !important;
   color: white !important;
-  border-left: 4px solid #2e7d32;
+  border-left: 4px solid #2E5984;
   font-weight: 500;
 }
 
 .chat-message.appointment-message.me {
-  background: linear-gradient(135deg, #4CAF50, #45a049) !important;
+  background: linear-gradient(135deg, #4A90E2, #357ABD) !important;
 }
 
 /* Styles pour les rendez-vous en attente */
@@ -1186,7 +1198,7 @@ body, html, #app {
 }
 
 .accept-btn {
-  background: #4CAF50;
+  background: #4A90E2;
   color: white;
   border: none;
   border-radius: 6px;
@@ -1198,7 +1210,7 @@ body, html, #app {
 }
 
 .accept-btn:hover {
-  background: #45a049;
+  background: #357ABD;
 }
 
 .decline-btn {
@@ -1223,6 +1235,35 @@ body, html, #app {
   font-style: italic;
   align-self: center;
   flex-shrink: 0;
+}
+
+/* Icon styles for discussions */
+.pending-icon {
+  width: 16px;
+  height: 16px;
+  filter: brightness(0) saturate(100%) invert(69%) sepia(74%) saturate(424%) hue-rotate(35deg) brightness(87%) contrast(91%);
+}
+
+.location-icon {
+  width: 14px;
+  height: 14px;
+  margin-right: 4px;
+  filter: brightness(0) saturate(100%) invert(47%) sepia(18%) saturate(1094%) hue-rotate(195deg) brightness(95%) contrast(87%);
+}
+
+.appointment-icon {
+  width: 18px;
+  height: 18px;
+  filter: brightness(0) saturate(100%) invert(18%) sepia(15%) saturate(1239%) hue-rotate(195deg) brightness(96%) contrast(91%);
+  /* #28303F color filter */
+}
+
+.btn-action-icon {
+  width: 14px;
+  height: 14px;
+  margin-right: 6px;
+  vertical-align: middle;
+  filter: brightness(0) saturate(100%) invert(100%) sepia(0%) saturate(0%) hue-rotate(0deg) brightness(100%) contrast(100%);
 }
 
 @media (max-width: 900px) {

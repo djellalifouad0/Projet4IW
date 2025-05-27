@@ -2,6 +2,7 @@ const User = require('./user');
 const Conversation = require('./conversation');
 const Message = require('./message');
 const Appointment = require('./appointment');
+const Rating = require('./rating');
 
 // Définir les associations
 Conversation.belongsTo(User, { as: 'user1', foreignKey: 'user1Id' });
@@ -22,9 +23,17 @@ User.hasMany(Appointment, { as: 'requestedAppointments', foreignKey: 'requesterI
 User.hasMany(Appointment, { as: 'receivedAppointments', foreignKey: 'receiverId' });
 Conversation.hasMany(Appointment, { foreignKey: 'conversationId' });
 
+// Associations pour les avis/notes
+Rating.belongsTo(User, { as: 'rater', foreignKey: 'raterId' });
+Rating.belongsTo(User, { as: 'ratedUser', foreignKey: 'ratedUserId' });
+
+User.hasMany(Rating, { as: 'givenRatings', foreignKey: 'raterId' });
+User.hasMany(Rating, { as: 'receivedRatings', foreignKey: 'ratedUserId' });
+
 module.exports = {
   User,
   Conversation,
   Message,
-  Appointment
+  Appointment,
+  Rating
 };

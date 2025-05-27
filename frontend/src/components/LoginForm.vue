@@ -15,7 +15,7 @@
         <input v-model="email" type="email" placeholder="Adresse e-mail" required />
         <div class="password-field">
           <input v-model="password" :type="showPassword ? 'text' : 'password'" placeholder="Mot de passe" required />
-          <button type="button" @click="showPassword = !showPassword">👁️</button>
+          <button type="button" @click="showPassword = !showPassword">👁</button>
         </div>
         <router-link to="/forgot-password" class="forgot">Mot de passe oublié</router-link>
         <button type="submit" class="primary">Se connecter</button>
