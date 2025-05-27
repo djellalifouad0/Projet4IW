@@ -13,28 +13,34 @@
           <div class="profile-address-v2">{{ user?.address || '' }}</div>
         </div>        <!-- Show 'Edit Profile' button only if the profile belongs to the logged-in user -->
         <div v-if="user?.profileToken === loggedInUser?.profileToken" class="profile-actions">
-          <button class="profile-btn-v2" @click="showEditModal = true">Modifier le profil</button>
+          <button class="profile-btn-icon" @click="showEditModal = true" title="Modifier le profil">
+            <img src="@/assets/icons/edit.svg" alt="Modifier" class="btn-icon-only" />
+          </button>
         </div>        <!-- Show 'Send Message' button if viewing someone else's profile -->        <div v-else class="profile-actions">
-          <button class="profile-btn-v2 profile-btn-message" @click="startConversation">Envoyer un message</button>
-          <button class="profile-btn-v2 profile-btn-rate" @click="showRatingModal = true">Noter cet utilisateur</button>
+          <button class="profile-btn-icon profile-btn-message" @click="startConversation" title="Envoyer un message">
+            <img src="@/assets/icons/message.svg" alt="Message" class="btn-icon-only" />
+          </button>
+          <button class="profile-btn-icon profile-btn-rate" @click="showRatingModal = true" title="Noter cet utilisateur">
+            <img src="@/assets/icons/star.svg" alt="Noter" class="btn-icon-only" />
+          </button>
         </div>
-      </div>
-      
-      <!-- Section des notes/avis -->
-      <div class="ratings-section">
-        <div class="ratings-summary" v-if="user?.ratingStats">
-          <div class="rating-average">
-            <div class="stars-display">
-              <span v-for="star in 5" :key="star" 
-                    :class="['star', { filled: star <= Math.round(user.ratingStats.averageRating) }]">
-                ⭐
-              </span>
+      </div>        <!-- Section des notes/avis -->
+        <div class="ratings-section" v-if="user?.ratingStats && user.ratingStats.totalRatings > 0">
+          <div class="ratings-summary">
+            <div class="rating-badge-subtle">
+              <div class="stars-display-main">
+                <span v-for="star in 5" :key="star" 
+                      :class="['star-main', getStarClass(star, user.ratingStats.averageRating)]">
+                  ★
+                </span>
+              </div>
+              <div class="rating-info-subtle">
+                <span class="rating-number-subtle">{{ user.ratingStats.averageRating.toFixed(1) }}</span>
+                <span class="rating-total-subtle">• {{ user.ratingStats.totalRatings }} avis</span>
+              </div>
             </div>
-            <span class="rating-number">{{ user.ratingStats.averageRating || 0 }}/5</span>
-            <span class="rating-count">({{ user.ratingStats.totalRatings }} avis)</span>
           </div>
         </div>
-      </div>
     </div>
     
     <!-- Section avec onglets pour Posts et Rendez-vous -->
@@ -58,13 +64,15 @@
           @click="activeTab = 'calendar'"
           v-if="user?.profileToken === loggedInUser?.profileToken"
         >
-          📅 Calendrier ({{ appointments.length }})
+          <img src="@/assets/icons/agenda.svg" alt="Calendrier" class="tab-icon" />
+          Calendrier
         </button>
         <button 
           :class="['tab-button', { active: activeTab === 'ratings' }]"
           @click="activeTab = 'ratings'; loadUserRatings()"
         >
-          ⭐ Avis ({{ user?.ratingStats?.totalRatings || 0 }})
+          <img src="@/assets/icons/star.svg" alt="Avis" class="tab-icon" />
+          Avis ({{ user?.ratingStats?.totalRatings || 0 }})
         </button>
       </div>
 
@@ -87,16 +95,18 @@
               <span :class="['appointment-status', appointment.status]">
                 {{ getStatusText(appointment.status) }}
               </span>
-            </div>
-            <div class="appointment-details">
+            </div>            <div class="appointment-details">
               <div class="appointment-date">
-                📅 {{ formatAppointmentDate(appointment.appointmentDate) }}
+                <img src="@/assets/icons/agenda.svg" alt="Date" class="detail-icon" />
+                {{ formatAppointmentDate(appointment.appointmentDate) }}
               </div>
               <div class="appointment-with">
-                👤 Avec {{ getOtherUserName(appointment) }}
+                <img src="@/assets/icons/user.svg" alt="Avec" class="detail-icon" />
+                Avec {{ getOtherUserName(appointment) }}
               </div>
               <div v-if="appointment.location" class="appointment-location">
-                📍 {{ appointment.location }}
+                <img src="@/assets/icons/carte.svg" alt="Lieu" class="detail-icon" />
+                {{ appointment.location }}
               </div>
               <div v-if="appointment.description" class="appointment-description">
                 {{ appointment.description }}
@@ -177,22 +187,23 @@
                 v-for="appointment in monthAppointments" 
                 :key="appointment.id" 
                 class="month-appointment-card"
-              >
-                <div class="appointment-date-time">
-                  📅 {{ formatAppointmentDateShort(appointment.appointmentDate) }}
+              >                <div class="appointment-date-time">
+                  <img src="@/assets/icons/agenda.svg" alt="Date" class="detail-icon" />
+                  {{ formatAppointmentDateShort(appointment.appointmentDate) }}
                 </div>
                 <div class="appointment-info">
                   <h5>{{ appointment.title }}</h5>
-                  <p>👤 Avec {{ getOtherUserName(appointment) }}</p>
+                  <p>
+                    <img src="@/assets/icons/user.svg" alt="Avec" class="detail-icon" />
+                    Avec {{ getOtherUserName(appointment) }}
+                  </p>
                   <span :class="['appointment-status', appointment.status]">
                     {{ getStatusText(appointment.status) }}
                   </span>
                 </div>
               </div>
             </div>          </div>        </div>
-      </div>
-
-      <!-- Contenu de l'onglet Avis -->
+      </div>      <!-- Contenu de l'onglet Avis -->
       <div v-if="activeTab === 'ratings'" class="tab-content">
         <div class="ratings-container">
           <div v-if="!userRatings.length" class="no-ratings">
@@ -208,16 +219,25 @@
                     class="rating-avatar"
                   />
                   <span class="rating-username">{{ rating.rater?.username }}</span>
-                </div>
-                <div class="rating-score">
-                  <div class="stars-display">
-                    <span v-for="star in 5" :key="star" 
-                          :class="['star', { filled: star <= rating.rating }]">
-                      ⭐
-                    </span>
+                </div>                  <div class="rating-score-actions">
+                    <div class="rating-score">
+                      <div class="stars-display-small">
+                        <span v-for="star in 5" :key="star" 
+                              :class="['star-small', getStarClass(star, rating.rating)]">
+                          ★
+                        </span>
+                      </div>
+                      <span class="rating-value">{{ rating.rating }}/5</span>
+                    </div>                    <!-- Actions pour modifier/supprimer si c'est notre avis -->
+                    <div v-if="rating.raterId === loggedInUser?.id" class="rating-actions">
+                      <button @click="editRating(rating)" class="btn-edit" title="Modifier">
+                        <img src="@/assets/icons/edit.svg" alt="Modifier" class="action-icon" />
+                      </button>
+                      <button @click="deleteRating(rating.id)" class="btn-delete" title="Supprimer">
+                        <img src="@/assets/icons/trash.svg" alt="Supprimer" class="action-icon" />
+                      </button>
+                    </div>
                   </div>
-                  <span class="rating-value">{{ rating.rating }}/5</span>
-                </div>
               </div>
               <div v-if="rating.comment" class="rating-comment">
                 {{ rating.comment }}
@@ -238,20 +258,23 @@
         <div class="modal-header">
           <span>Éditer le profil</span>
           <button class="modal-save" @click="saveProfile">Enregistrer</button>
-        </div>
-        <div class="modal-cover-block">
-          <img class="modal-cover-img" :src="edit.cover || user?.cover || 'https://images.unsplash.com/photo-1506744038136-46273834b3fb?auto=format&fit=crop&w=800&q=80'" alt="cover" />
-          <label class="modal-cover-upload">
-            <input type="file" accept="image/*" @change="onCoverChange" style="display:none" />
-            <span class="modal-cover-camera">📷</span>
-          </label>
-          <button v-if="edit.cover" class="modal-cover-remove" @click="removeCover">✕</button>
+        </div>        <div class="modal-cover-block">
+          <div class="modal-cover-container" :class="{ 'no-cover': !edit.cover && !user?.cover }">
+            <img v-if="edit.cover || user?.cover" class="modal-cover-img" :src="edit.cover || user?.cover" alt="cover" />
+          </div>          <div class="modal-cover-actions">
+            <label class="modal-cover-upload">
+              <input type="file" accept="image/*" @change="onCoverChange" style="display:none" />
+              <img src="@/assets/icons/avatar_change.svg" alt="Changer couverture" class="modal-camera-icon" />
+            </label>
+            <button v-if="edit.cover || user?.cover" class="modal-cover-remove" @click="removeCover">
+              <img src="@/assets/icons/trash.svg" alt="Supprimer bannière" class="modal-remove-icon" />
+            </button>
+          </div>
         </div>
         <div class="modal-avatar-block">
-          <img class="modal-avatar-img" :src="edit.avatar || user?.avatar || 'https://randomuser.me/api/portraits/men/32.jpg'" alt="avatar" />
-          <label class="modal-avatar-upload">
+          <img class="modal-avatar-img" :src="edit.avatar || user?.avatar || 'https://randomuser.me/api/portraits/men/32.jpg'" alt="avatar" />          <label class="modal-avatar-upload">
             <input type="file" accept="image/*" @change="onAvatarChange" style="display:none" />
-            <span class="modal-avatar-camera">📷</span>
+            <img src="@/assets/icons/avatar_change.svg" alt="Changer avatar" class="modal-camera-icon" />
           </label>
         </div>
         <div class="modal-form">
@@ -259,14 +282,12 @@
           <textarea v-model="edit.bio" placeholder="Bio"></textarea>
           <input v-model="edit.address" placeholder="Localisation" />
         </div>      </div>    </div>
-    <!-- FIN MODALE EDITION -->
-
-    <!-- MODALE NOTATION UTILISATEUR -->
-    <div v-if="showRatingModal" class="modal-overlay" @click.self="showRatingModal = false">
+    <!-- FIN MODALE EDITION -->    <!-- MODALE NOTATION UTILISATEUR -->
+    <div v-if="showRatingModal" class="modal-overlay" @click.self="resetRatingForm">
       <div class="modal-rating">
-        <button class="modal-close" @click="showRatingModal = false">×</button>
+        <button class="modal-close" @click="resetRatingForm">×</button>
         <div class="modal-header">
-          <h2>Noter {{ user?.username }}</h2>
+          <h2>{{ editingRating ? 'Modifier votre avis' : 'Noter' }} {{ user?.username }}</h2>
         </div>
         <div class="modal-body">
           <div class="rating-form">
@@ -276,7 +297,7 @@
                 <span v-for="star in 5" :key="star" 
                       :class="['star-input', { active: star <= newRating.rating }]"
                       @click="newRating.rating = star">
-                  ⭐
+                  ★
                 </span>
               </div>
             </div>
@@ -290,9 +311,9 @@
             </div>
           </div>
           <div class="modal-actions">
-            <button @click="showRatingModal = false" class="btn btn-cancel">Annuler</button>
+            <button @click="resetRatingForm" class="btn btn-cancel">Annuler</button>
             <button @click="submitRating" class="btn btn-primary" :disabled="!newRating.rating">
-              Publier l'avis
+              {{ editingRating ? 'Modifier l\'avis' : 'Publier l\'avis' }}
             </button>
           </div>
         </div>
@@ -312,8 +333,8 @@ export default {
       userPosts: [],
       appointments: [],
       loggedInUser: null, // Store the logged-in user's data
-      showEditModal: false,
-      showRatingModal: false,
+      showEditModal: false,      showRatingModal: false,
+      editingRating: null, // Pour stocker l'avis en cours de modification
       userRatings: [],
       newRating: {
         rating: 0,
@@ -466,9 +487,10 @@ export default {
         }
         reader.readAsDataURL(file)
       }
-    },
-    removeCover() {
+    },    removeCover() {
       this.edit.cover = ''
+      // Force la mise à jour de l'affichage pour montrer le fond #FFF4E3
+      this.$forceUpdate();
     },
     saveProfile() {
       const updatedProfile = {
@@ -604,25 +626,34 @@ export default {
       } catch (error) {
         console.error('Error loading user ratings:', error);
       }
-    },
-
-    async submitRating() {
+    },    async submitRating() {
       try {
-        await api.post('/ratings', {
-          ratedUserId: this.user.id,
-          rating: this.newRating.rating,
-          comment: this.newRating.comment
-        });
+        if (this.editingRating) {
+          // Mode modification
+          await api.put(`/ratings/${this.editingRating.id}`, {
+            rating: this.newRating.rating,
+            comment: this.newRating.comment
+          });
+          alert('Votre avis a été modifié avec succès !');
+        } else {
+          // Mode création
+          await api.post('/ratings', {
+            ratedUserId: this.user.id,
+            rating: this.newRating.rating,
+            comment: this.newRating.comment
+          });
+          alert('Votre avis a été publié avec succès !');
+        }
 
         // Réinitialiser le formulaire
         this.newRating = { rating: 0, comment: '' };
+        this.editingRating = null;
         this.showRatingModal = false;
 
         // Recharger les avis et les stats
         await this.loadUserRatings();
         await this.loadUser(); // Pour mettre à jour les stats
 
-        alert('Votre avis a été publié avec succès !');
       } catch (error) {
         console.error('Error submitting rating:', error);
         if (error.response?.status === 409) {
@@ -633,15 +664,59 @@ export default {
           alert('Erreur lors de la publication de l\'avis');
         }
       }
-    },
-
-    formatRatingDate(dateString) {
+    },formatRatingDate(dateString) {
       const date = new Date(dateString);
       return date.toLocaleDateString('fr-FR', {
         year: 'numeric',
         month: 'long',
         day: 'numeric'
       });
+    },
+
+    // Méthodes pour modifier/supprimer les avis
+    editRating(rating) {
+      this.editingRating = rating;
+      this.newRating = {
+        rating: rating.rating,
+        comment: rating.comment || ''
+      };
+      this.showRatingModal = true;
+    },
+
+    async deleteRating(ratingId) {
+      if (!confirm('Êtes-vous sûr de vouloir supprimer cet avis ?')) {
+        return;
+      }
+
+      try {
+        await api.delete(`/ratings/${ratingId}`);
+        
+        // Recharger les avis et les stats
+        await this.loadUserRatings();
+        await this.loadUser();
+        
+        alert('Votre avis a été supprimé avec succès !');
+      } catch (error) {
+        console.error('Error deleting rating:', error);        alert('Erreur lors de la suppression de l\'avis');
+      }
+    },
+
+    // Méthode pour déterminer la classe d'une étoile
+    getStarClass(starPosition, rating) {
+      if (starPosition <= Math.floor(rating)) {
+        return 'filled';
+      } else if (starPosition === Math.ceil(rating) && rating % 1 >= 0.5) {
+        return 'half-filled';
+      } else {
+        return 'empty';
+      }
+    },
+
+    // Réinitialiser le formulaire de notation quand on ferme la modale
+    resetRatingForm() {
+      this.newRating = { rating: 0, comment: '' };
+      this.editingRating = null;
+      this.showRatingModal = false;
     },
   }
 }
@@ -754,10 +829,10 @@ export default {
   color: #fff;
 }
 .profile-btn-message {
-  background: #4CAF50;
+  background: #4A90E2;
 }
 .profile-btn-message:hover {
-  background: #45a049;
+  background: #357ABD;
 }
 .profile-actions {
   display: flex;
@@ -910,46 +985,81 @@ export default {
   border-top-right-radius: 18px;
   overflow: hidden;
 }
+.modal-cover-container {
+  position: relative;
+  width: 100%;
+  height: 160px;
+  background: #eee;
+  border-top-left-radius: 18px;
+  border-top-right-radius: 18px;
+  overflow: hidden;
+}
+
+.modal-cover-container.no-cover {
+  background: #FFF4E3;
+}
+
 .modal-cover-img {
   width: 100%;
   height: 100%;
   object-fit: cover;
   display: block;
+  background: #FFF4E3;
 }
-.modal-cover-upload {
+.modal-cover-actions {
   position: absolute;
-  right: 1.2rem;
-  bottom: 1.2rem;
-  background: rgba(0, 0, 0, 0.32);
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  display: flex;
+  gap: 12px;
+  align-items: center;
+}
+
+.modal-cover-upload {
+  background: rgba(0, 0, 0, 0.6);
   border-radius: 50%;
-  width: 38px;
-  height: 38px;
+  width: 44px;
+  height: 44px;
   display: flex;
   align-items: center;
   justify-content: center;
   cursor: pointer;
+  transition: all 0.2s;
 }
-.modal-cover-camera {
-  font-size: 1.3rem;
-  color: #fff;
+
+.modal-cover-upload:hover {
+  background: rgba(0, 0, 0, 0.8);
+  transform: scale(1.05);
 }
+
+.modal-cover-upload .modal-camera-icon {
+  width: 20px;
+  height: 20px;
+  filter: brightness(0) saturate(100%) invert(100%) sepia(0%) saturate(0%) hue-rotate(0deg) brightness(100%) contrast(100%);
+}
+
 .modal-cover-remove {
-  position: absolute;
-  right: 3.2rem;
-  top: 1.2rem;
-  background: rgba(0, 0, 0, 0.32);
+  background: rgba(0, 0, 0, 0.6);
   border: none;
-  color: #fff;
-  font-size: 1.2rem;
   border-radius: 50%;
-  width: 32px;
-  height: 32px;
+  width: 44px;
+  height: 44px;
   cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s;
+}
+
+.modal-cover-remove:hover {
+  background: rgba(0, 0, 0, 0.8);
+  transform: scale(1.05);
 }
 .modal-avatar-block {
   position: absolute;
   left: 2.2rem;
-  top: 110px;
+  top: 120px;
   z-index: 2;
   display: flex;
   flex-direction: column;
@@ -965,21 +1075,29 @@ export default {
 }
 .modal-avatar-upload {
   position: absolute;
-  right: -10px;
-  bottom: 0;
-  background: #E48700;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  background: rgba(0, 0, 0, 0.6);
   border-radius: 50%;
-  width: 32px;
-  height: 32px;
+  width: 36px;
+  height: 36px;
   display: flex;
   align-items: center;
   justify-content: center;
   cursor: pointer;
-  border: 2px solid #fff;
+  transition: all 0.2s;
 }
-.modal-avatar-camera {
-  font-size: 1.1rem;
-  color: #fff;
+
+.modal-avatar-upload:hover {
+  background: rgba(0, 0, 0, 0.8);
+  transform: translate(-50%, -50%) scale(1.05);
+}
+
+.modal-avatar-upload .modal-camera-icon {
+  width: 18px;
+  height: 18px;
+  filter: brightness(0) saturate(100%) invert(100%) sepia(0%) saturate(0%) hue-rotate(0deg) brightness(100%) contrast(100%);
 }
 .modal-form {
   margin-top: 70px;
@@ -1100,12 +1218,12 @@ export default {
 }
 
 .appointment-btn.accept {
-  background: #4CAF50;
+  background: #4A90E2;
   color: white;
 }
 
 .appointment-btn.accept:hover {
-  background: #45a049;
+  background: #357ABD;
 }
 
 .appointment-btn.decline {
@@ -1436,15 +1554,135 @@ export default {
 
 /* Styles pour le système d'avis */
 .ratings-section {
-  background: white;
-  border-radius: 12px;
-  padding: 1.5rem;
-  margin: 1rem 0;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  background: rgba(255, 255, 255, 0.6);
+  border-radius: 8px;
+  padding: 1rem;
+  margin: 0.5rem 0;
+  backdrop-filter: blur(10px);
+  border: 1px solid rgba(228, 135, 0, 0.1);
 }
 
 .ratings-summary {
   text-align: center;
+}
+
+/* Design subtil pour le badge de note */
+.rating-badge-subtle {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.8rem;
+  background: rgba(228, 135, 0, 0.05);
+  padding: 0.6rem 1.2rem;
+  border-radius: 20px;
+  border: 1px solid rgba(228, 135, 0, 0.15);
+}
+
+.stars-display-main {
+  display: flex;
+  gap: 1px;
+}
+
+.star-main {
+  font-size: 1.1rem;
+  transition: all 0.2s ease;
+}
+
+.star-main.filled {
+  color: #ffc107;
+  text-shadow: 0 0 2px rgba(255, 193, 7, 0.3);
+}
+
+.star-main.half-filled {
+  background: linear-gradient(90deg, #ffc107 50%, #e0e0e0 50%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+.star-main.empty {
+  color: #e0e0e0;
+}
+
+.rating-info-subtle {
+  display: flex;
+  align-items: center;
+  gap: 0.3rem;
+  font-size: 0.9rem;
+}
+
+.rating-number-subtle {
+  font-weight: 600;
+  color: #E48700;
+  font-size: 1rem;
+}
+
+.rating-total-subtle {
+  color: #666;
+  font-size: 0.85rem;
+}
+
+/* Étoiles pour la liste des avis */
+.stars-display-small {
+  display: flex;
+  gap: 1px;
+}
+
+.star-small {
+  font-size: 1rem;
+  transition: all 0.2s ease;
+}
+
+.star-small.filled {
+  color: #ffc107;
+}
+
+.star-small.half-filled {
+  background: linear-gradient(90deg, #ffc107 50%, #e0e0e0 50%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+.star-small.empty {
+  color: #e0e0e0;
+}
+
+/* Actions de modification/suppression */
+.rating-score-actions {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  width: 100%;
+}
+
+.rating-actions {
+  display: flex;
+  gap: 0.5rem;
+  opacity: 0.7;
+  transition: opacity 0.2s;
+}
+
+.rating-card:hover .rating-actions {
+  opacity: 1;
+}
+
+.btn-edit,
+.btn-delete {
+  background: none;
+  border: none;
+  font-size: 1rem;
+  cursor: pointer;
+  padding: 0.3rem;
+  border-radius: 4px;
+  transition: background-color 0.2s;
+}
+
+.btn-edit:hover {
+  background: rgba(76, 175, 80, 0.1);
+}
+
+.btn-delete:hover {
+  background: rgba(244, 67, 54, 0.1);
 }
 
 .rating-average {
@@ -1669,12 +1907,121 @@ export default {
 }
 
 .profile-btn-rate {
-  background: #28a745;
+  background: #E48700;
   color: white;
   margin-left: 0.5rem;
 }
 
 .profile-btn-rate:hover {
-  background: #218838;
+  background: #cc7700;
+}
+
+/* Icon styles */
+.btn-icon {
+  width: 20px;
+  height: 20px;
+  margin-right: 8px;
+  vertical-align: middle;
+}
+
+/* Boutons avec icônes uniquement */
+.profile-btn-icon {
+  background: #ECBC76;
+  border: none;
+  border-radius: 50%;
+  width: 44px;
+  height: 44px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all 0.2s;
+  margin-left: 0.5rem;
+}
+
+.profile-btn-icon:first-child {
+  margin-left: 0;
+}
+
+.profile-btn-icon:hover {
+  background: #e4a94f;
+  transform: scale(1.05);
+}
+
+.profile-btn-icon.profile-btn-message {
+  background: #ECBC76;
+}
+
+.profile-btn-icon.profile-btn-message:hover {
+  background: #e4a94f;
+}
+
+.profile-btn-icon.profile-btn-rate {
+  background: #ECBC76;
+}
+
+.profile-btn-icon.profile-btn-rate:hover {
+  background: #e4a94f;
+}
+
+.btn-icon-only {
+  width: 20px;
+  height: 20px;
+  filter: brightness(0) saturate(100%) invert(100%) sepia(0%) saturate(0%) hue-rotate(0deg) brightness(100%) contrast(100%);
+}
+
+.tab-icon {
+  width: 18px;
+  height: 18px;
+  margin-right: 8px;
+  vertical-align: middle;
+  filter: brightness(0) saturate(100%) invert(40%) sepia(0%) saturate(0%) hue-rotate(0deg) brightness(100%) contrast(100%);
+  /* #666 color filter */
+}
+
+.tab-button:hover .tab-icon {
+  filter: brightness(0) saturate(100%) invert(55%) sepia(85%) saturate(5068%) hue-rotate(24deg) brightness(95%) contrast(95%);
+  /* #E48700 color filter */
+}
+
+.tab-button.active .tab-icon {
+  filter: brightness(0) saturate(100%) invert(55%) sepia(85%) saturate(5068%) hue-rotate(24deg) brightness(95%) contrast(95%);
+  /* #E48700 color filter */
+}
+
+.detail-icon {
+  width: 16px;
+  height: 16px;
+  margin-right: 6px;
+  vertical-align: middle;
+  filter: brightness(0) saturate(100%) invert(18%) sepia(15%) saturate(1239%) hue-rotate(195deg) brightness(96%) contrast(91%);
+}
+
+.action-icon {
+  width: 16px;
+  height: 16px;
+  vertical-align: middle;
+  transition: filter 0.2s;
+}
+
+.btn-edit .action-icon {
+  filter: brightness(0) saturate(100%) invert(18%) sepia(15%) saturate(1239%) hue-rotate(195deg) brightness(96%) contrast(91%);
+}
+
+.btn-delete .action-icon {
+  filter: brightness(0) saturate(100%) invert(27%) sepia(51%) saturate(2878%) hue-rotate(346deg) brightness(104%) contrast(97%);
+}
+
+.modal-camera-icon {
+  width: 16px;
+  height: 16px;
+  vertical-align: middle;
+}
+
+.modal-remove-icon {
+  width: 16px;
+  height: 16px;
+  vertical-align: middle;
+  filter: brightness(0) saturate(100%) invert(100%) sepia(0%) saturate(0%) hue-rotate(0deg) brightness(100%) contrast(100%);
 }
 </style>

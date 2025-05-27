@@ -17,9 +17,12 @@
             @click.stop
           >{{ rate }}</div>          <!-- Actions pour le propriétaire du post -->
           <div v-if="isOwnPost" class="post-actions">
-            <button class="post-action-btn" @click.stop.prevent="startInlineEdit" title="Édition rapide">✏️</button>
-            <button class="post-action-btn" @click.stop.prevent="startEditPost" title="Édition complète">📝</button>
-            <button class="post-action-btn delete" @click.stop.prevent="deletePost" title="Supprimer">🗑️</button>
+            <button class="post-action-btn" @click.stop.prevent="startInlineEdit" title="Édition rapide">
+              <img src="../assets/icons/edit.svg" class="action-icon-small" alt="Edit">
+            </button>
+            <button class="post-action-btn delete" @click.stop.prevent="deletePost" title="Supprimer">
+              <img src="../assets/icons/trash.svg" class="action-icon-small" alt="Delete">
+            </button>
           </div>
         </div>
       </div>      <div class="card-body">
@@ -75,8 +78,12 @@
             <div class="rate" :class="paid ? 'rate-paid' : ''" v-if="rate">{{ rate }}</div>
             <!-- Actions pour le propriétaire du post -->
             <div v-if="isOwnPost" class="post-actions">
-              <button class="post-action-btn" @click.stop="startEditPost" title="Modifier">✏️</button>
-              <button class="post-action-btn delete" @click.stop="deletePost" title="Supprimer">🗑️</button>
+              <button class="post-action-btn" @click.stop="startEditPost" title="Modifier">
+                <img src="../assets/icons/edit.svg" class="action-icon-small" alt="Edit">
+              </button>
+              <button class="post-action-btn delete" @click.stop="deletePost" title="Supprimer">
+                <img src="../assets/icons/trash.svg" class="action-icon-small" alt="Delete">
+              </button>
             </div>
           </div>
         </div>
@@ -609,7 +616,7 @@ export default {
   display: inline-block;
   width: 8px;
   height: 8px;
-  background: #4cd964;
+  background: #4CAF50;
   border-radius: 50%;
   margin-left: 4px;
 }
@@ -1282,4 +1289,26 @@ export default {
     width: 100%;
   }
 }
+
+/* Action icon styles */
+.action-icon-small {
+  width: 14px;
+  height: 14px;
+  vertical-align: middle;
+  filter: brightness(0) saturate(100%) invert(47%) sepia(18%) saturate(1094%) hue-rotate(195deg) brightness(95%) contrast(87%);
+}
+
+.post-action-btn.delete .action-icon-small {
+  filter: brightness(0) saturate(100%) invert(27%) sepia(51%) saturate(2878%) hue-rotate(346deg) brightness(104%) contrast(97%);
+}
+
+.post-action-btn:hover .action-icon-small {
+  filter: brightness(0) saturate(100%) invert(56%) sepia(88%) saturate(2574%) hue-rotate(24deg) brightness(100%) contrast(91%);
+}
+
+.post-action-btn.delete:hover .action-icon-small {
+  filter: brightness(0) saturate(100%) invert(14%) sepia(93%) saturate(7495%) hue-rotate(4deg) brightness(98%) contrast(118%);
+}
+
+/* Status dot colors updated */
 </style>

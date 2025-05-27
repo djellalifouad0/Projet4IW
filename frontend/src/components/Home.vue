@@ -42,9 +42,8 @@
 
     <!-- Formulaire de création de post -->
     <div v-if="showForm" class="modal-overlay" @click.self="showForm = false">
-      <div class="modal-card" @click.stop>
-        <div class="modal-header">
-          <span class="modal-icon">📝</span>
+      <div class="modal-card" @click.stop>        <div class="modal-header">
+          <img src="../assets/icons/edit.svg" class="modal-icon-svg" alt="Edit">
           <h2>Publier un service</h2>
         </div>
         <div class="modal-separator"></div>
@@ -415,6 +414,12 @@ export default {
   justify-content: center;
   margin: 0 -2rem;
 }
+.modal-icon-svg {
+  width: 32px;
+  height: 32px;
+  margin-bottom: 0.2rem;
+  filter: brightness(0) saturate(100%) invert(100%) sepia(0%) saturate(0%) hue-rotate(0deg) brightness(100%) contrast(100%);
+}
 .modal-icon {
   font-size: 2.1rem;
   margin-bottom: 0.2rem;
@@ -595,5 +600,14 @@ export default {
 .filter-dropdown button:hover {
   background: #ECBC76;
   color: #fff;
+}
+
+/* Modal icon styling */
+.modal-icon-svg {
+  width: 20px;
+  height: 20px;
+  margin-right: 8px;
+  vertical-align: middle;
+  filter: brightness(0) saturate(100%) invert(56%) sepia(88%) saturate(2574%) hue-rotate(24deg) brightness(100%) contrast(91%);
 }
 </style>
