@@ -1,6 +1,6 @@
 const crypto = require('crypto');
 const User = require('../models/user');
-const { Rating } = require('../models/associations');
+const Rating = require('../models/rating');
 const { Sequelize } = require('sequelize');
 
 // Generate a unique profile token for a user

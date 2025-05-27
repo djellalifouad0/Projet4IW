@@ -4,8 +4,12 @@
     <div v-if="notification.show" :class="['notification-banner', notification.type]">
       <div class="notification-content">
         <span>{{ notification.message }}</span>
+        <button @click="hideNotification" class="notification-close">×</button>
+      </div>
+    </div>
+    
     <!-- Post Card -->
-    <div :class="['card', paid ? 'card-paid' : 'card-orange']" @click="openModal">      <div class="card-header" @click.stop>
+    <div :class="['card', paid ? 'card-paid' : 'card-orange']" @click="openModal"><div class="card-header" @click.stop>
         <img class="avatar" :src="avatar || 'https://randomuser.me/api/portraits/men/32.jpg'" alt="avatar" @click.stop />        <div>
           <div class="name" @click.stop="handleProfileClick" style="cursor:pointer;">
             {{ name }}
@@ -168,7 +172,19 @@
             <div class="add-comment">
               <input v-model="newComment" type="text" placeholder="Écrire un commentaire..." @keyup.enter="addComment" :disabled="loadingComments" />
               <button @click="addComment" :disabled="!newComment.trim() || loadingComments">Envoyer</button>
-            </div>
+            </div>          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- DIALOGUE DE CONFIRMATION -->
+    <div v-if="confirmDialog.show" class="modal-overlay confirmation-overlay" @click="cancelConfirmation">
+      <div class="confirmation-dialog" @click.stop>
+        <div class="confirmation-content">
+          <p>{{ confirmDialog.message }}</p>
+          <div class="confirmation-actions">
+            <button @click="confirmAction" class="confirm-btn">Confirmer</button>
+            <button @click="cancelConfirmation" class="cancel-btn">Annuler</button>
           </div>
         </div>
       </div>
@@ -195,8 +211,7 @@ export default {
     likedByMe: { type: Boolean, default: false },
     commentsCount: { type: Number, default: 0 },
     profileToken: { type: String, default: '' }
-  },
-  data() {
+  },  data() {
     return {
       showModal: false,
       charLimit: 270,
@@ -207,10 +222,23 @@ export default {
       loadingComments: false,
       errorComments: '',
       successComment: '',
-      loggedInUser: null,      editingComment: null,
+      loggedInUser: null,
+      editingComment: null,
       editCommentText: '',
       editPostDescription: '',
-      isEditingInline: false
+      isEditingInline: false,
+      // Système de notifications
+      notification: {
+        show: false,
+        message: '',
+        type: 'success' // 'success' ou 'error'
+      },
+      // Système de confirmation
+      confirmDialog: {
+        show: false,
+        message: '',
+        confirmCallback: null
+      }
     }
   },
   computed: {
@@ -427,9 +455,8 @@ export default {
       this.isEditingInline = false;
       this.editPostDescription = '';
     },
-    
-    async deletePost() {
-      if (confirm('Êtes-vous sûr de vouloir supprimer ce post ?')) {
+      async deletePost() {
+      this.showConfirmation('Êtes-vous sûr de vouloir supprimer ce post ?', async () => {
         try {
           await api.delete(`/skills/${this.postId}`);
           
@@ -437,10 +464,11 @@ export default {
           this.$emit('post-deleted', this.postId);
           
           this.closeModal();
+          this.showNotification('Post supprimé avec succès !', 'success');
         } catch (e) {
-          this.errorComments = 'Erreur lors de la suppression du post.';
+          this.showNotification('Erreur lors de la suppression du post.', 'error');
         }
-      }
+      });
     },
     
     // === MÉTHODES POUR LA GESTION DES COMMENTAIRES ===
@@ -472,18 +500,17 @@ export default {
       this.editingComment = null;
       this.editCommentText = '';
     },
-    
-    async deleteComment(commentId) {
-      if (confirm('Êtes-vous sûr de vouloir supprimer ce commentaire ?')) {
+      async deleteComment(commentId) {
+      this.showConfirmation('Êtes-vous sûr de vouloir supprimer ce commentaire ?', async () => {
         try {
           await api.delete(`/skills/comments/${commentId}`);
-          this.successComment = 'Commentaire supprimé !';
+          this.showNotification('Commentaire supprimé avec succès !', 'success');
           await this.fetchComments();
           this.$emit('comment-deleted'); // Pour mettre à jour le compteur
         } catch (e) {
-          this.errorComments = 'Erreur lors de la suppression du commentaire.';
+          this.showNotification('Erreur lors de la suppression du commentaire.', 'error');
         }
-      }
+      });
     },
       // === MÉTHODE POUR CHARGER L'UTILISATEUR CONNECTÉ ===
     async loadLoggedInUser() {
@@ -496,8 +523,7 @@ export default {
         console.error('Erreur lors du chargement de l\'utilisateur:', e);
       }
     },
-    
-    // === MÉTHODE POUR SCROLL VERS UN COMMENTAIRE ===
+      // === MÉTHODE POUR SCROLL VERS UN COMMENTAIRE ===
     scrollToNewComment(commentId) {
       const commentElement = document.getElementById(`comment-${commentId}`);
       if (commentElement) {
@@ -512,6 +538,42 @@ export default {
           commentElement.style.backgroundColor = '';
         }, 2000);
       }
+    },
+
+    // === SYSTÈME DE NOTIFICATIONS ===
+    showNotification(message, type = 'success') {
+      this.notification.message = message;
+      this.notification.type = type;
+      this.notification.show = true;
+      
+      // Auto-hide après 5 secondes
+      setTimeout(() => {
+        this.hideNotification();
+      }, 5000);
+    },
+
+    hideNotification() {
+      this.notification.show = false;
+    },
+
+    // === SYSTÈME DE CONFIRMATION ===
+    showConfirmation(message, confirmCallback) {
+      this.confirmDialog.message = message;
+      this.confirmDialog.confirmCallback = confirmCallback;
+      this.confirmDialog.show = true;
+    },
+
+    confirmAction() {
+      if (this.confirmDialog.confirmCallback) {
+        this.confirmDialog.confirmCallback();
+      }
+      this.cancelConfirmation();
+    },
+
+    cancelConfirmation() {
+      this.confirmDialog.show = false;
+      this.confirmDialog.message = '';
+      this.confirmDialog.confirmCallback = null;
     }},
   mounted() {
     console.log('Avatar prop:', this.avatar);
@@ -1265,4 +1327,118 @@ export default {
 }
 
 /* Status dot colors updated */
+
+/* === STYLES POUR LES NOTIFICATIONS === */
+.notification-banner {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  z-index: 1000;
+  padding: 1rem;
+  color: white;
+  font-weight: 500;
+  animation: slideDown 0.3s ease-out;
+}
+
+.notification-banner.success {
+  background: linear-gradient(135deg, #28a745, #20c997);
+}
+
+.notification-banner.error {
+  background: linear-gradient(135deg, #dc3545, #fd7e14);
+}
+
+.notification-content {
+  max-width: 1200px;
+  margin: 0 auto;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0 1rem;
+}
+
+.notification-close {
+  background: none;
+  border: none;
+  color: white;
+  font-size: 1.5rem;
+  cursor: pointer;
+  padding: 0;
+  margin-left: 1rem;
+  opacity: 0.8;
+  transition: opacity 0.2s ease;
+}
+
+.notification-close:hover {
+  opacity: 1;
+}
+
+@keyframes slideDown {
+  from {
+    transform: translateY(-100%);
+    opacity: 0;
+  }
+  to {
+    transform: translateY(0);
+    opacity: 1;
+  }
+}
+
+/* === STYLES POUR LE DIALOGUE DE CONFIRMATION === */
+.confirmation-overlay {
+  z-index: 1001;
+}
+
+.confirmation-dialog {
+  background: white;
+  border-radius: 12px;
+  padding: 1.5rem;
+  max-width: 400px;
+  width: 90%;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
+}
+
+.confirmation-content p {
+  margin: 0 0 1.5rem 0;
+  font-size: 1.1rem;
+  color: #333;
+  text-align: center;
+}
+
+.confirmation-actions {
+  display: flex;
+  gap: 1rem;
+  justify-content: center;
+}
+
+.confirm-btn {
+  background: #dc3545;
+  color: white;
+  border: none;
+  border-radius: 6px;
+  padding: 0.75rem 1.5rem;
+  font-size: 1rem;
+  cursor: pointer;
+  transition: background 0.2s ease;
+}
+
+.confirm-btn:hover {
+  background: #c82333;
+}
+
+.cancel-btn {
+  background: #6c757d;
+  color: white;
+  border: none;
+  border-radius: 6px;
+  padding: 0.75rem 1.5rem;
+  font-size: 1rem;
+  cursor: pointer;
+  transition: background 0.2s ease;
+}
+
+.cancel-btn:hover {
+  background: #5a6268;
+}
 </style>
