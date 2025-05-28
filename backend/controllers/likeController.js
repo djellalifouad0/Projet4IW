@@ -25,7 +25,10 @@ exports.likeSkill = async (req, res) => {
       where: { userId: req.user.id, skillId: req.params.id }
     });
     console.log('LIKE RESULT:', like, 'CREATED:', created);
-    res.json({ liked: created });
+    res.json({ 
+      liked: created, 
+      message: created ? 'Compétence ajoutée à vos favoris !' : 'Vous avez déjà aimé cette compétence'
+    });
   } catch (error) {
     console.error('LIKE ERROR:', error);
     res.status(500).json({ error: 'Erreur lors du like', details: error.message });
@@ -53,7 +56,10 @@ exports.likeSkill = async (req, res) => {
 exports.unlikeSkill = async (req, res) => {
   try {
     const result = await Like.destroy({ where: { userId: req.user.id, skillId: req.params.id } });
-    res.json({ unliked: result > 0 });
+    res.json({ 
+      unliked: result > 0, 
+      message: result > 0 ? 'Compétence retirée de vos favoris' : 'Cette compétence n\'était pas dans vos favoris'
+    });
   } catch (error) {
     res.status(500).json({ error: 'Erreur lors du unlike' });
   }

@@ -61,6 +61,7 @@
 import PostCard from './PostCard.vue'
 import SearchBar from './SearchBar.vue'
 import api from '../services/api'
+import toast from '../services/toast'
 
 export default {
   name: 'Carte',
@@ -125,32 +126,38 @@ export default {
       this.posts = []
     }
   },
-  methods: {
-    async likePost(postId) {
+  methods: {    async likePost(postId) {
       try {
         const idx = this.posts.findIndex(p => p.postId === postId)
         if (idx !== -1 && !this.posts[idx].likedByMe) {
           this.posts[idx].likes++
           this.posts[idx].likedByMe = true
         }
-        await api.post(`/likes/${postId}/like`)
+        const response = await api.post(`/likes/${postId}/like`)
+        if (response.data.message) {
+          toast.success(response.data.message);
+        }
         // Optionnel : rafraîchir les posts pour synchro
         // await this.fetchPosts()
       } catch (e) {
+        toast.error('Erreur lors du like');
         // Optionnel : gestion d'erreur
       }
-    },
-    async dislikePost(postId) {
+    },    async dislikePost(postId) {
       try {
         const idx = this.posts.findIndex(p => p.postId === postId)
         if (idx !== -1 && this.posts[idx].likedByMe) {
           this.posts[idx].likes = Math.max(0, this.posts[idx].likes - 1)
           this.posts[idx].likedByMe = false
         }
-        await api.delete(`/likes/${postId}/unlike`)
+        const response = await api.delete(`/likes/${postId}/unlike`)
+        if (response.data.message) {
+          toast.success(response.data.message);
+        }
         // Optionnel : rafraîchir les posts pour synchro
         // await this.fetchPosts()
       } catch (e) {
+        toast.error('Erreur lors du dislike');
         // Optionnel : gestion d'erreur
       }
     },

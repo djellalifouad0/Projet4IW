@@ -37,7 +37,10 @@ exports.addComment = async (req, res) => {
       content,
       parentId: parentId || null
     });
-    res.status(201).json(comment);
+    res.status(201).json({ 
+      ...comment.toJSON(), 
+      message: parentId ? 'Réponse ajoutée avec succès !' : 'Commentaire ajouté avec succès !'
+    });
   } catch (error) {
     res.status(500).json({ error: 'Erreur lors de l\'ajout du commentaire' });
   }
@@ -110,7 +113,7 @@ exports.updateComment = async (req, res) => {
     
     const { content } = req.body;
     await comment.update({ content });
-    res.json(comment);
+    res.json({ ...comment.toJSON(), message: 'Commentaire modifié avec succès !' });
   } catch (error) {
     res.status(500).json({ error: 'Erreur mise à jour commentaire' });
   }
@@ -145,7 +148,7 @@ exports.deleteComment = async (req, res) => {
     if (comment.userId !== req.user.id) return res.status(403).json({ error: 'Non autorisé' });
     
     await comment.destroy();
-    res.json({ message: 'Commentaire supprimé' });
+    res.json({ message: 'Commentaire supprimé avec succès !' });
   } catch (error) {
     res.status(500).json({ error: 'Erreur suppression commentaire' });
   }
