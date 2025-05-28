@@ -200,8 +200,9 @@ export default {
     postId: { type: Number, required: true },
     likedByMe: { type: Boolean, default: false },
     commentsCount: { type: Number, default: 0 },
-    profileToken: { type: String, default: '' }
-  },  data() {
+    profileToken: { type: String, default: '' },
+    userId: { type: Number, required: true }
+  },data() {
     return {
       showModal: false,
       charLimit: 270,
@@ -272,10 +273,9 @@ export default {
     },    totalCommentsCount() {
       // Compte tous les commentaires et leurs réponses
       return this.comments.reduce((acc, c) => acc + 1 + (c.replies ? c.replies.length : 0), 0);
-    },
-    isOwnPost() {
+    },    isOwnPost() {
       // Vérifie si l'utilisateur connecté est le propriétaire du post
-      return this.loggedInUser && this.loggedInUser.username === this.name;
+      return this.loggedInUser && this.loggedInUser.id === this.userId;
     }
   },
   methods: {

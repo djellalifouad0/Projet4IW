@@ -15,8 +15,7 @@
       <button class="publish-btn" @click="showForm = true">+ Publier</button>
     </div>
 
-    <div v-if="likeError" class="error-message" style="margin-bottom: 10px;">{{ likeError }}</div>    <div class="cards">
-      <PostCard
+    <div v-if="likeError" class="error-message" style="margin-bottom: 10px;">{{ likeError }}</div>    <div class="cards">      <PostCard
         v-for="post in posts"
         :key="post.id"
         :name="post.User?.username || ''"
@@ -32,7 +31,9 @@
         :postId="post.id"
         :likedByMe="post.likedByMe"
         :commentsCount="post.commentsCount || 0"
-        :profileToken="post.User?.profileToken || ''"        @like="likePost"
+        :profileToken="post.User?.profileToken || ''"
+        :userId="post.userId"
+        @like="likePost"
         @dislike="dislikePost"
         @addressClicked="handleAddressClick"
         @comment-posted="fetchPosts"

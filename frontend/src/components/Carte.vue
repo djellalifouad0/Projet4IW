@@ -33,7 +33,9 @@
           :postId="post.postId"
           :likedByMe="post.likedByMe"
           :commentsCount="post.commentsCount || 0"
-          :profileToken="post.profileToken || ''"          @like="likePost"
+          :profileToken="post.profileToken || ''"
+          :userId="post.userId"
+          @like="likePost"
           @dislike="dislikePost"
           @addressClicked="centerMapOnAddress"
           @comment-posted="refreshPosts"
@@ -78,8 +80,7 @@ export default {
     try {
       const res = await api.get('/skills')
       // Adapter les données pour PostCard
-      const postsWithComments = await Promise.all(res.data.map(async skill => {
-        try {
+      const postsWithComments = await Promise.all(res.data.map(async skill => {        try {
           const commentsRes = await api.get(`/skills/${skill.id}/comments`);
           const commentsCount = Array.isArray(commentsRes.data) ? commentsRes.data.length : 0;
           return {
@@ -96,9 +97,9 @@ export default {
             postId: skill.id,
             likedByMe: skill.likedByMe || false,
             commentsCount,
-            profileToken: skill.User?.profileToken || ''
-          };
-        } catch {
+            profileToken: skill.User?.profileToken || '',
+            userId: skill.userId
+          };        } catch {
           return {
             name: skill.User?.username || 'Utilisateur inconnu',
             address: skill.location || '',
@@ -113,7 +114,8 @@ export default {
             postId: skill.id,
             likedByMe: skill.likedByMe || false,
             commentsCount: 0,
-            profileToken: skill.User?.profileToken || ''
+            profileToken: skill.User?.profileToken || '',
+            userId: skill.userId
           };
         }
       }))
@@ -172,7 +174,8 @@ export default {
               postId: skill.id,
               likedByMe: skill.likedByMe || false,
               commentsCount,
-              profileToken: skill.User?.profileToken || ''
+              profileToken: skill.User?.profileToken || '',
+              userId: skill.userId
             };
           } catch {            return {
               name: skill.User?.username || 'Utilisateur inconnu',
@@ -188,7 +191,8 @@ export default {
               postId: skill.id,
               likedByMe: skill.likedByMe || false,
               commentsCount: 0,
-              profileToken: skill.User?.profileToken || ''
+              profileToken: skill.User?.profileToken || '',
+              userId: skill.userId
             };
           }
         }))
