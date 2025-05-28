@@ -328,17 +328,30 @@
           <button @click="confirmAction" class="btn btn-danger">Supprimer</button>
         </div>
       </div>
-    </div>
-    <!-- FIN DIALOG DE CONFIRMATION -->
+    </div>    <!-- FIN DIALOG DE CONFIRMATION -->
+    
+    <!-- IMAGE CROPPER -->
+    <ImageCropper
+      :show="showImageCropper"
+      :imageData="cropperImageData"
+      :cropType="cropperType"
+      @crop-complete="onCropComplete"
+      @cancel="closeCropper"
+    />
+    <!-- FIN IMAGE CROPPER -->
   </div>
 </template>
 
 <script>
 import api from '../services/api'
 import toast from '../services/toast'
+import ImageCropper from './ImageCropper.vue'
 
 export default {
-  name: 'Profile',  data() {    return {
+  name: 'Profile',
+  components: {
+    ImageCropper
+  },  data() {    return {
       user: null,
       userPosts: [],
       appointments: [],
@@ -363,7 +376,12 @@ export default {
         address: '',
         avatar: '',
         cover: ''
-      }
+      },
+      // Image cropper
+      showImageCropper: false,
+      cropperImageData: '',
+      cropperType: '', // 'avatar' or 'banner'
+      pendingImageFile: null
     }  },
   computed: {
     upcomingAppointments() {
@@ -481,30 +499,81 @@ export default {
       }
       
       console.log('Active tab:', this.activeTab);
-    },
-    onAvatarChange(e) {
+    },    onAvatarChange(e) {
       const file = e.target.files[0]
       if (file) {
+        // Vérifier le type de fichier
+        if (!file.type.startsWith('image/')) {
+          toast.error('Veuillez sélectionner une image valide.');
+          return;
+        }
+        
+        // Vérifier la taille du fichier (max 5MB)
+        if (file.size > 5 * 1024 * 1024) {
+          toast.error('L\'image ne doit pas dépasser 5MB.');
+          return;
+        }
+        
         const reader = new FileReader()
         reader.onload = (ev) => {
-          this.edit.avatar = ev.target.result
+          this.cropperImageData = ev.target.result
+          this.cropperType = 'avatar'
+          this.pendingImageFile = file
+          this.showImageCropper = true
         }
         reader.readAsDataURL(file)
       }
+      // Réinitialiser l'input pour permettre de sélectionner le même fichier
+      e.target.value = ''
     },
     onCoverChange(e) {
       const file = e.target.files[0]
       if (file) {
+        // Vérifier le type de fichier
+        if (!file.type.startsWith('image/')) {
+          toast.error('Veuillez sélectionner une image valide.');
+          return;
+        }
+        
+        // Vérifier la taille du fichier (max 5MB)
+        if (file.size > 5 * 1024 * 1024) {
+          toast.error('L\'image ne doit pas dépasser 5MB.');
+          return;
+        }
+        
         const reader = new FileReader()
         reader.onload = (ev) => {
-          this.edit.cover = ev.target.result
+          this.cropperImageData = ev.target.result
+          this.cropperType = 'banner'
+          this.pendingImageFile = file
+          this.showImageCropper = true
         }
         reader.readAsDataURL(file)
       }
+      // Réinitialiser l'input pour permettre de sélectionner le même fichier
+      e.target.value = ''
     },    removeCover() {
       this.edit.cover = ''
       // Force la mise à jour de l'affichage pour montrer le fond #FFF4E3
       this.$forceUpdate();
+    },
+    
+    // Méthodes pour le cropper d'images
+    onCropComplete(result) {
+      if (result.cropType === 'avatar') {
+        this.edit.avatar = result.dataUrl
+      } else if (result.cropType === 'banner') {
+        this.edit.cover = result.dataUrl
+      }
+      this.closeCropper()
+      toast.success('Image recadrée avec succès !')
+    },
+    
+    closeCropper() {
+      this.showImageCropper = false
+      this.cropperImageData = ''
+      this.cropperType = ''
+      this.pendingImageFile = null
     },
     saveProfile() {
       const updatedProfile = {
