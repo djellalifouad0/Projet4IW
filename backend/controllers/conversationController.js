@@ -350,3 +350,102 @@ exports.sendMessage = async (req, res) => {
     res.status(500).json({ error: 'Erreur envoi message' });
   }
 };
+
+/**
+ * @swagger
+ * /conversations/unread-count:
+ *   get:
+ *     summary: Récupère le nombre de messages non lus
+ *     tags: [Conversations]
+ *     security:
+ *       - bearerAuth: []
+ *     responses:
+ *       200:
+ *         description: Nombre de messages non lus
+ */
+exports.getUnreadMessagesCount = async (req, res) => {
+  try {
+    const userId = req.user.id;
+    
+    // Compter les messages non lus où l'utilisateur n'est PAS l'expéditeur
+    const unreadCount = await Message.count({
+      include: [
+        {
+          model: Conversation,
+          where: {
+            [Op.or]: [
+              { user1Id: userId },
+              { user2Id: userId }
+            ]
+          }
+        }
+      ],
+      where: {
+        senderId: { [Op.ne]: userId }, // Messages pas envoyés par l'utilisateur
+        readAt: null // Messages non lus
+      }
+    });
+
+    res.json({ unreadCount });
+  } catch (error) {
+    console.error('Error getting unread messages count:', error);
+    res.status(500).json({ error: 'Erreur récupération messages non lus' });
+  }
+};
+
+/**
+ * @swagger
+ * /conversations/{id}/mark-read:
+ *   patch:
+ *     summary: Marque tous les messages d'une conversation comme lus
+ *     tags: [Conversations]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         schema:
+ *           type: integer
+ *         required: true
+ *     responses:
+ *       200:
+ *         description: Messages marqués comme lus
+ */
+exports.markConversationAsRead = async (req, res) => {
+  try {
+    const conversationId = req.params.id;
+    const userId = req.user.id;
+
+    // Vérifier que l'utilisateur fait partie de cette conversation
+    const conversation = await Conversation.findOne({
+      where: {
+        id: conversationId,
+        [Op.or]: [
+          { user1Id: userId },
+          { user2Id: userId }
+        ]
+      }
+    });
+
+    if (!conversation) {
+      return res.status(404).json({ error: 'Conversation introuvable' });
+    }
+
+    // Marquer tous les messages non lus de cette conversation comme lus
+    await Message.update(
+      { readAt: new Date() },
+      {
+        where: {
+          conversationId,
+          senderId: { [Op.ne]: userId }, // Messages pas envoyés par l'utilisateur
+          readAt: null
+        }
+      }
+    );
+
+    res.json({ success: true });
+  } catch (error) {
+    console.error('Error marking conversation as read:', error);
+    res.status(500).json({ error: 'Erreur marquage messages comme lus' });
+  }
+};

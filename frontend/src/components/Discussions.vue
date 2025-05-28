@@ -183,6 +183,7 @@
 <script>
 import api from '../services/api'
 import socketService from '../services/socket'
+import unreadMessagesService from '../services/unreadMessages'
 
 export default {
   name: 'Discussions',  data() {    return {
@@ -244,6 +245,8 @@ export default {
     if (this.typingTimeout) {
       clearTimeout(this.typingTimeout);
     }
+    // Nettoyer le service unreadMessages
+    unreadMessagesService.cleanup();
     // Déconnecter le WebSocket
     socketService.disconnect();
   },watch: {
@@ -303,8 +306,12 @@ export default {
         this.selectedConversation = conv;
         this.error = '';
         
+        // Informer le service unreadMessages de la conversation active
+        unreadMessagesService.setActiveConversation(conv.id);
+        
         // Charger les messages
         const messagesResponse = await api.get(`/conversations/${conv.id}/messages`);        
+        
         this.messages = messagesResponse.data.map(msg => ({
           id: msg.id,
           text: msg.content,
@@ -313,6 +320,9 @@ export default {
           sender: msg.sender,
           status: msg.fromMe ? 'delivered' : null
         }));
+
+        // Marquer la conversation comme lue
+        await unreadMessagesService.markConversationAsRead(conv.id);
 
         // Charger les rendez-vous de la conversation
         await this.loadConversationAppointments(conv.id);
@@ -407,6 +417,13 @@ export default {
       try {
         await socketService.connect(token);
         console.log('WebSocket initialisé avec succès');
+        
+        // Initialiser l'intégration WebSocket pour les messages non lus
+        const userId = this.$store?.state?.user?.id;
+        if (userId) {
+          unreadMessagesService.initWebSocketIntegration(socketService, userId);
+        }
+        
         this.setupSocketListeners();
         this.error = ''; // Effacer les erreurs précédentes
       } catch (error) {
