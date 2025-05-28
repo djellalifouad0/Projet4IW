@@ -20,7 +20,7 @@
         :key="post.id"
         :name="post.User?.username || ''"
         :address="post.location || ''"
-        :avatar="post.User?.avatar || 'https://randomuser.me/api/portraits/men/32.jpg'"
+        :avatar="post.User?.avatar || `https://ui-avatars.com/api/?name=${encodeURIComponent(post.User?.username || 'User')}&background=ECBC76&color=fff&size=64&bold=true`"
         :rate="post.pricePerHour ? post.pricePerHour + '€/h' : ''"
         :likes="post.likes || 0"
         :views="post.views || 0"

@@ -82,12 +82,11 @@ export default {
       const res = await api.get('/skills')
       // Adapter les données pour PostCard
       const postsWithComments = await Promise.all(res.data.map(async skill => {        try {
-          const commentsRes = await api.get(`/skills/${skill.id}/comments`);
-          const commentsCount = Array.isArray(commentsRes.data) ? commentsRes.data.length : 0;
+          const commentsRes = await api.get(`/skills/${skill.id}/comments`);            const commentsCount = Array.isArray(commentsRes.data) ? commentsRes.data.length : 0;
           return {
             name: skill.User?.username || 'Utilisateur inconnu',
             address: skill.location || '',
-            avatar: skill.User?.avatar || 'https://randomuser.me/api/portraits/men/32.jpg',
+            avatar: skill.User?.avatar || `https://ui-avatars.com/api/?name=${encodeURIComponent(skill.User?.username || 'User')}&background=ECBC76&color=fff&size=64&bold=true`,
             rate: skill.pricePerHour ? skill.pricePerHour + ' €/h' : '',
             likes: skill.likes || 0,
             views: skill.views || 0,
@@ -104,7 +103,7 @@ export default {
           return {
             name: skill.User?.username || 'Utilisateur inconnu',
             address: skill.location || '',
-            avatar: skill.User?.avatar || 'https://randomuser.me/api/portraits/men/32.jpg',
+            avatar: skill.User?.avatar || `https://ui-avatars.com/api/?name=${encodeURIComponent(skill.User?.username || 'User')}&background=ECBC76&color=fff&size=64&bold=true`,
             rate: skill.pricePerHour ? skill.pricePerHour + ' €/h' : '',
             likes: skill.likes || 0,
             views: skill.views || 0,
@@ -170,7 +169,7 @@ export default {
             const commentsCount = Array.isArray(commentsRes.data) ? commentsRes.data.length : 0;            return {
               name: skill.User?.username || 'Utilisateur inconnu',
               address: skill.location || '',
-              avatar: skill.User?.avatar || 'https://randomuser.me/api/portraits/men/32.jpg',
+              avatar: skill.User?.avatar || `https://ui-avatars.com/api/?name=${encodeURIComponent(skill.User?.username || 'User')}&background=ECBC76&color=fff&size=64&bold=true`,
               rate: skill.pricePerHour ? skill.pricePerHour + ' €/h' : '',
               likes: skill.likes || 0,
               views: skill.views || 0,
@@ -183,11 +182,10 @@ export default {
               commentsCount,
               profileToken: skill.User?.profileToken || '',
               userId: skill.userId
-            };
-          } catch {            return {
+            };          } catch {            return {
               name: skill.User?.username || 'Utilisateur inconnu',
               address: skill.location || '',
-              avatar: skill.User?.avatar || 'https://randomuser.me/api/portraits/men/32.jpg',
+              avatar: skill.User?.avatar || `https://ui-avatars.com/api/?name=${encodeURIComponent(skill.User?.username || 'User')}&background=ECBC76&color=fff&size=64&bold=true`,
               rate: skill.pricePerHour ? skill.pricePerHour + ' €/h' : '',
               likes: skill.likes || 0,
               views: skill.views || 0,

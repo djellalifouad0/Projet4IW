@@ -2,7 +2,7 @@
   <div>
     <!-- Post Card -->
     <div :class="['card', paid ? 'card-paid' : 'card-orange']" @click="openModal"><div class="card-header" @click.stop>
-        <img class="avatar" :src="avatar || 'https://randomuser.me/api/portraits/men/32.jpg'" alt="avatar" @click.stop />        <div>
+        <img class="avatar" :src="avatar || `https://ui-avatars.com/api/?name=${encodeURIComponent(name || 'User')}&background=ECBC76&color=fff&size=64&bold=true`" alt="avatar" @click.stop />        <div>
           <div class="name" @click.stop="handleProfileClick" style="cursor:pointer;">
             {{ name }}
             <span v-if="online" class="status-dot"></span>
@@ -64,7 +64,7 @@
     <!-- MODALE -->
     <div v-if="showModal" class="modal-overlay" @click="closeModal">
       <div :class="['modal-card', paid ? 'card-paid' : 'card-orange']" @click.stop>        <div class="card-header">
-          <img class="avatar" :src="avatar || 'https://randomuser.me/api/portraits/men/32.jpg'" alt="avatar" />          <div>
+          <img class="avatar" :src="avatar || `https://ui-avatars.com/api/?name=${encodeURIComponent(name || 'User')}&background=ECBC76&color=fff&size=64&bold=true`" alt="avatar" />          <div>
             <div class="name" @click.stop="handleProfileClick" style="cursor:pointer;">
               {{ name }}
               <span v-if="online" class="status-dot"></span>

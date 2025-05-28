@@ -267,6 +267,10 @@ export default {
     }
   },
   methods: {
+    // Méthode utilitaire pour générer un avatar par défaut personnalisé
+    getDefaultAvatar(username) {
+      return `https://ui-avatars.com/api/?name=${encodeURIComponent(username)}&background=ECBC76&color=fff&size=128&bold=true`;
+    },
     async loadConversations() {
       try {
         this.loading = true;
@@ -274,7 +278,7 @@ export default {
         const response = await api.get('/conversations');        this.conversations = response.data.map(conv => ({
           id: conv.id,
           name: conv.otherUser.username,
-          avatar: conv.otherUser.avatar || 'https://randomuser.me/api/portraits/lego/1.jpg',
+          avatar: conv.otherUser.avatar || this.getDefaultAvatar(conv.otherUser.username),
           profileToken: conv.otherUser.profileToken,
           userId: conv.otherUser.id,
           lastMessage: conv.lastMessage ? conv.lastMessage.content : 'Aucun message',

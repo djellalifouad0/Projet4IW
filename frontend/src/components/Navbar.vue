@@ -47,7 +47,7 @@
       </li>
     </ul>
     <div class="navbar-profile" @click="navigateToMyProfile" style="cursor:pointer; position: relative;">
-      <img class="avatar" :src="user?.avatar || 'https://randomuser.me/api/portraits/men/32.jpg'" alt="avatar" />
+      <img class="avatar" :src="user?.avatar || `https://ui-avatars.com/api/?name=${encodeURIComponent(user?.username || 'User')}&background=ECBC76&color=fff&size=64&bold=true`" alt="avatar" />
       <div class="profile-info">
         <span class="username" :title="user ? user.username : ''">{{ user ? user.username : 'Non connecté' }}</span>
         <span class="email" :title="user ? user.email : ''">{{ user ? user.email : '' }}</span>
