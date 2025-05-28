@@ -5,7 +5,7 @@
         <img class="profile-cover-img" :src="user?.cover || 'https://images.unsplash.com/photo-1506744038136-46273834b3fb?auto=format&fit=crop&w=800&q=80'" alt="cover" />
       </div>
       <div class="profile-card-bottom-v2">        <div class="profile-avatar-block">
-          <img class="profile-avatar-v2" :src="user?.avatar || 'https://randomuser.me/api/portraits/men/32.jpg'" alt="Avatar utilisateur" />
+          <img class="profile-avatar-v2" :src="user?.avatar || `https://ui-avatars.com/api/?name=${encodeURIComponent(user?.username || 'User')}&background=ECBC76&color=fff&size=128&bold=true`" alt="Avatar utilisateur" />
           <div class="profile-name-v2">{{ user?.username || '' }}</div>
           <!-- Moyenne des avis intégrée dans le profil -->
           <div v-if="user?.ratingStats && user.ratingStats.totalRatings > 0" class="profile-rating-inline">
@@ -203,9 +203,8 @@
           <div v-else class="ratings-list">
             <div v-for="rating in userRatings" :key="rating.id" class="rating-card">
               <div class="rating-header">
-                <div class="rating-user">
-                  <img 
-                    :src="rating.rater?.avatar || 'https://randomuser.me/api/portraits/men/32.jpg'" 
+                <div class="rating-user">                  <img 
+                    :src="rating.rater?.avatar || `https://ui-avatars.com/api/?name=${encodeURIComponent(rating.rater?.username || 'User')}&background=ECBC76&color=fff&size=64&bold=true`" 
                     :alt="rating.rater?.username"
                     class="rating-avatar"
                   />
@@ -263,7 +262,7 @@
           </div>
         </div>
         <div class="modal-avatar-block">
-          <img class="modal-avatar-img" :src="edit.avatar || user?.avatar || 'https://randomuser.me/api/portraits/men/32.jpg'" alt="avatar" />          <label class="modal-avatar-upload">
+          <img class="modal-avatar-img" :src="edit.avatar || user?.avatar || `https://ui-avatars.com/api/?name=${encodeURIComponent(user?.username || 'User')}&background=ECBC76&color=fff&size=128&bold=true`" alt="avatar" />          <label class="modal-avatar-upload">
             <input type="file" accept="image/*" @change="onAvatarChange" style="display:none" />
             <img src="@/assets/icons/avatar_change.svg" alt="Changer avatar" class="modal-camera-icon" />
           </label>

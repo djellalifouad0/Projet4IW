@@ -2,7 +2,7 @@
   <div>
     <!-- Post Card -->
     <div :class="['card', paid ? 'card-paid' : 'card-orange']" @click="openModal"><div class="card-header" @click.stop>
-        <img class="avatar" :src="avatar || 'https://randomuser.me/api/portraits/men/32.jpg'" alt="avatar" @click.stop />        <div>
+        <img class="avatar" :src="avatar || `https://ui-avatars.com/api/?name=${encodeURIComponent(name || 'User')}&background=ECBC76&color=fff&size=64&bold=true`" alt="avatar" @click.stop />        <div>
           <div class="name" @click.stop="handleProfileClick" style="cursor:pointer;">
             {{ name }}
             <span v-if="online" class="status-dot"></span>
@@ -64,7 +64,7 @@
     <!-- MODALE -->
     <div v-if="showModal" class="modal-overlay" @click="closeModal">
       <div :class="['modal-card', paid ? 'card-paid' : 'card-orange']" @click.stop>        <div class="card-header">
-          <img class="avatar" :src="avatar || 'https://randomuser.me/api/portraits/men/32.jpg'" alt="avatar" />          <div>
+          <img class="avatar" :src="avatar || `https://ui-avatars.com/api/?name=${encodeURIComponent(name || 'User')}&background=ECBC76&color=fff&size=64&bold=true`" alt="avatar" />          <div>
             <div class="name" @click.stop="handleProfileClick" style="cursor:pointer;">
               {{ name }}
               <span v-if="online" class="status-dot"></span>
@@ -322,6 +322,12 @@ export default {
         this.successComment = '';
         try {
           const response = await api.post(`/skills/${this.postId}/comments`, { content: this.newComment });
+          
+          // Afficher le toast avec le message du serveur
+          if (response.data.message) {
+            toast.success(response.data.message);
+          }
+          
           this.successComment = 'Commentaire envoyé !';
           this.newComment = '';
           await this.fetchComments();
@@ -336,8 +342,10 @@ export default {
         } catch (e) {
           if (e.response && e.response.status === 401) {
             this.errorComments = "Vous devez être connecté pour commenter.";
+            toast.error("Vous devez être connecté pour commenter.");
           } else {
             this.errorComments = "Erreur lors de l'envoi du commentaire.";
+            toast.error("Erreur lors de l'envoi du commentaire.");
           }
         }
       }
@@ -352,6 +360,12 @@ export default {
         try {
           const parentId = this.comments[idx].id;
           const response = await api.post(`/skills/${this.postId}/comments`, { content: this.replyText, parentId });
+          
+          // Afficher le toast avec le message du serveur
+          if (response.data.message) {
+            toast.success(response.data.message);
+          }
+          
           this.replyText = '';
           this.replyingTo = null;
           await this.fetchComments();
@@ -365,8 +379,10 @@ export default {
         } catch (e) {
           if (e.response && e.response.status === 401) {
             this.errorComments = "Vous devez être connecté pour répondre.";
+            toast.error("Vous devez être connecté pour répondre.");
           } else {
             this.errorComments = "Erreur lors de l'envoi de la réponse.";
+            toast.error("Erreur lors de l'envoi de la réponse.");
           }
         }
       }

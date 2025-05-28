@@ -20,7 +20,7 @@
         :key="post.id"
         :name="post.User?.username || ''"
         :address="post.location || ''"
-        :avatar="post.User?.avatar || 'https://randomuser.me/api/portraits/men/32.jpg'"
+        :avatar="post.User?.avatar || `https://ui-avatars.com/api/?name=${encodeURIComponent(post.User?.username || 'User')}&background=ECBC76&color=fff&size=64&bold=true`"
         :rate="post.pricePerHour ? post.pricePerHour + '€/h' : ''"
         :likes="post.likes || 0"
         :views="post.views || 0"
@@ -82,6 +82,7 @@
 <script>
 import PostCard from './PostCard.vue'
 import api from '../services/api'
+import toast from '../services/toast'
 
 export default {
   name: 'Home',
@@ -196,8 +197,7 @@ export default {
       } catch (e) {
         this.publishError = e.response?.data?.error || 'Erreur lors de la publication.';
       }
-    },
-    async likePost(postId) {
+    },    async likePost(postId) {
       this.likeError = '';
       try {
         const idx = this.posts.findIndex(p => p.id === postId);
@@ -205,13 +205,16 @@ export default {
           this.posts[idx].likes++;
           this.posts[idx].likedByMe = true;
         }
-        await api.post(`/likes/${postId}/like`); // Correction ici
+        const response = await api.post(`/likes/${postId}/like`);
+        if (response.data.message) {
+          toast.success(response.data.message);
+        }
         await this.fetchPosts();
       } catch (e) {
         this.likeError = 'Erreur lors du like.';
+        toast.error('Erreur lors du like');
       }
-    },
-    async dislikePost(postId) {
+    },    async dislikePost(postId) {
       this.likeError = '';
       try {
         const idx = this.posts.findIndex(p => p.id === postId);
@@ -219,10 +222,14 @@ export default {
           this.posts[idx].likes = Math.max(0, this.posts[idx].likes - 1);
           this.posts[idx].likedByMe = false;
         }
-        await api.delete(`/likes/${postId}/unlike`); // Correction ici
+        const response = await api.delete(`/likes/${postId}/unlike`);
+        if (response.data.message) {
+          toast.success(response.data.message);
+        }
         await this.fetchPosts();
       } catch (e) {
         this.likeError = 'Erreur lors du dislike.';
+        toast.error('Erreur lors du dislike');
       }
     },
     async searchCities() {

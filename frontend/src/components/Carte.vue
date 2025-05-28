@@ -61,6 +61,7 @@
 import PostCard from './PostCard.vue'
 import SearchBar from './SearchBar.vue'
 import api from '../services/api'
+import toast from '../services/toast'
 
 export default {
   name: 'Carte',
@@ -81,12 +82,11 @@ export default {
       const res = await api.get('/skills')
       // Adapter les données pour PostCard
       const postsWithComments = await Promise.all(res.data.map(async skill => {        try {
-          const commentsRes = await api.get(`/skills/${skill.id}/comments`);
-          const commentsCount = Array.isArray(commentsRes.data) ? commentsRes.data.length : 0;
+          const commentsRes = await api.get(`/skills/${skill.id}/comments`);            const commentsCount = Array.isArray(commentsRes.data) ? commentsRes.data.length : 0;
           return {
             name: skill.User?.username || 'Utilisateur inconnu',
             address: skill.location || '',
-            avatar: skill.User?.avatar || 'https://randomuser.me/api/portraits/men/32.jpg',
+            avatar: skill.User?.avatar || `https://ui-avatars.com/api/?name=${encodeURIComponent(skill.User?.username || 'User')}&background=ECBC76&color=fff&size=64&bold=true`,
             rate: skill.pricePerHour ? skill.pricePerHour + ' €/h' : '',
             likes: skill.likes || 0,
             views: skill.views || 0,
@@ -103,7 +103,7 @@ export default {
           return {
             name: skill.User?.username || 'Utilisateur inconnu',
             address: skill.location || '',
-            avatar: skill.User?.avatar || 'https://randomuser.me/api/portraits/men/32.jpg',
+            avatar: skill.User?.avatar || `https://ui-avatars.com/api/?name=${encodeURIComponent(skill.User?.username || 'User')}&background=ECBC76&color=fff&size=64&bold=true`,
             rate: skill.pricePerHour ? skill.pricePerHour + ' €/h' : '',
             likes: skill.likes || 0,
             views: skill.views || 0,
@@ -125,32 +125,38 @@ export default {
       this.posts = []
     }
   },
-  methods: {
-    async likePost(postId) {
+  methods: {    async likePost(postId) {
       try {
         const idx = this.posts.findIndex(p => p.postId === postId)
         if (idx !== -1 && !this.posts[idx].likedByMe) {
           this.posts[idx].likes++
           this.posts[idx].likedByMe = true
         }
-        await api.post(`/likes/${postId}/like`)
+        const response = await api.post(`/likes/${postId}/like`)
+        if (response.data.message) {
+          toast.success(response.data.message);
+        }
         // Optionnel : rafraîchir les posts pour synchro
         // await this.fetchPosts()
       } catch (e) {
+        toast.error('Erreur lors du like');
         // Optionnel : gestion d'erreur
       }
-    },
-    async dislikePost(postId) {
+    },    async dislikePost(postId) {
       try {
         const idx = this.posts.findIndex(p => p.postId === postId)
         if (idx !== -1 && this.posts[idx].likedByMe) {
           this.posts[idx].likes = Math.max(0, this.posts[idx].likes - 1)
           this.posts[idx].likedByMe = false
         }
-        await api.delete(`/likes/${postId}/unlike`)
+        const response = await api.delete(`/likes/${postId}/unlike`)
+        if (response.data.message) {
+          toast.success(response.data.message);
+        }
         // Optionnel : rafraîchir les posts pour synchro
         // await this.fetchPosts()
       } catch (e) {
+        toast.error('Erreur lors du dislike');
         // Optionnel : gestion d'erreur
       }
     },
@@ -163,7 +169,7 @@ export default {
             const commentsCount = Array.isArray(commentsRes.data) ? commentsRes.data.length : 0;            return {
               name: skill.User?.username || 'Utilisateur inconnu',
               address: skill.location || '',
-              avatar: skill.User?.avatar || 'https://randomuser.me/api/portraits/men/32.jpg',
+              avatar: skill.User?.avatar || `https://ui-avatars.com/api/?name=${encodeURIComponent(skill.User?.username || 'User')}&background=ECBC76&color=fff&size=64&bold=true`,
               rate: skill.pricePerHour ? skill.pricePerHour + ' €/h' : '',
               likes: skill.likes || 0,
               views: skill.views || 0,
@@ -176,11 +182,10 @@ export default {
               commentsCount,
               profileToken: skill.User?.profileToken || '',
               userId: skill.userId
-            };
-          } catch {            return {
+            };          } catch {            return {
               name: skill.User?.username || 'Utilisateur inconnu',
               address: skill.location || '',
-              avatar: skill.User?.avatar || 'https://randomuser.me/api/portraits/men/32.jpg',
+              avatar: skill.User?.avatar || `https://ui-avatars.com/api/?name=${encodeURIComponent(skill.User?.username || 'User')}&background=ECBC76&color=fff&size=64&bold=true`,
               rate: skill.pricePerHour ? skill.pricePerHour + ' €/h' : '',
               likes: skill.likes || 0,
               views: skill.views || 0,

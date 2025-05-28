@@ -16,11 +16,11 @@
           <img src="../assets/icons/dashboard.svg" alt="Dashboard" class="nav-icon" />
           <span class="nav-label">Dashboard</span>
         </router-link>
-      </li>
-      <li>
+      </li>      <li>
         <router-link to="/discussions" exact-active-class="active">
           <img src="../assets/icons/discussions.svg" alt="Discussions" class="nav-icon" />
           <span class="nav-label">Discussions</span>
+          <span v-if="unreadCount > 0" class="unread-badge">{{ unreadCount > 99 ? '99+' : unreadCount }}</span>
         </router-link>
       </li>
       <li>
@@ -47,7 +47,7 @@
       </li>
     </ul>
     <div class="navbar-profile" @click="navigateToMyProfile" style="cursor:pointer; position: relative;">
-      <img class="avatar" :src="user?.avatar || 'https://randomuser.me/api/portraits/men/32.jpg'" alt="avatar" />
+      <img class="avatar" :src="user?.avatar || `https://ui-avatars.com/api/?name=${encodeURIComponent(user?.username || 'User')}&background=ECBC76&color=fff&size=64&bold=true`" alt="avatar" />
       <div class="profile-info">
         <span class="username" :title="user ? user.username : ''">{{ user ? user.username : 'Non connecté' }}</span>
         <span class="email" :title="user ? user.email : ''">{{ user ? user.email : '' }}</span>
@@ -62,6 +62,7 @@
 
 <script>
 import api from '../services/api'
+import unreadMessagesService from '../services/unreadMessages'
 
 export default {
   name: 'Navbar',
@@ -69,6 +70,11 @@ export default {
     return {
       user: null,
       showMenu: false
+    }
+  },
+  computed: {
+    unreadCount() {
+      return unreadMessagesService.getCount();
     }
   },
   async mounted() {
@@ -81,6 +87,9 @@ export default {
       const res = await api.get('/auth/me');
       this.user = res.data;
       console.log('User data:', this.user); // Debugging line to verify user data
+      
+      // Charger le compteur de messages non lus
+      await unreadMessagesService.fetchUnreadCount();
     } catch (e) {
       this.user = null;
       this.$router.push('/login');
@@ -252,6 +261,20 @@ export default {
   padding: 2px 8px;
   margin-left: 8px;
   display: inline-block;
+}
+
+.unread-badge {
+  background: #e74c3c;
+  color: #fff;
+  font-size: 0.8rem;
+  font-weight: bold;
+  border-radius: 10px;
+  padding: 2px 6px;
+  margin-left: auto;
+  display: inline-block;
+  min-width: 18px;
+  text-align: center;
+  line-height: 1.2;
 }
 
 .navbar-profile {
