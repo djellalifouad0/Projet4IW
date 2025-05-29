@@ -12,6 +12,8 @@
     "@vuepic/vue-datepicker": "^11.0.2",
     "axios": "^1.6.7",
     "lucide-vue-next": "^0.511.0",
+    "primeicons": "^7.0.0",
+    "primevue": "^4.3.4",
     "react": "^18.2.0",
     "react-dom": "^18.2.0",
     "react-router-dom": "^6.21.2",
