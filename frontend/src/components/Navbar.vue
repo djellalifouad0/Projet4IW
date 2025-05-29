@@ -29,9 +29,13 @@
           <span class="nav-label">Carte</span>
         </router-link>
       </li>
-    </ul>
-    <!-- Ajout Notification et Paramètres -->
-    <ul class="navbar-actions">
+    </ul>    <!-- Ajout Notification et Paramètres -->
+    <ul class="navbar-actions">      <li v-if="user && user.role === 'admin'">
+        <router-link to="/admin" exact-active-class="active" class="admin-link">
+          <span class="nav-icon admin-icon">🛠️</span>
+          <span class="nav-label">Administration</span>
+        </router-link>
+      </li>
       <li>
         <router-link to="/notifications" exact-active-class="active">
           <img src="../assets/icons/notification.svg" alt="Notification" class="nav-icon" />
@@ -358,6 +362,31 @@ export default {
 
 .dropdown-menu button:hover {
   background: #f5f5f5;
+}
+
+/* Styles pour le lien admin */
+.admin-link {
+  background: linear-gradient(135deg, #ff6b6b, #ee5a52) !important;
+  color: white !important;
+  border: 2px solid #ff6b6b;
+}
+
+.admin-link:hover {
+  background: linear-gradient(135deg, #ee5a52, #ff4757) !important;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 15px rgba(255, 107, 107, 0.3);
+}
+
+.admin-link.active {
+  background: linear-gradient(135deg, #ee5a52, #ff4757) !important;
+  border-color: #ee5a52;
+}
+
+.admin-icon {
+  font-size: 1.2rem !important;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
 /* --- Responsive version Twitter: icons only --- */
