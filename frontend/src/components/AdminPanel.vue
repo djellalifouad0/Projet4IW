@@ -3,18 +3,21 @@
     <!-- Header avec flèche de retour -->
     <div class="admin-header">
       <button @click="goBack" class="back-button" title="Retour au site">
-        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-          <path d="M19 12H5M12 19L5 12L12 5" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-        </svg>
+        <ArrowLeft :size="20" />
       </button>
-      <h1 class="admin-title">🛠️ Panneau d'Administration</h1>
+      <h1 class="admin-title">
+        <Settings :size="24" class="title-icon" />
+        Panneau d'Administration
+      </h1>
       <div class="admin-user">
+        <User :size="16" />
         <span>Connecté en tant qu'admin</span>
-        <button @click="logout" class="logout-btn">Déconnexion</button>
+        <button @click="logout" class="logout-btn">
+          <LogOut :size="16" />
+          Déconnexion
+        </button>
       </div>
-    </div>
-
-    <!-- Navigation -->
+    </div>    <!-- Navigation -->
     <nav class="admin-nav">
       <button 
         v-for="tab in tabs" 
@@ -23,7 +26,7 @@
         :class="{ active: activeTab === tab.id }"
         class="nav-tab"
       >
-        <span class="tab-icon">{{ tab.icon }}</span>
+        <component :is="tab.icon" :size="20" class="tab-icon" />
         <span>{{ tab.label }}</span>
         <span v-if="tab.count" class="tab-count">{{ tab.count }}</span>
       </button>
@@ -32,52 +35,49 @@
     <!-- Contenu principal -->
     <main class="admin-content">
       <!-- Dashboard -->
-      <div v-if="activeTab === 'dashboard'" class="dashboard">
-        <div class="stats-grid">
+      <div v-if="activeTab === 'dashboard'" class="dashboard">        <div class="stats-grid">
           <div class="stat-card">
-            <h3>👥 Utilisateurs</h3>
+            <h3><Users :size="20" class="stat-icon" /> Utilisateurs</h3>
             <div class="stat-number">{{ stats.overview?.totalUsers || 0 }}</div>
             <div class="stat-detail">
-              <span class="active">{{ stats.overview?.activeUsers || 0 }} actifs</span>
-              <span class="inactive">{{ stats.overview?.inactiveUsers || 0 }} inactifs</span>
+              <span class="active"><CheckCircle :size="14" /> {{ stats.overview?.activeUsers || 0 }} actifs</span>
+              <span class="inactive"><XCircle :size="14" /> {{ stats.overview?.inactiveUsers || 0 }} inactifs</span>
             </div>
           </div>
 
           <div class="stat-card">
-            <h3>🎯 Compétences</h3>
+            <h3><Target :size="20" class="stat-icon" /> Compétences</h3>
             <div class="stat-number">{{ stats.overview?.totalSkills || 0 }}</div>
             <div class="stat-detail">Compétences publiées</div>
           </div>
 
           <div class="stat-card">
-            <h3>💬 Conversations</h3>
+            <h3><MessageCircle :size="20" class="stat-icon" /> Conversations</h3>
             <div class="stat-number">{{ stats.overview?.totalConversations || 0 }}</div>
             <div class="stat-detail">{{ stats.overview?.totalMessages || 0 }} messages</div>
           </div>
 
           <div class="stat-card">
-            <h3>📅 Rendez-vous</h3>
+            <h3><Calendar :size="20" class="stat-icon" /> Rendez-vous</h3>
             <div class="stat-number">{{ stats.overview?.totalAppointments || 0 }}</div>
             <div class="stat-detail">{{ stats.overview?.pendingAppointments || 0 }} en attente</div>
           </div>
 
           <div class="stat-card">
-            <h3>📈 Cette semaine</h3>
+            <h3><Zap :size="20" class="stat-icon" /> Cette semaine</h3>
             <div class="stat-number">{{ stats.overview?.newUsersThisWeek || 0 }}</div>
             <div class="stat-detail">Nouveaux utilisateurs</div>
           </div>
 
           <div class="stat-card">
-            <h3>💬 Activité</h3>
+            <h3><BarChart3 :size="20" class="stat-icon" /> Activité</h3>
             <div class="stat-number">{{ stats.overview?.messagesThisWeek || 0 }}</div>
             <div class="stat-detail">Messages cette semaine</div>
           </div>
-        </div>
-
-        <!-- Graphiques -->
+        </div>        <!-- Graphiques -->
         <div class="charts-section">
           <div class="chart-card">
-            <h3>📊 Nouveaux utilisateurs (7 derniers jours)</h3>
+            <h3><BarChart3 :size="20" class="stat-icon" /> Nouveaux utilisateurs (7 derniers jours)</h3>
             <div class="chart-placeholder">
               <div v-if="stats.charts?.newUsers?.length" class="simple-chart">
                 <div 
@@ -95,7 +95,7 @@
         </div>
       </div>      <!-- Gestion des utilisateurs -->
       <div v-if="activeTab === 'users'" class="users-section">        <div class="section-header">
-          <h2>👥 Gestion des Utilisateurs</h2>
+          <h2><Users :size="20" class="section-icon" /> Gestion des Utilisateurs</h2>
           <div class="filters">
             <div class="search-group">
               <input 
@@ -103,25 +103,22 @@
                 @input="debounceSearch"
                 placeholder="Rechercher par nom ou email..."
                 class="search-input"
-              >
-              <button 
+              >              <button 
                 v-if="userFilters.search" 
                 @click="clearSearch" 
                 class="clear-search"
                 title="Effacer la recherche"
               >
-                ✕
+                <XCircle :size="16" />
               </button>
-            </div>
-            <select v-model="userFilters.status" @change="fetchUsers" class="filter-select">
+            </div>            <select v-model="userFilters.status" @change="fetchUsers" class="filter-select">
               <option value="all">Tous les statuts</option>
-              <option value="active">✅ Actifs seulement</option>
-              <option value="inactive">🚫 Inactifs seulement</option>
-            </select>
-            <select v-model="userFilters.role" @change="fetchUsers" class="filter-select">
+              <option value="active">Actifs seulement</option>
+              <option value="inactive">Inactifs seulement</option>
+            </select>            <select v-model="userFilters.role" @change="fetchUsers" class="filter-select">
               <option value="all">Tous les rôles</option>
-              <option value="user">👤 Utilisateurs</option>
-              <option value="admin">👑 Administrateurs</option>
+              <option value="user">Utilisateurs</option>
+              <option value="admin">Administrateurs</option>
             </select>
           </div>
         </div>
@@ -133,13 +130,13 @@
             <span v-if="userFilters.search || userFilters.status !== 'all' || userFilters.role !== 'all'">
               avec les filtres appliqués
             </span>
-          </span>
-          <button 
+          </span>          <button 
             v-if="userFilters.search || userFilters.status !== 'all' || userFilters.role !== 'all'" 
             @click="resetFilters" 
             class="btn btn-secondary btn-sm"
           >
-            🔄 Réinitialiser les filtres
+            <Zap :size="14" class="btn-icon" />
+            Réinitialiser les filtres
           </button>
         </div>        <div class="users-table-container">
           <div class="table-controls">
@@ -148,12 +145,12 @@
               à {{ Math.min(users.pagination?.currentPage * users.pagination?.itemsPerPage, users.pagination?.totalItems) || 0 }} 
               sur {{ users.pagination?.totalItems || 0 }} utilisateurs
             </div>
-            <div class="table-actions">
-              <button @click="exportUsers" class="btn btn-secondary btn-sm">
-                📊 Exporter CSV
-              </button>
-              <button @click="refreshUsers" class="btn btn-primary btn-sm">
-                🔄 Actualiser
+            <div class="table-actions">              <button @click="exportUsers" class="btn btn-secondary btn-sm">
+                <Download :size="14" class="btn-icon" />
+                Exporter CSV
+              </button>              <button @click="refreshUsers" class="btn btn-primary btn-sm">
+                <Zap :size="14" class="btn-icon" />
+                Actualiser
               </button>
             </div>
           </div>
@@ -212,9 +209,8 @@
               </thead>
               <tbody>
                 <tr v-if="!users.users?.length && !isLoading" class="no-results">
-                  <td colspan="11" class="text-center">
-                    <div class="empty-state">
-                      <span class="empty-icon">👤</span>
+                  <td colspan="11" class="text-center">                    <div class="empty-state">
+                      <span class="empty-icon"><Users :size="48" /></span>
                       <p>Aucun utilisateur trouvé</p>
                       <button @click="resetFilters" class="btn btn-primary btn-sm">
                         Voir tous les utilisateurs
@@ -241,12 +237,15 @@
                   </td>
                   <td class="user-email-desktop">{{ user.email }}</td>                  <td class="user-status">
                     <span :class="['status-badge', user.isActive ? 'active' : 'inactive']">
-                      {{ user.isActive ? '✅ Actif' : '🚫 Inactif' }}
+                      <CheckCircle v-if="user.isActive" :size="12" class="status-icon" />
+                      <XCircle v-else :size="12" class="status-icon" />
+                      {{ user.isActive ? 'Actif' : 'Inactif' }}
                     </span>
-                  </td>
-                  <td class="user-role">
+                  </td>                  <td class="user-role">
                     <span :class="['role-badge', user.role]">
-                      {{ user.role === 'admin' ? '👑 Admin' : '👤 Utilisateur' }}
+                      <Shield v-if="user.role === 'admin'" :size="12" class="role-icon" />
+                      <User v-else :size="12" class="role-icon" />
+                      {{ user.role === 'admin' ? 'Admin' : 'Utilisateur' }}
                     </span>
                   </td>
                   <td class="user-stats">
@@ -254,35 +253,34 @@
                   </td>
                   <td class="user-stats">
                     <span class="stat-number">{{ user.stats?.messagesCount || 0 }}</span>
-                  </td>
-                  <td class="user-rating">
+                  </td>                  <td class="user-rating">
                     <div class="rating-display">
-                      <span class="rating-value">⭐ {{ user.stats?.averageRating?.toFixed(1) || '0.0' }}</span>
+                      <span class="rating-value"><Star :size="12" class="rating-icon" /> {{ user.stats?.averageRating?.toFixed(1) || '0.0' }}</span>
                       <small class="rating-count">({{ user.stats?.totalRatings || 0 }})</small>
                     </div>
                   </td>
                   <td class="user-date">{{ formatDate(user.createdAt) }}</td>                  <td class="user-actions">
-                    <div class="actions">
-                      <button 
+                    <div class="actions">                      <button 
                         @click="viewUserDetails(user.id)"
                         class="btn btn-info btn-sm"
                         title="Voir détails"
                       >
-                        👁️
+                        <Eye :size="14" />
                       </button>
                       <button 
                         @click="editUser(user)"
                         class="btn btn-secondary btn-sm"
                         title="Modifier"
                       >
-                        ✏️
+                        <Edit :size="14" />
                       </button>
                       <button 
                         @click="toggleUserBan(user.id)"
                         :class="['btn', 'btn-sm', user.isActive ? 'btn-warning' : 'btn-success']"
                         :title="user.isActive ? 'Bannir' : 'Débannir'"
                       >
-                        {{ user.isActive ? '🚫' : '✅' }}
+                        <XCircle v-if="user.isActive" :size="14" />
+                        <CheckCircle v-else :size="14" />
                       </button>
                       <button 
                         v-if="user.role !== 'admin'"
@@ -290,7 +288,7 @@
                         class="btn btn-danger btn-sm"
                         title="Supprimer"
                       >
-                        🗑️
+                        <Trash2 :size="14" />
                       </button>
                     </div>
                   </td>
@@ -324,9 +322,8 @@
       </div>
 
       <!-- Gestion des compétences -->
-      <div v-if="activeTab === 'skills'" class="skills-section">
-        <div class="section-header">
-          <h2>🎯 Gestion des Compétences</h2>
+      <div v-if="activeTab === 'skills'" class="skills-section">        <div class="section-header">
+          <h2><Target :size="20" class="section-icon" /> Gestion des Compétences</h2>
           <input 
             v-model="skillSearch" 
             @input="searchSkills"
@@ -337,21 +334,19 @@
 
         <div class="skills-grid">          <div v-for="skill in skills.skills" :key="skill.id" class="skill-card">
             <div class="skill-header">
-              <h3>{{ skill.description.substring(0, 50) }}{{ skill.description.length > 50 ? '...' : '' }}</h3>
-              <button @click="deleteSkill(skill.id)" class="btn btn-danger btn-sm">
-                🗑️
+              <h3>{{ skill.description.substring(0, 50) }}{{ skill.description.length > 50 ? '...' : '' }}</h3>              <button @click="deleteSkill(skill.id)" class="btn btn-danger btn-sm">
+                <Trash2 :size="16" />
               </button>
             </div>
-            <p class="skill-description">{{ skill.description }}</p>
-            <div class="skill-meta">
+            <p class="skill-description">{{ skill.description }}</p>            <div class="skill-meta">
               <span class="author">
-                👤 {{ skill.author?.username }}
+                <User :size="14" class="meta-icon" /> {{ skill.author?.username }}
               </span>
               <span class="date">
-                📅 {{ formatDate(skill.createdAt) }}
+                <Calendar :size="14" class="meta-icon" /> {{ formatDate(skill.createdAt) }}
               </span>
               <span class="category">
-                🏷️ {{ skill.category }}
+                <Target :size="14" class="meta-icon" /> {{ skill.category }}
               </span>
             </div>
           </div>
@@ -380,9 +375,8 @@
       </div>
 
       <!-- Gestion des conversations -->
-      <div v-if="activeTab === 'conversations'" class="conversations-section">
-        <div class="section-header">
-          <h2>💬 Gestion des Conversations</h2>
+      <div v-if="activeTab === 'conversations'" class="conversations-section">        <div class="section-header">
+          <h2><MessageCircle :size="20" class="section-icon" /> Gestion des Conversations</h2>
         </div>
 
         <div class="conversations-table">
@@ -403,7 +397,7 @@
                       <img :src="conv.user1?.avatar || `https://ui-avatars.com/api/?name=${encodeURIComponent(conv.user1?.username || 'User')}&background=ECBC76&color=fff&size=64&bold=true`" :alt="conv.user1?.username" class="avatar-sm" />
                       {{ conv.user1?.username }}
                     </div>
-                    <span class="separator">↔️</span>
+                    <span class="separator"><ArrowLeft :size="12" style="transform: rotate(180deg)" /></span>
                     <div class="participant">
                       <img :src="conv.user2?.avatar || `https://ui-avatars.com/api/?name=${encodeURIComponent(conv.user2?.username || 'User')}&background=ECBC76&color=fff&size=64&bold=true`" :alt="conv.user2?.username" class="avatar-sm" />
                       {{ conv.user2?.username }}
@@ -425,17 +419,17 @@
                       class="btn btn-info btn-sm"
                       title="Voir la conversation"
                     >
-                      👁️
+                      <Eye :size="16" />
                     </button>
                     <button 
                       @click="deleteConversation(conv.id)"
                       class="btn btn-danger btn-sm"
                       title="Supprimer la conversation"
                     >
-                      🗑️
+                      <Trash2 :size="16" />
                     </button>
                   </div>
-                </td>              </tr>
+                </td></tr>
             </tbody>
           </table>
         </div>
@@ -464,9 +458,8 @@
       </div>
 
       <!-- Gestion des rendez-vous -->
-      <div v-if="activeTab === 'appointments'" class="appointments-section">
-        <div class="section-header">
-          <h2>📅 Gestion des Rendez-vous</h2>
+      <div v-if="activeTab === 'appointments'" class="appointments-section">        <div class="section-header">
+          <h2><Calendar :size="20" class="section-icon" /> Gestion des Rendez-vous</h2>
           <select v-model="appointmentStatus" @change="fetchAppointments" class="filter-select">
             <option value="all">Tous les statuts</option>
             <option value="pending">En attente</option>
@@ -512,15 +505,14 @@
                     {{ getStatusLabel(appointment.status) }}
                   </span>                </td>
                 <td>{{ appointment.location || 'Non spécifié' }}</td>
-                <td>{{ formatDate(appointment.createdAt) }}</td>
-                <td>
+                <td>{{ formatDate(appointment.createdAt) }}</td>                <td>
                   <div class="actions">
                     <button 
                       @click="viewAppointmentDetails(appointment.id)"
                       class="btn btn-info btn-sm"
                       title="Voir détails"
                     >
-                      👁️
+                      <Eye :size="16" />
                     </button>
                     <button 
                       v-if="appointment.status === 'pending'"
@@ -528,7 +520,7 @@
                       class="btn btn-success btn-sm"
                       title="Accepter"
                     >
-                      ✅
+                      <CheckCircle :size="16" />
                     </button>
                     <button 
                       v-if="appointment.status === 'pending'"
@@ -536,17 +528,17 @@
                       class="btn btn-warning btn-sm"
                       title="Refuser"
                     >
-                      ❌
+                      <XCircle :size="16" />
                     </button>
                     <button 
                       @click="deleteAppointment(appointment.id)"
                       class="btn btn-danger btn-sm"
                       title="Supprimer"
                     >
-                      🗑️
+                      <Trash2 :size="16" />
                     </button>
                   </div>
-                </td>              </tr>
+                </td></tr>
             </tbody>
           </table>
         </div>
@@ -577,10 +569,9 @@
 
     <!-- Modal détails utilisateur -->
     <div v-if="selectedUser" class="modal-overlay" @click="closeUserModal">
-      <div class="modal" @click.stop>
-        <div class="modal-header">
-          <h2>👤 Détails de {{ selectedUser.user?.username }}</h2>
-          <button @click="closeUserModal" class="btn btn-secondary">✕</button>
+      <div class="modal" @click.stop>        <div class="modal-header">
+          <h2><User :size="20" class="modal-icon" /> Détails de {{ selectedUser.user?.username }}</h2>
+          <button @click="closeUserModal" class="btn btn-secondary"><XCircle :size="16" /></button>
         </div>
         <div class="modal-content">
           <div class="user-details">            <div class="user-profile">
@@ -618,10 +609,9 @@
 
     <!-- Modal de modification d'utilisateur -->
     <div v-if="editingUser" class="modal-overlay" @click="closeEditModal">
-      <div class="modal edit-user-modal" @click.stop>
-        <div class="modal-header">
-          <h2>✏️ Modifier l'utilisateur</h2>
-          <button @click="closeEditModal" class="btn btn-secondary">✕</button>
+      <div class="modal edit-user-modal" @click.stop>        <div class="modal-header">
+          <h2><Edit :size="20" class="modal-icon" /> Modifier l'utilisateur</h2>
+          <button @click="closeEditModal" class="btn btn-secondary"><XCircle :size="16" /></button>
         </div>
         <div class="modal-content">
           <form @submit.prevent="saveUserChanges" class="edit-user-form">
@@ -692,9 +682,64 @@
 
 <script>
 import adminService from '../services/adminService'
+import { 
+  ArrowLeft,
+  BarChart3,
+  Users,
+  Target,
+  MessageCircle,
+  Calendar,
+  Search,
+  Filter,
+  Plus,
+  Edit,
+  Trash2,
+  Eye,
+  Download,
+  ChevronLeft,
+  ChevronRight,
+  Settings,
+  CheckCircle,
+  XCircle,
+  AlertCircle,
+  User,
+  Mail,
+  Shield,
+  Clock,
+  Zap,
+  LogOut,
+  Star
+} from 'lucide-vue-next'
 
 export default {
-  name: 'AdminPanel',
+  name: 'AdminPanel',  components: {
+    ArrowLeft,
+    BarChart3,
+    Users,
+    Target,
+    MessageCircle,
+    Calendar,
+    Search,
+    Filter,
+    Plus,
+    Edit,
+    Trash2,
+    Eye,
+    Download,
+    ChevronLeft,
+    ChevronRight,
+    Settings,
+    CheckCircle,
+    XCircle,
+    AlertCircle,
+    User,
+    Mail,
+    Shield,
+    Clock,
+    Zap,
+    LogOut,
+    Star
+  },
   data() {
     return {
       activeTab: 'dashboard',
@@ -726,13 +771,12 @@ export default {
         show: false,
         message: '',
         type: 'success'
-      },
-      tabs: [
-        { id: 'dashboard', label: 'Dashboard', icon: '📊' },
-        { id: 'users', label: 'Utilisateurs', icon: '👥', count: 0 },
-        { id: 'skills', label: 'Compétences', icon: '🎯', count: 0 },
-        { id: 'conversations', label: 'Conversations', icon: '💬', count: 0 },
-        { id: 'appointments', label: 'Rendez-vous', icon: '📅', count: 0 }
+      },      tabs: [
+        { id: 'dashboard', label: 'Dashboard', icon: 'BarChart3' },
+        { id: 'users', label: 'Utilisateurs', icon: 'Users', count: 0 },
+        { id: 'skills', label: 'Compétences', icon: 'Target', count: 0 },
+        { id: 'conversations', label: 'Conversations', icon: 'MessageCircle', count: 0 },
+        { id: 'appointments', label: 'Rendez-vous', icon: 'Calendar', count: 0 }
       ]
     }
   },  async created() {
@@ -1686,18 +1730,154 @@ tr:hover {
   font-size: 0.9rem;
 }
 
-/* Buttons */
+/* Icônes générales */
+.title-icon,
+.section-icon,
+.modal-icon,
+.stat-icon,
+.meta-icon,
+.btn-icon,
+.status-icon,
+.role-icon,
+.rating-icon {
+  display: inline-flex;
+  align-items: center;
+  vertical-align: middle;
+}
+
+.title-icon {
+  margin-right: 0.75rem;
+  color: var(--white);
+}
+
+.section-icon {
+  margin-right: 0.5rem;
+  color: var(--accent);
+}
+
+.modal-icon {
+  margin-right: 0.5rem;
+  color: var(--accent);
+}
+
+.stat-icon {
+  margin-right: 0.5rem;
+  color: var(--accent);
+}
+
+.meta-icon {
+  margin-right: 0.25rem;
+  opacity: 0.7;
+}
+
+.btn-icon {
+  margin-right: 0.5rem;
+}
+
+.status-icon {
+  margin-right: 0.25rem;
+}
+
+.role-icon {
+  margin-right: 0.25rem;
+}
+
+.rating-icon {
+  margin-right: 0.25rem;
+  color: #ffc107;
+}
+
+/* Amélioration des badges */
+.status-badge,
+.role-badge {
+  display: inline-flex;
+  align-items: center;
+  padding: 0.25rem 0.75rem;
+  border-radius: 50px;
+  font-size: 0.8rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  white-space: nowrap;
+}
+
+.status-badge.active {
+  background: #e8f5e8;
+  color: #2d5a3d;
+  border: 1px solid #4caf50;
+}
+
+.status-badge.active .status-icon {
+  color: #4caf50;
+}
+
+.status-badge.inactive {
+  background: #ffeaea;
+  color: #a94442;
+  border: 1px solid #d32f2f;
+}
+
+.status-badge.inactive .status-icon {
+  color: #d32f2f;
+}
+
+.role-badge.admin {
+  background: #fff3e0;
+  color: #e65100;
+  border: 1px solid var(--accent);
+}
+
+.role-badge.admin .role-icon {
+  color: var(--accent);
+}
+
+.role-badge.user {
+  background: #e3f2fd;
+  color: #1565c0;
+  border: 1px solid #2196f3;
+}
+
+.role-badge.user .role-icon {
+  color: #2196f3;
+}
+
+/* Amélioration des sections header */
+.section-header h2 {
+  display: flex;
+  align-items: center;
+  margin: 0;
+  color: var(--title-color);
+  font-weight: 600;
+  font-size: 1.5rem;
+}
+
+/* Amélioration des meta info des compétences */
+.skill-meta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1rem;
+  font-size: 0.9rem;
+  color: var(--accent);
+}
+
+.skill-meta span {
+  display: flex;
+  align-items: center;
+}
+
+/* Amélioration des boutons avec icônes */
 .btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.25rem;
   padding: 0.5rem 1rem;
   border: none;
   border-radius: var(--border-radius);
   cursor: pointer;
   font-size: 0.9rem;
-  transition: all 0.3s;
+  transition: all 0.3s ease;
   text-decoration: none;
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
   font-weight: 500;
 }
 
@@ -2084,7 +2264,6 @@ tr:hover {
   border: none;
   color: var(--dark);
   cursor: pointer;
-  font-size: 1.2rem;
   opacity: 0.6;
   transition: opacity 0.3s ease;
   width: 20px;
@@ -2092,6 +2271,7 @@ tr:hover {
   display: flex;
   align-items: center;
   justify-content: center;
+  padding: 0;
 }
 
 .clear-search:hover {
@@ -2333,43 +2513,6 @@ tr:hover {
   z-index: 100;
   font-weight: 600;
   color: var(--accent);
-}
-
-/* Badges de statut et rôle */
-.status-badge,
-.role-badge {
-  padding: 0.25rem 0.75rem;
-  border-radius: 50px;
-  font-size: 0.8rem;
-  font-weight: 600;
-  text-transform: uppercase;
-  letter-spacing: 0.5px;
-  display: inline-block;
-  white-space: nowrap;
-}
-
-.status-badge.active {
-  background: #e8f5e8;
-  color: #2d5a3d;
-  border: 1px solid #4caf50;
-}
-
-.status-badge.inactive {
-  background: #ffeaea;
-  color: #a94442;
-  border: 1px solid #d32f2f;
-}
-
-.role-badge.admin {
-  background: #fff3e0;
-  color: #e65100;
-  border: 1px solid var(--accent);
-}
-
-.role-badge.user {
-  background: #e3f2fd;
-  color: #1565c0;
-  border: 1px solid #2196f3;
 }
 
 /* Responsive */
