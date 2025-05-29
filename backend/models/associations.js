@@ -3,6 +3,8 @@ const Conversation = require('./conversation');
 const Message = require('./message');
 const Appointment = require('./appointment');
 const Rating = require('./rating');
+const Skill = require('./skill');
+const Notification = require('./notification');
 
 // Définir les associations
 Conversation.belongsTo(User, { as: 'user1', foreignKey: 'user1Id' });
@@ -30,10 +32,20 @@ Rating.belongsTo(User, { as: 'ratedUser', foreignKey: 'ratedUserId' });
 User.hasMany(Rating, { as: 'givenRatings', foreignKey: 'raterId' });
 User.hasMany(Rating, { as: 'receivedRatings', foreignKey: 'ratedUserId' });
 
+// Associations pour les compétences
+User.hasMany(Skill, { as: 'skills', foreignKey: 'userId' });
+Skill.belongsTo(User, { as: 'author', foreignKey: 'userId' });
+
+// Associations pour les notifications
+User.hasMany(Notification, { foreignKey: 'userId' });
+Notification.belongsTo(User, { foreignKey: 'userId' });
+
 module.exports = {
   User,
   Conversation,
   Message,
   Appointment,
-  Rating
+  Rating,
+  Skill,
+  Notification
 };
