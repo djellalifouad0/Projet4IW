@@ -83,6 +83,7 @@
 import PostCard from './PostCard.vue'
 import api from '../services/api'
 import toast from '../services/toast'
+import NotificationService from '../services/notificationService'
 
 export default {
   name: 'Home',
@@ -209,6 +210,10 @@ export default {
         if (response.data.message) {
           toast.success(response.data.message);
         }
+        
+        // Déclencher une vérification des notifications
+        NotificationService.triggerNotificationCheck();
+        
         await this.fetchPosts();
       } catch (e) {
         this.likeError = 'Erreur lors du like.';
@@ -226,6 +231,10 @@ export default {
         if (response.data.message) {
           toast.success(response.data.message);
         }
+        
+        // Déclencher une vérification des notifications
+        NotificationService.triggerNotificationCheck();
+        
         await this.fetchPosts();
       } catch (e) {
         this.likeError = 'Erreur lors du dislike.';

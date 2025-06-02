@@ -92,8 +92,7 @@ io.on('connection', (socket) => {
     userId: socket.userId,
     profileToken: socket.profileToken
   });
-  
-  // Indicateur de frappe
+    // Indicateur de frappe
   socket.on('typing', (data) => {
     const { conversationId, isTyping } = data;
     socket.to(`conversation-${conversationId}`).emit('user-typing', {
@@ -102,6 +101,41 @@ io.on('connection', (socket) => {
       isTyping
     });
     console.log(`⌨️  Utilisateur ${socket.userId} ${isTyping ? 'tape' : 'arrête de taper'} dans la conversation ${conversationId}`);
+  });
+
+  // ====== GESTION DES NOTIFICATIONS EN TEMPS RÉEL ======
+  
+  // Demande de vérification des notifications
+  socket.on('check-notifications', async () => {
+    try {
+      console.log(`🔔 Vérification des notifications pour l'utilisateur ${socket.userId}`);
+      
+      // Importer le service de notifications si pas déjà fait
+      const notificationService = require('./services/notificationService');
+      
+      // Récupérer le nombre de notifications non lues pour cet utilisateur
+      const unreadCount = await notificationService.getUnreadNotificationCount(socket.userId);
+      
+      // Envoyer le nombre à cet utilisateur spécifiquement
+      socket.emit('notification-count-update', unreadCount);
+      
+      console.log(`📊 Nombre de notifications non lues pour ${socket.userId}: ${unreadCount}`);
+    } catch (error) {
+      console.error('❌ Erreur lors de la vérification des notifications:', error);
+      socket.emit('notification-count-update', 0); // Fallback
+    }
+  });
+
+  // Demande explicite du nombre de notifications non lues
+  socket.on('get-notification-count', async () => {
+    try {
+      const notificationService = require('./services/notificationService');
+      const unreadCount = await notificationService.getUnreadNotificationCount(socket.userId);
+      socket.emit('notification-count-update', unreadCount);
+    } catch (error) {
+      console.error('❌ Erreur lors de la récupération du nombre de notifications:', error);
+      socket.emit('notification-count-update', 0);
+    }
   });
 
   // Gestion des messages en temps réel avec notifications

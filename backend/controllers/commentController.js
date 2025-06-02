@@ -1,5 +1,7 @@
 const Comment = require('../models/comment');
 const User = require('../models/user');
+const Skill = require('../models/skill');
+const NotificationService = require('../services/notificationService');
 
 /**
  * @swagger
@@ -36,12 +38,31 @@ exports.addComment = async (req, res) => {
       skillId: req.params.id,
       content,
       parentId: parentId || null
-    });
+    });    // Récupérer les informations de la compétence et du propriétaire
+    const skill = await Skill.findByPk(req.params.id, {
+      include: [{ model: User, attributes: ['id', 'username'] }]
+    });    // Créer une notification pour le propriétaire de la compétence (si ce n'est pas lui qui commente)
+    if (skill && skill.User && skill.User.id !== req.user.id) {
+      try {
+        const commenterName = req.user.username;
+        const io = req.app.get('socketio'); // Récupérer l'instance WebSocket
+        await NotificationService.createNewCommentNotification(
+          skill.User.id,
+          commenterName,
+          skill.title,
+          io
+        );
+      } catch (notifError) {
+        console.error('Erreur création notification commentaire:', notifError);
+      }
+    }
+
     res.status(201).json({ 
       ...comment.toJSON(), 
       message: parentId ? 'Réponse ajoutée avec succès !' : 'Commentaire ajouté avec succès !'
     });
   } catch (error) {
+    console.error('Erreur lors de l\'ajout du commentaire:', error);
     res.status(500).json({ error: 'Erreur lors de l\'ajout du commentaire' });
   }
 };

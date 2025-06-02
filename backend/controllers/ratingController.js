@@ -1,5 +1,6 @@
 const { Rating, User } = require('../models/associations');
 const { Sequelize } = require('sequelize');
+const NotificationService = require('../services/notificationService');
 
 /**
  * @swagger
@@ -72,18 +73,28 @@ const ratingController = {
         ratedUserId: parseInt(ratedUserId),
         rating: parseFloat(rating),
         comment
-      });
-
-      // Récupérer l'avis créé avec les informations du notateur
+      });      // Récupérer l'avis créé avec les informations du notateur
       const createdRating = await Rating.findByPk(newRating.id, {
         include: [
           {
-            model: User,
-            as: 'rater',
+            model: User,          as: 'rater',
             attributes: ['id', 'username', 'avatar']
           }
         ]
-      });
+      });      // Créer une notification pour l'utilisateur noté
+      try {
+        const raterName = createdRating.rater.username;
+        const io = req.app.get('socketio'); // Récupérer l'instance WebSocket
+        await NotificationService.createNewRatingNotification(
+          ratedUserId,
+          raterName,
+          'votre profil', // Titre générique car ce n'est pas lié à une compétence spécifique
+          rating,
+          io
+        );
+      } catch (notifError) {
+        console.error('Erreur création notification évaluation:', notifError);
+      }
 
       res.status(201).json(createdRating);
     } catch (error) {

@@ -184,6 +184,7 @@
 import api from '../services/api'
 import socketService from '../services/socket'
 import unreadMessagesService from '../services/unreadMessages'
+import NotificationService from '../services/notificationService'
 
 export default {
   name: 'Discussions',  data() {    return {
@@ -373,8 +374,10 @@ export default {
             this.conversations[convIndex].lastMessage = messageContent;
             this.conversations[convIndex].lastMessageAt = response.data.createdAt;
           }
+            this.newMessage = '';
           
-          this.newMessage = '';
+          // Déclencher la vérification des notifications après envoi d'un message
+          NotificationService.triggerNotificationCheck();
           
           // Scroll to bottom
           this.$nextTick(() => {
@@ -572,11 +575,13 @@ export default {
     async updateAppointmentStatus(appointmentId, status) {
       try {
         await api.patch(`/appointments/${appointmentId}/status`, { status });
-        
-        // Recharger les rendez-vous de la conversation
+          // Recharger les rendez-vous de la conversation
         if (this.selectedConversation) {
           await this.loadConversationAppointments(this.selectedConversation.id);
         }
+        
+        // Déclencher la vérification des notifications après mise à jour du statut
+        NotificationService.triggerNotificationCheck();
         
         // Ajouter un message de confirmation dans le chat
         const statusMessages = {
@@ -660,10 +665,11 @@ export default {
         const response = await api.post('/appointments', appointmentData);
         
         // Fermer le modal et réinitialiser le formulaire
-        this.closeAppointmentModal();
-
-        // Recharger les rendez-vous de la conversation
+        this.closeAppointmentModal();        // Recharger les rendez-vous de la conversation
         await this.loadConversationAppointments(this.selectedConversation.id);
+        
+        // Déclencher la vérification des notifications après création du rendez-vous
+        NotificationService.triggerNotificationCheck();
         
         // Ajouter un message système dans la conversation pour informer du rendez-vous
         const systemMessage = `Rendez-vous proposé: "${this.appointmentForm.title}" le ${new Date(appointmentDateTime).toLocaleDateString('fr-FR')} à ${this.appointmentForm.time}`;

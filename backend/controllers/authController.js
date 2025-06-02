@@ -2,6 +2,7 @@ const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
 const crypto = require('crypto');
 const User = require('../models/user');
+const NotificationService = require('../services/notificationService');
 
 const JWT_SECRET = 'votre_clé_secrète'; // Remplace avec un .env sécurisé
 
@@ -21,7 +22,13 @@ exports.register = async (req, res) => {
       password: hashedPassword,
       role: role || 'user',
       profileToken
-    });
+    });    // Créer une notification de bienvenue
+    try {
+      const io = req.app.get('socketio'); // Récupérer l'instance WebSocket
+      await NotificationService.createWelcomeNotification(user.id, io);
+    } catch (notifError) {
+      console.error('Erreur création notification bienvenue:', notifError);
+    }
 
     res.status(201).json({ message: 'Compte créé', user });
   } catch (error) {

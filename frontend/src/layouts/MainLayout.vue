@@ -3,28 +3,50 @@
     <Navbar v-if="!isAuthPage && !isCartePage" />
     <main class="main-content">
       <SearchBar v-if="!isAuthPage && !isCartePage" v-model="search" />
-      <router-view />
+      <ErrorBoundary>
+        <router-view />
+      </ErrorBoundary>
     </main>
   </div>
 </template>
 
 <script>
+import { computed, ref, watchEffect } from 'vue'
+import { useRoute } from 'vue-router'
 import Navbar from '../components/Navbar.vue'
 import SearchBar from '../components/SearchBar.vue'
-import { useRoute } from 'vue-router'
-import { ref, computed } from 'vue'
+import ErrorBoundary from '../components/ErrorBoundary.vue'
 
 export default {
-  components: { Navbar, SearchBar },
+  name: 'MainLayout',
+  components: { 
+    Navbar, 
+    SearchBar, 
+    ErrorBoundary 
+  },
   setup() {
     const route = useRoute()
-    // Détecte si on est sur une page d'authentification
-    const isAuthPage = computed(() =>
-      route.path === '/login' || route.path === '/register'
-    )
-    const isCartePage = computed(() => route.path === '/carte')
     const search = ref('')
-    return { isAuthPage, isCartePage, search }
+    
+    // Computed properties pour détecter les pages spéciales
+    const isAuthPage = computed(() => {
+      return route.path === '/login' || route.path === '/register'
+    })
+    
+    const isCartePage = computed(() => {
+      return route.path === '/carte'
+    })
+
+    // Debug: surveiller les changements de route
+    watchEffect(() => {
+      console.log('Route actuelle:', route.path)
+    })
+
+    return { 
+      isAuthPage, 
+      isCartePage, 
+      search
+    }
   }
 }
 </script>

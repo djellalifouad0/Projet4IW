@@ -62,6 +62,7 @@ import PostCard from './PostCard.vue'
 import SearchBar from './SearchBar.vue'
 import api from '../services/api'
 import toast from '../services/toast'
+import NotificationService from '../services/notificationService'
 
 export default {
   name: 'Carte',
@@ -136,6 +137,10 @@ export default {
         if (response.data.message) {
           toast.success(response.data.message);
         }
+        
+        // Déclencher une vérification des notifications
+        NotificationService.triggerNotificationCheck();
+        
         // Optionnel : rafraîchir les posts pour synchro
         // await this.fetchPosts()
       } catch (e) {
@@ -153,6 +158,10 @@ export default {
         if (response.data.message) {
           toast.success(response.data.message);
         }
+        
+        // Déclencher une vérification des notifications
+        NotificationService.triggerNotificationCheck();
+        
         // Optionnel : rafraîchir les posts pour synchro
         // await this.fetchPosts()
       } catch (e) {

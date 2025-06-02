@@ -1,20 +1,19 @@
 <template>
-  <router-view />
-  <ToastContainer />
+  <ErrorBoundary>
+    <router-view />
+    <ToastContainer />
+  </ErrorBoundary>
 </template>
 
-
 <script>
-import Navbar from './components/Navbar.vue'
+import ErrorBoundary from './components/ErrorBoundary.vue'
 import ToastContainer from './components/ToastContainer.vue'
-import { useRoute } from 'vue-router'
 
 export default {
-  components: { Navbar, ToastContainer },
-  setup() {
-    const route = useRoute()
-    const isAuthPage = route.path === '/login' || route.path === '/register'
-    return { isAuthPage }
+  name: 'App',
+  components: { 
+    ErrorBoundary,
+    ToastContainer
   }
 }
 </script>

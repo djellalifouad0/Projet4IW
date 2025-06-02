@@ -345,6 +345,7 @@
 import api from '../services/api'
 import toast from '../services/toast'
 import ImageCropper from './ImageCropper.vue'
+import NotificationService from '../services/notificationService'
 
 export default {
   name: 'Profile',
@@ -626,12 +627,13 @@ export default {
       } catch (error) {
         console.error('Error loading appointments:', error);
       }
-    },
-    async updateAppointmentStatus(appointmentId, status) {
+    },    async updateAppointmentStatus(appointmentId, status) {
       try {
         await api.patch(`/appointments/${appointmentId}/status`, { status });
         // Recharger les rendez-vous après mise à jour
         await this.loadAppointments();
+        // Déclencher la vérification des notifications après mise à jour du statut
+        NotificationService.triggerNotificationCheck();
       } catch (error) {
         console.error('Error updating appointment status:', error);
       }
@@ -729,7 +731,12 @@ export default {
         // Réinitialiser le formulaire
         this.newRating = { rating: 0, comment: '' };
         this.editingRating = null;
-        this.showRatingModal = false;        // Recharger les avis et les stats
+        this.showRatingModal = false;
+        
+        // Déclencher une vérification des notifications
+        NotificationService.triggerNotificationCheck();
+        
+        // Recharger les avis et les stats
         await this.loadUserRatings();
         await this.loadUser(); // Pour mettre à jour les stats
       } catch (error) {
