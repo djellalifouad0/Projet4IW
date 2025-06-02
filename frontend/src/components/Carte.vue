@@ -305,47 +305,32 @@ export default {
   padding-top: 110px;
 }
 .carte-content {
-  background: #fff;
-  border-radius: 0 0 0 18px;
-  box-shadow: 0 4px 24px #0001;
   display: flex;
   flex-direction: row;
   width: 100vw;
-  max-width: 100vw;
-  min-height: 600px;
-  height: 85vh; /* Augmente la hauteur pour combler le vide en bas */
-  max-height: 92vh; /* Permet d'aller presque jusqu'en bas de l'écran */
-  overflow: hidden;
-  position: relative;
-  margin-top: 32px;
+  height: calc(100vh - 110px);
+  position: fixed;
+  top: 110px;
+  left: 0;
 }
 .carte-list {
-  width: 38%;
+  width: 600px;
   background: #fff4e3;
-  padding: 32px 18px 32px 32px;
+  padding: 20px;
   display: flex;
   flex-direction: column;
   gap: 18px;
   overflow-y: auto;
-  min-width: 340px;
   height: 100%;
-  max-height: 100%;
-  z-index: 2;
-  border-radius: 0 0 0 18px;
+  border-right: 2px solid #eee;
 }
 .carte-map {
-  width: 62%;
-  min-width: 350px;
+  flex: 1;
   height: 100%;
   background: #f5f5f5;
   display: flex;
   align-items: center;
   justify-content: center;
-  border-left: 1.5px solid #eee;
-  position: sticky;
-  top: 0;
-  border-radius: 0;
-  margin-right: 0;
 }
 .btn-retour {
   background: #fff;
@@ -368,50 +353,26 @@ export default {
 @media (max-width: 1100px) {
   .carte-content {
     flex-direction: column;
-    width: 100vw;
-    max-width: 100vw;
-    border-radius: 0;
     height: auto;
-    max-height: none;
+    position: relative;
+    top: 0;
   }
-  .carte-list, .carte-map {
+  .carte-list {
     width: 100%;
-    min-width: 0;
     height: auto;
-    border-left: none;
-    max-height: none;
-    position: static;
-    border-radius: 0;
+    border-right: none;
+    border-bottom: 2px solid #eee;
   }
   .carte-map {
-    min-height: 350px;
-    height: 350px;
-    border-top: 1.5px solid #eee;
-    border-radius: 0;
+    height: 400px;
   }
 }
 @media (max-width: 700px) {
-  .carte-content {
-    flex-direction: column;
-    width: 100vw;
-    min-width: 0;
-    border-radius: 0;
-    box-shadow: none;
-    padding: 0;
-    height: auto;
-    max-height: none;
-  }
   .carte-list {
-    padding: 12px 4vw 12px 4vw;
-    min-width: 0;
-    height: auto;
-    max-height: none;
+    padding: 15px;
   }
   .carte-map {
-    min-height: 220px;
-    height: 220px;
-    border-radius: 0;
-    position: static;
+    height: 300px;
   }
 }
 </style>
