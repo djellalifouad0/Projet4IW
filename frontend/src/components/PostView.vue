@@ -166,14 +166,12 @@ export default {
       } finally {
         this.loading = false
       }
-    },
-
-    async loadRelatedPosts() {
-      if (!this.post?.User?.id) return
+    },    async loadRelatedPosts() {
+      if (!this.post?.User?.profileToken) return
 
       try {
-        // Load all posts from the same user
-        const response = await api.get(`/users/${this.post.User.id}/posts`)
+        // Load all posts from the same user using profileToken
+        const response = await api.get(`/skills?profileToken=${this.post.User.profileToken}`)
         // Filter out the current post and limit to 5 related posts
         this.relatedPosts = response.data
           .filter(post => post.id !== this.post.id)

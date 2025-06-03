@@ -1100,6 +1100,54 @@ export default {
   margin-bottom: 1rem;
   box-shadow: 0 2px 8px #0001;
 }
+
+/* Styles pour les posts cliquables */
+.clickable-post {
+  cursor: pointer;
+  transition: all 0.2s ease;
+  border: 1px solid transparent;
+}
+
+.clickable-post:hover {
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  transform: translateY(-2px);
+  border-color: #E48700;
+}
+
+.clickable-post:active {
+  transform: translateY(-1px);
+}
+
+/* Styles pour les statistiques des posts */
+.profile-post-stats {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  margin-top: 0.8rem;
+  padding-top: 0.8rem;
+  border-top: 1px solid #f0f0f0;
+}
+
+.post-stat {
+  display: flex;
+  align-items: center;
+  gap: 0.3rem;
+  font-size: 0.85rem;
+  color: #666;
+}
+
+.stat-icon-small {
+  width: 14px;
+  height: 14px;
+  filter: brightness(0) saturate(100%) invert(45%) sepia(0%) saturate(0%) hue-rotate(0deg) brightness(100%) contrast(100%);
+}
+
+.post-price {
+  margin-left: auto;
+  font-weight: 600;
+  color: #E48700;
+  font-size: 0.9rem;
+}
 .profile-post-title {
   font-size: 1.1rem;
   color: #28303F;

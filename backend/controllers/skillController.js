@@ -81,14 +81,35 @@ exports.getAllSkills = async (req, res) => {
  */
 exports.getSkillById = async (req, res) => {
   try {
+    const userId = req.user ? req.user.id : null;
+    
     const skill = await Skill.findByPk(req.params.id, {
-      include: [{
-        model: require('../models/user'),
-        attributes: ['username']
-      }]
+      include: [
+        {
+          model: User,
+          attributes: ['username', 'avatar', 'profileToken'], // Inclure l'avatar et profileToken
+        },
+        {
+          model: Like,
+          attributes: ['userId'],
+          required: false
+        }
+      ]
     });
+    
     if (!skill) return res.status(404).json({ error: 'Compétence non trouvée' });
-    res.json(skill);
+    
+    // Ajout des infos de like pour le front
+    const likes = skill.Likes ? skill.Likes.length : 0;
+    const likedByMe = userId ? skill.Likes.some(l => l.userId === userId) : false;
+    
+    const result = {
+      ...skill.toJSON(),
+      likes,
+      likedByMe
+    };
+    
+    res.json(result);
   } catch (error) {
     res.status(500).json({ error: 'Erreur serveur' });
   }

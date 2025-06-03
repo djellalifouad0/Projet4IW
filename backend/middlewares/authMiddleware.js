@@ -32,3 +32,27 @@ exports.authorizeAdmin = (req, res, next) => {
   }
   next();
 };
+
+/**
+ * Middleware d'authentification optionnel :
+ * - Vérifie le token s'il est présent
+ * - N'échoue pas si le token est absent
+ */
+exports.optionalAuthenticate = (req, res, next) => {
+  const authHeader = req.headers.authorization;
+
+  if (!authHeader || !authHeader.startsWith('Bearer ')) {
+    req.user = null;
+    return next();
+  }
+
+  const token = authHeader.split(' ')[1];
+  try {
+    const decoded = jwt.verify(token, JWT_SECRET);
+    req.user = decoded; // { id, userId, username, role, profileToken }
+    next();
+  } catch (error) {
+    req.user = null;
+    next();
+  }
+};
