@@ -67,26 +67,49 @@
         </button>
       </div>      <!-- Contenu de l'onglet Posts -->
       <div v-if="activeTab === 'posts'" class="tab-content">
-        <ul class="profile-posts-list">
-          <li 
+        <ul class="profile-posts-list">          <li 
             v-for="post in userPosts" 
             :key="post.id" 
             class="profile-post-item clickable-post"
             @click="navigateToPost(post.id)"
             :title="'Cliquer pour voir le post complet'"
           >
-            <div class="profile-post-title">{{ post.description }}</div>
-            <div class="profile-post-date">Publié le {{ new Date(post.createdAt).toLocaleDateString() }}</div>
-            <div class="profile-post-stats">
-              <span class="post-stat">
-                <img src="@/assets/icons/coeur.svg" alt="Likes" class="stat-icon-small" />
-                {{ post.likes || 0 }}
-              </span>
-              <span class="post-stat">
-                <img src="@/assets/icons/comment.svg" alt="Comments" class="stat-icon-small" />
-                {{ post.commentsCount || 0 }}
-              </span>
-              <span v-if="post.pricePerHour" class="post-price">{{ post.pricePerHour }}€/h</span>
+            <div class="post-content">
+              <div class="post-header">
+                <div class="profile-post-title">{{ post.description }}</div>
+                <span v-if="post.pricePerHour" class="post-price-badge">{{ post.pricePerHour }}€/h</span>
+              </div>
+              
+              <div class="post-meta">
+                <div class="profile-post-date">
+                  <svg class="date-icon" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect>
+                    <line x1="16" y1="2" x2="16" y2="6"></line>
+                    <line x1="8" y1="2" x2="8" y2="6"></line>
+                    <line x1="3" y1="10" x2="21" y2="10"></line>
+                  </svg>
+                  {{ formatPostDate(post.createdAt) }}
+                </div>
+              </div>
+              
+              <div class="profile-post-stats">
+                <div class="post-stat-item">
+                  <img src="@/assets/icons/coeur.svg" alt="Likes" class="stat-icon-small" />
+                  <span class="stat-value">{{ post.likes || 0 }}</span>
+                  <span class="stat-label">J'aime</span>
+                </div>
+                <div class="post-stat-item">
+                  <img src="@/assets/icons/comment.svg" alt="Comments" class="stat-icon-small" />
+                  <span class="stat-value">{{ post.commentsCount || 0 }}</span>
+                  <span class="stat-label">Commentaire{{ (post.commentsCount || 0) > 1 ? 's' : '' }}</span>
+                </div>
+              </div>
+            </div>
+            
+            <div class="post-hover-indicator">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="m9 18 6-6-6-6"/>
+              </svg>
             </div>
           </li>
         </ul>
@@ -514,11 +537,32 @@ export default {
         this.activeTab = 'posts';
       }
         console.log('Active tab:', this.activeTab);
-    },
-
-    // Méthode pour naviguer vers la vue individuelle du post
+    },    // Méthode pour naviguer vers la vue individuelle du post
     navigateToPost(postId) {
       this.$router.push(`/post/${postId}`);
+    },
+
+    // Méthode pour formater la date des posts de manière plus lisible
+    formatPostDate(dateString) {
+      const date = new Date(dateString);
+      const now = new Date();
+      const diffTime = Math.abs(now - date);
+      const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+      
+      if (diffDays === 1) {
+        return 'Hier';
+      } else if (diffDays <= 7) {
+        return `Il y a ${diffDays} jour${diffDays > 1 ? 's' : ''}`;
+      } else if (diffDays <= 30) {
+        const weeks = Math.floor(diffDays / 7);
+        return `Il y a ${weeks} semaine${weeks > 1 ? 's' : ''}`;
+      } else {
+        return date.toLocaleDateString('fr-FR', { 
+          day: 'numeric', 
+          month: 'long', 
+          year: 'numeric' 
+        });
+      }
     },onAvatarChange(e) {
       const file = e.target.files[0]
       if (file) {
@@ -1092,61 +1136,190 @@ export default {
   list-style: none;
   padding: 0;
   margin: 0;
+  display: grid;
+  gap: 0.75rem;
 }
+
 .profile-post-item {
   background: #fff;
-  border-radius: 8px;
-  padding: 1.2rem;
-  margin-bottom: 1rem;
-  box-shadow: 0 2px 8px #0001;
+  border-radius: 12px;
+  padding: 0;
+  margin: 0;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08);
+  border: 1px solid #f0f2f5;
+  overflow: hidden;
+  position: relative;
+  display: flex;
+  align-items: center;
+  min-height: 80px;
 }
 
 /* Styles pour les posts cliquables */
 .clickable-post {
   cursor: pointer;
-  transition: all 0.2s ease;
-  border: 1px solid transparent;
+  transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
 .clickable-post:hover {
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
-  transform: translateY(-2px);
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.12);
+  transform: translateY(-1px);
   border-color: #E48700;
 }
 
-.clickable-post:active {
-  transform: translateY(-1px);
+.clickable-post:hover .post-hover-indicator {
+  opacity: 1;
+  transform: translateX(0);
 }
 
-/* Styles pour les statistiques des posts */
+.clickable-post:active {
+  transform: translateY(0);
+}
+
+/* Structure du contenu des posts */
+.post-content {
+  flex: 1;
+  padding: 1.25rem;
+  min-width: 0;
+}
+
+.post-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 1rem;
+  margin-bottom: 0.75rem;
+}
+
+.profile-post-title {
+  color: #1a1a1a;
+  font-size: 1rem;
+  font-weight: 600;
+  line-height: 1.4;
+  margin: 0;
+  flex: 1;
+  /* Fallback for browsers that don't support line-clamp */
+  max-height: 2.8rem; /* Approximately 2 lines at 1.4 line height */
+  overflow: hidden;
+  /* Modern line-clamp with fallback */
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  /* Alternative fallback using text-overflow */
+  text-overflow: ellipsis;
+  word-wrap: break-word;
+}
+
+.post-price-badge {
+  background: linear-gradient(135deg, #E48700, #ff9500);
+  color: white;
+  padding: 0.375rem 0.75rem;
+  border-radius: 20px;
+  font-size: 0.8rem;
+  font-weight: 600;
+  white-space: nowrap;
+  box-shadow: 0 2px 8px rgba(228, 135, 0, 0.25);
+}
+
+.post-meta {
+  margin-bottom: 1rem;
+}
+
+.profile-post-date {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  color: #65676b;
+  font-size: 0.85rem;
+  font-weight: 500;
+}
+
+.date-icon {
+  color: #65676b;
+  flex-shrink: 0;
+}
+
+/* Styles améliorés pour les statistiques des posts */
 .profile-post-stats {
   display: flex;
   align-items: center;
-  gap: 1rem;
-  margin-top: 0.8rem;
-  padding-top: 0.8rem;
-  border-top: 1px solid #f0f0f0;
+  gap: 1.5rem;
+  margin: 0;
+  padding: 0;
 }
 
-.post-stat {
+.post-stat-item {
   display: flex;
   align-items: center;
-  gap: 0.3rem;
-  font-size: 0.85rem;
-  color: #666;
+  gap: 0.5rem;
+  background: #f8f9fa;
+  padding: 0.5rem 0.75rem;
+  border-radius: 8px;
+  transition: background-color 0.2s ease;
+}
+
+.post-stat-item:hover {
+  background: #e9ecef;
 }
 
 .stat-icon-small {
-  width: 14px;
-  height: 14px;
-  filter: brightness(0) saturate(100%) invert(45%) sepia(0%) saturate(0%) hue-rotate(0deg) brightness(100%) contrast(100%);
+  width: 16px;
+  height: 16px;
+  filter: brightness(0) saturate(100%) invert(45%) sepia(15%) saturate(500%) hue-rotate(200deg) brightness(95%) contrast(85%);
+  flex-shrink: 0;
 }
 
-.post-price {
-  margin-left: auto;
+.stat-value {
   font-weight: 600;
-  color: #E48700;
+  color: #1a1a1a;
   font-size: 0.9rem;
+}
+
+.stat-label {
+  color: #65676b;
+  font-size: 0.8rem;
+  font-weight: 500;
+}
+
+/* Indicateur de hover */
+.post-hover-indicator {
+  padding: 1rem;
+  color: #E48700;
+  opacity: 0;
+  transform: translateX(8px);
+  transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+  display: flex;
+  align-items: center;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .profile-post-item {
+    min-height: auto;
+    flex-direction: column;
+    align-items: stretch;
+  }
+  
+  .post-content {
+    padding: 1rem;
+  }
+  
+  .post-header {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0.5rem;
+  }
+  
+  .profile-post-stats {
+    gap: 1rem;
+  }
+  
+  .post-stat-item {
+    padding: 0.4rem 0.6rem;
+  }
+  
+  .post-hover-indicator {
+    display: none;
+  }
 }
 .profile-post-title {
   font-size: 1.1rem;
