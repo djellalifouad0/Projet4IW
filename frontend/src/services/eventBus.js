@@ -49,4 +49,11 @@ export const NotificationEvents = {
   NEW_NOTIFICATION: 'notification:new'
 }
 
+// Événements spécifiques au profil utilisateur
+export const ProfileEvents = {
+  PROFILE_UPDATED: 'profile:updated',
+  AVATAR_CHANGED: 'profile:avatar-changed',
+  USERNAME_CHANGED: 'profile:username-changed'
+}
+
 export default eventBus

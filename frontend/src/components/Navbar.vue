@@ -66,7 +66,7 @@ import api from '../services/api'
 import authService from '../services/authService'
 import unreadMessagesService from '../services/unreadMessages'
 import NotificationService from '../services/notificationService'
-import eventBus, { NotificationEvents } from '../services/eventBus'
+import eventBus, { NotificationEvents, ProfileEvents } from '../services/eventBus'
 
 export default {
   name: 'Navbar',  data() {
@@ -142,13 +142,40 @@ export default {
 
       eventBus.on(NotificationEvents.UNREAD_COUNT_CHANGED, (newCount) => {
         this.notificationCount = newCount;
-      });
-
-      eventBus.on(NotificationEvents.NEW_NOTIFICATION, () => {
+      });      eventBus.on(NotificationEvents.NEW_NOTIFICATION, () => {
         this.notificationCount += 1;
         // Rafraîchir immédiatement pour avoir les données les plus récentes
         this.loadNotificationCount();
-      });      // Écouter les événements qui peuvent déclencher des notifications
+      });
+
+      // Écouter les événements de mise à jour du profil
+      eventBus.on(ProfileEvents.PROFILE_UPDATED, (profileData) => {
+        console.log('Mise à jour du profil reçue:', profileData);
+        if (this.user) {
+          this.user.username = profileData.username;
+          this.user.avatar = profileData.avatar;
+          // Forcer la réactivité de Vue
+          this.$forceUpdate();
+        }
+      });
+
+      eventBus.on(ProfileEvents.USERNAME_CHANGED, (newUsername) => {
+        console.log('Nom d\'utilisateur changé:', newUsername);
+        if (this.user) {
+          this.user.username = newUsername;
+          this.$forceUpdate();
+        }
+      });
+
+      eventBus.on(ProfileEvents.AVATAR_CHANGED, (newAvatar) => {
+        console.log('Avatar changé:', newAvatar);
+        if (this.user) {
+          this.user.avatar = newAvatar;
+          this.$forceUpdate();
+        }
+      });
+
+      // Écouter les événements qui peuvent déclencher des notifications
       eventBus.on('action-completed', () => {
         // Vérifier les nouvelles notifications après une action
         setTimeout(() => this.loadNotificationCount(), 1000);
@@ -159,6 +186,10 @@ export default {
       eventBus.off(NotificationEvents.ALL_NOTIFICATIONS_READ);
       eventBus.off(NotificationEvents.UNREAD_COUNT_CHANGED);
       eventBus.off(NotificationEvents.NEW_NOTIFICATION);
+      eventBus.off(ProfileEvents.PROFILE_UPDATED);
+      eventBus.off(ProfileEvents.USERNAME_CHANGED);
+      eventBus.off(ProfileEvents.AVATAR_CHANGED);
+      eventBus.off('action-completed');
     },
 
     startAutoRefresh() {

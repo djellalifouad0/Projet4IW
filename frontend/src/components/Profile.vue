@@ -346,6 +346,7 @@ import api from '../services/api'
 import toast from '../services/toast'
 import ImageCropper from './ImageCropper.vue'
 import NotificationService from '../services/notificationService'
+import eventBus, { ProfileEvents } from '../services/eventBus'
 
 export default {
   name: 'Profile',
@@ -574,8 +575,7 @@ export default {
       this.cropperImageData = ''
       this.cropperType = ''
       this.pendingImageFile = null
-    },
-    saveProfile() {
+    },    saveProfile() {
       const updatedProfile = {
         username: this.edit.username,
         bio: this.edit.bio,
@@ -584,18 +584,47 @@ export default {
         cover: this.edit.cover
       };
 
+      const oldUsername = this.user.username;
+      const oldAvatar = this.user.avatar;
+
       api.put('/profile', updatedProfile)
         .then(() => {
+          // Mettre à jour les données locales
           this.user.username = this.edit.username;
           this.user.bio = this.edit.bio;
           this.user.address = this.edit.address;
           this.user.avatar = this.edit.avatar;
           this.user.cover = this.edit.cover;
+          
+          // Émettre les événements de mise à jour du profil
+          eventBus.emit(ProfileEvents.PROFILE_UPDATED, {
+            username: this.edit.username,
+            avatar: this.edit.avatar,
+            cover: this.edit.cover,
+            bio: this.edit.bio,
+            address: this.edit.address
+          });
+
+          // Émettre des événements spécifiques si le nom d'utilisateur ou l'avatar ont changé
+          if (oldUsername !== this.edit.username) {
+            eventBus.emit(ProfileEvents.USERNAME_CHANGED, this.edit.username);
+          }
+          
+          if (oldAvatar !== this.edit.avatar) {
+            eventBus.emit(ProfileEvents.AVATAR_CHANGED, this.edit.avatar);
+          }
+
+          // Déclencher la vérification des notifications (pour la notification de mise à jour du profil)
+          NotificationService.triggerNotificationCheck();
+          
           this.showEditModal = false;
-        })        .catch((error) => {
+          toast.success('Profil mis à jour avec succès !');
+        })
+        .catch((error) => {
           console.error('Error updating profile:', error);
+          toast.error('Erreur lors de la mise à jour du profil');
         });
-    },    async startConversation() {
+    },async startConversation() {
       try {
         // Créer une conversation avec l'utilisateur visité
         const response = await api.post('/conversations', {
