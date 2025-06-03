@@ -49,6 +49,7 @@ exports.login = async (req, res) => {
     const token = jwt.sign({ 
       id: user.id, 
       userId: user.id, // Ajouter pour compatibilité WebSocket
+      username: user.username, // Ajouter le username pour les notifications
       role: user.role,
       profileToken: user.profileToken 
     }, JWT_SECRET, { expiresIn: '2h' });
@@ -77,6 +78,7 @@ exports.googleAuthCallback = async (req, res) => {
     }    const token = jwt.sign({ 
       id: user.id, 
       userId: user.id, // Ajouter pour compatibilité WebSocket
+      username: user.username, // Ajouter le username pour les notifications
       role: user.role,
       profileToken: user.profileToken 
     }, JWT_SECRET, { expiresIn: '2h' });

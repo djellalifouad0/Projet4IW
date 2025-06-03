@@ -39,7 +39,7 @@ exports.likeSkill = async (req, res) => {
           await NotificationService.createNewLikeNotification(
             skill.User.id,
             likerName,
-            skill.title,
+            skill.description,
             io
           );
         } catch (notifError) {

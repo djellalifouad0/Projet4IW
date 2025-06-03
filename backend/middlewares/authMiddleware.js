@@ -13,10 +13,9 @@ exports.authenticate = (req, res, next) => {
     return res.status(401).json({ error: 'Token manquant ou mal formé' });
 
   const token = authHeader.split(' ')[1];
-
   try {
     const decoded = jwt.verify(token, JWT_SECRET);
-    req.user = decoded; // { id, role }
+    req.user = decoded; // { id, userId, username, role, profileToken }
     next();
   } catch (error) {
     res.status(403).json({ error: 'Token invalide ou expiré' });

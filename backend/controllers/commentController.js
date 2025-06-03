@@ -43,13 +43,13 @@ exports.addComment = async (req, res) => {
       include: [{ model: User, attributes: ['id', 'username'] }]
     });    // Créer une notification pour le propriétaire de la compétence (si ce n'est pas lui qui commente)
     if (skill && skill.User && skill.User.id !== req.user.id) {
-      try {
+          try {
         const commenterName = req.user.username;
         const io = req.app.get('socketio'); // Récupérer l'instance WebSocket
         await NotificationService.createNewCommentNotification(
           skill.User.id,
           commenterName,
-          skill.title,
+          skill.description,
           io
         );
       } catch (notifError) {

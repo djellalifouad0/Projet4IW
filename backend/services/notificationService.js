@@ -51,22 +51,21 @@ class NotificationService {
     }
     
     return notification;
-  }
-  /**
+  }  /**
    * Créer une notification pour un nouveau rendez-vous
    */
-  static async createAppointmentNotification(userId, type, otherUserName, skillTitle, io = null) {
+  static async createAppointmentNotification(userId, type, otherUserName, appointmentTitle, io = null) {
     let message = '';
     
     switch (type) {
       case 'created':
-        message = `${otherUserName} a demandé un rendez-vous pour votre compétence "${skillTitle}".`;
+        message = `${otherUserName} a demandé un rendez-vous pour "${appointmentTitle}".`;
         break;
       case 'accepted':
-        message = `${otherUserName} a accepté votre demande de rendez-vous pour "${skillTitle}".`;
+        message = `${otherUserName} a accepté votre demande de rendez-vous pour "${appointmentTitle}".`;
         break;
       case 'rejected':
-        message = `${otherUserName} a refusé votre demande de rendez-vous pour "${skillTitle}".`;
+        message = `${otherUserName} a refusé votre demande de rendez-vous pour "${appointmentTitle}".`;
         break;
     }
 
@@ -76,7 +75,7 @@ class NotificationService {
       type === 'accepted' ? NOTIFICATION_TYPES.APPOINTMENT_ACCEPTED :
       NOTIFICATION_TYPES.APPOINTMENT_REJECTED,
       message,
-      { skillTitle, otherUserName }
+      { appointmentTitle, otherUserName }
     );
     
     if (notification && io) {
