@@ -3,6 +3,9 @@ const Conversation = require('./conversation');
 const Message = require('./message');
 const Appointment = require('./appointment');
 const Rating = require('./rating');
+const Skill = require('./skill');
+const Comment = require('./comment');
+const Like = require('./like');
 
 // Définir les associations
 Conversation.belongsTo(User, { as: 'user1', foreignKey: 'user1Id' });
@@ -30,10 +33,33 @@ Rating.belongsTo(User, { as: 'ratedUser', foreignKey: 'ratedUserId' });
 User.hasMany(Rating, { as: 'givenRatings', foreignKey: 'raterId' });
 User.hasMany(Rating, { as: 'receivedRatings', foreignKey: 'ratedUserId' });
 
+// Associations pour les compétences/skills
+Skill.belongsTo(User, { foreignKey: 'userId', onDelete: 'CASCADE' });
+User.hasMany(Skill, { foreignKey: 'userId' });
+
+// Associations pour les commentaires
+Skill.hasMany(Comment, { foreignKey: 'skillId', onDelete: 'CASCADE' });
+Comment.belongsTo(Skill, { foreignKey: 'skillId' });
+User.hasMany(Comment, { foreignKey: 'userId' });
+Comment.belongsTo(User, { foreignKey: 'userId' });
+
+// Association pour les réponses imbriquées
+Comment.hasMany(Comment, { as: 'replies', foreignKey: 'parentId' });
+Comment.belongsTo(Comment, { as: 'parent', foreignKey: 'parentId' });
+
+// Associations pour les likes
+Skill.hasMany(Like, { foreignKey: 'skillId', onDelete: 'CASCADE' });
+Like.belongsTo(Skill, { foreignKey: 'skillId' });
+User.hasMany(Like, { foreignKey: 'userId' });
+Like.belongsTo(User, { foreignKey: 'userId' });
+
 module.exports = {
   User,
   Conversation,
   Message,
   Appointment,
-  Rating
+  Rating,
+  Skill,
+  Comment,
+  Like
 };

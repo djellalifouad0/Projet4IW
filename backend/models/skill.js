@@ -1,7 +1,6 @@
 // models/skill.js
 const { DataTypes } = require('sequelize');
 const sequelize = require('../config/db');
-const User = require('./user');
 
 const Skill = sequelize.define('Skill', {
   id: {
@@ -37,8 +36,5 @@ const Skill = sequelize.define('Skill', {
 }, {
   tableName: 'Skills'
 });
-
-Skill.belongsTo(User, { foreignKey: 'userId', onDelete: 'CASCADE' });
-User.hasMany(Skill, { foreignKey: 'userId' });
 
 module.exports = Skill;
