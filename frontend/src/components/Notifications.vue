@@ -195,13 +195,12 @@ export default {
       })
       
       return groups
-    },      async markAsRead(notification) {
+    },    async markAsRead(notification) {
       if (notification.read) return
       
       try {
         await NotificationService.markAsRead(notification.id)
         notification.read = true
-        this.unreadCount = Math.max(0, this.unreadCount - 1)
         
         // Émettre l'événement pour actualiser les autres composants
         eventBus.emit(NotificationEvents.NOTIFICATION_READ)
@@ -209,7 +208,7 @@ export default {
         console.error('Erreur marquage notification:', error)
         toastService.error('Erreur lors du marquage de la notification')
       }
-    },      async markAllAsRead() {
+    },async markAllAsRead() {
       try {
         await NotificationService.markAllAsRead()
         

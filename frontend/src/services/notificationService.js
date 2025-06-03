@@ -26,34 +26,24 @@ class NotificationService {/**
       console.error('Erreur récupération compteur notifications:', error)
       throw error
     }
-  }
-  /**
+  }  /**
    * Marquer une notification comme lue
    */
   static async markAsRead(notificationId) {
     try {
       const response = await api.patch(`/notifications/${notificationId}/read`)
-      
-      // Émettre un événement pour mettre à jour le compteur
-      eventBus.emit(NotificationEvents.NOTIFICATION_READ)
-      
       return response.data
     } catch (error) {
       console.error('Erreur marquage notification:', error)
       throw error
     }
   }
-
   /**
    * Marquer toutes les notifications comme lues
    */
   static async markAllAsRead() {
     try {
       const response = await api.patch('/notifications/mark-all-read')
-      
-      // Émettre un événement pour remettre le compteur à zéro
-      eventBus.emit(NotificationEvents.ALL_NOTIFICATIONS_READ)
-      
       return response.data
     } catch (error) {
       console.error('Erreur marquage toutes notifications:', error)
