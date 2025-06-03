@@ -65,14 +65,29 @@
           <img src="@/assets/icons/star.svg" alt="Avis" class="tab-icon" />
           Avis ({{ user?.ratingStats?.totalRatings || 0 }})
         </button>
-      </div>
-
-      <!-- Contenu de l'onglet Posts -->
+      </div>      <!-- Contenu de l'onglet Posts -->
       <div v-if="activeTab === 'posts'" class="tab-content">
         <ul class="profile-posts-list">
-          <li v-for="post in userPosts" :key="post.id" class="profile-post-item">
+          <li 
+            v-for="post in userPosts" 
+            :key="post.id" 
+            class="profile-post-item clickable-post"
+            @click="navigateToPost(post.id)"
+            :title="'Cliquer pour voir le post complet'"
+          >
             <div class="profile-post-title">{{ post.description }}</div>
             <div class="profile-post-date">Publié le {{ new Date(post.createdAt).toLocaleDateString() }}</div>
+            <div class="profile-post-stats">
+              <span class="post-stat">
+                <img src="@/assets/icons/coeur.svg" alt="Likes" class="stat-icon-small" />
+                {{ post.likes || 0 }}
+              </span>
+              <span class="post-stat">
+                <img src="@/assets/icons/comment.svg" alt="Comments" class="stat-icon-small" />
+                {{ post.commentsCount || 0 }}
+              </span>
+              <span v-if="post.pricePerHour" class="post-price">{{ post.pricePerHour }}€/h</span>
+            </div>
           </li>
         </ul>
       </div>
@@ -498,9 +513,13 @@ export default {
       else {
         this.activeTab = 'posts';
       }
-      
-      console.log('Active tab:', this.activeTab);
-    },    onAvatarChange(e) {
+        console.log('Active tab:', this.activeTab);
+    },
+
+    // Méthode pour naviguer vers la vue individuelle du post
+    navigateToPost(postId) {
+      this.$router.push(`/post/${postId}`);
+    },onAvatarChange(e) {
       const file = e.target.files[0]
       if (file) {
         // Vérifier le type de fichier
