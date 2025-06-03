@@ -1,5 +1,6 @@
 const { createNotification, NOTIFICATION_TYPES } = require('../controllers/notificationController');
 const Notification = require('../models/notification');
+const { Op } = require('sequelize');
 
 class NotificationService {
     /**
@@ -34,24 +35,64 @@ class NotificationService {
     }
     
     return notification;
-  }
-  /**
+  }  /**
    * Créer une notification pour un nouveau like
    */
-  static async createNewLikeNotification(userId, likerName, skillTitle, io = null) {
+  static async createNewLikeNotification(userId, likerName, skillTitle, likerId = null, io = null) {
+    // Supprimer toutes les anciennes notifications de like de ce même utilisateur pour cette compétence
+    if (likerId) {
+      // D'abord, récupérer toutes les notifications de like pour cet utilisateur
+      const existingNotifications = await Notification.findAll({
+        where: {
+          userId: userId,
+          type: NOTIFICATION_TYPES.NEW_LIKE
+        }
+      });
+
+      // Filtrer et supprimer celles qui correspondent au même likeur et à la même compétence
+      const notificationsToDelete = [];
+      for (const notification of existingNotifications) {
+        if (notification.data) {
+          let notificationData;
+          try {
+            notificationData = typeof notification.data === 'string' 
+              ? JSON.parse(notification.data) 
+              : notification.data;
+          } catch (e) {
+            continue; // Ignorer les données mal formées
+          }
+          
+          if (notificationData.likerName === likerName && notificationData.skillTitle === skillTitle) {
+            notificationsToDelete.push(notification.id);
+          }
+        }
+      }
+
+      // Supprimer les notifications correspondantes
+      if (notificationsToDelete.length > 0) {
+        await Notification.destroy({
+          where: {
+            id: {
+              [Op.in]: notificationsToDelete
+            }
+          }
+        });
+      }
+    }
+
     const notification = await createNotification(
       userId,
       NOTIFICATION_TYPES.NEW_LIKE,
       `${likerName} a aimé votre compétence "${skillTitle}".`,
-      { skillTitle, likerName }
+      { skillTitle, likerName, likerId }
     );
     
     if (notification && io) {
       await this.notifyUserRealTime(userId, notification, io);
     }
-    
+
     return notification;
-  }  /**
+  }/**
    * Créer une notification pour un nouveau rendez-vous
    */
   static async createAppointmentNotification(userId, type, otherUserName, appointmentTitle, io = null) {
