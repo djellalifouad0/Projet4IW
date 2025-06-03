@@ -26,8 +26,11 @@ exports.getNotifications = async (req, res) => {
       offset
     });
 
+    // Enrichir les notifications avec les données utilisateur
+    const enrichedNotifications = await enrichNotificationsWithUserData(notifications);
+
     // Grouper les notifications par date
-    const groupedNotifications = groupNotificationsByDate(notifications);
+    const groupedNotifications = groupNotificationsByDate(enrichedNotifications);
 
     res.json({
       notifications: groupedNotifications,
@@ -144,6 +147,60 @@ exports.createNotification = async (userId, type, message, data = null) => {
     throw error;
   }
 };
+
+/**
+ * Fonction pour enrichir les notifications avec les données utilisateur
+ */
+async function enrichNotificationsWithUserData(notifications) {
+  const enrichedNotifications = [];
+  
+  for (const notification of notifications) {
+    const enrichedNotification = notification.toJSON();
+    
+    // Extraire les informations utilisateur depuis les données de la notification
+    if (notification.data) {
+      let notificationData;
+      try {
+        notificationData = typeof notification.data === 'string' 
+          ? JSON.parse(notification.data) 
+          : notification.data;
+      } catch (e) {
+        notificationData = {};
+      }
+      
+      // Pour les notifications qui contiennent un nom d'utilisateur, chercher les détails complets
+      if (notificationData.commenterName || notificationData.likerName || notificationData.raterName || notificationData.otherUserName || notificationData.senderName) {
+        const username = notificationData.commenterName || 
+                        notificationData.likerName || 
+                        notificationData.raterName || 
+                        notificationData.otherUserName || 
+                        notificationData.senderName;
+        
+        try {
+          const user = await User.findOne({ 
+            where: { username },
+            attributes: ['id', 'username', 'avatar', 'profileToken']
+          });
+          
+          if (user) {
+            enrichedNotification.triggerUser = {
+              id: user.id,
+              username: user.username,
+              avatar: user.avatar,
+              profileToken: user.profileToken
+            };
+          }
+        } catch (error) {
+          console.log('Erreur lors de la récupération de l\'utilisateur:', error);
+        }
+      }
+    }
+    
+    enrichedNotifications.push(enrichedNotification);
+  }
+  
+  return enrichedNotifications;
+}
 
 /**
  * Fonction pour grouper les notifications par date

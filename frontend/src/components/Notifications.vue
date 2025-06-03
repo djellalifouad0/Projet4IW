@@ -19,19 +19,29 @@
     <div v-else class="notifications-wrapper">
       <div v-for="(notifs, dateGroup) in groupedNotifications" :key="dateGroup" class="date-group">
         <h3 class="date-header">{{ dateGroup }}</h3>
-        <ul class="notification-list">
-          <li 
+        <ul class="notification-list">          <li 
             v-for="notif in notifs" 
             :key="notif.id" 
             class="notification-item"
             :class="{ 'unread': !notif.read }"
             @click="markAsRead(notif)"
           >
-            <span class="icon" :style="{ color: getNotificationColor(notif.type) }">
+            <!-- Photo de profil de l'utilisateur qui a généré la notification -->
+            <div class="notification-avatar" v-if="notif.triggerUser">
+              <img 
+                :src="notif.triggerUser.avatar || `https://ui-avatars.com/api/?name=${encodeURIComponent(notif.triggerUser.username || 'User')}&background=ECBC76&color=fff&size=40&bold=true`" 
+                :alt="notif.triggerUser.username"
+                class="trigger-user-avatar"
+                @click.stop="navigateToProfile(notif.triggerUser.profileToken)"
+              />
+            </div>
+            <!-- Icône par défaut si pas d'utilisateur spécifique -->
+            <span v-else class="icon" :style="{ color: getNotificationColor(notif.type) }">
               {{ getNotificationIcon(notif.type) }}
             </span>
+            
             <div class="notif-content">
-              <p class="notif-message">{{ notif.message }}</p>
+              <p class="notif-message" v-html="formatNotificationMessage(notif)"></p>
               <span class="notif-date">{{ formatDate(notif.createdAt) }}</span>
             </div>
             <div v-if="!notif.read" class="unread-indicator"></div>
@@ -99,11 +109,13 @@ export default {
     hasNotifications() {
       return Object.keys(this.groupedNotifications).length > 0
     }
-  },
-  async mounted() {
+  },  async mounted() {
     await this.loadNotifications()
     // Actualisation automatique toutes les 30 secondes
     this.startAutoRefresh()
+    
+    // Ajouter un gestionnaire pour les clics sur les pseudos dans les messages
+    this.addUsernameClickHandlers()
   },
   beforeUnmount() {
     this.stopAutoRefresh()
@@ -132,14 +144,15 @@ export default {
           // Regrouper toutes les notifications par date
           this.groupedNotifications = this.groupNotificationsByDate(this.allNotifications)
         }
-        
-        this.pagination = response.pagination
+          this.pagination = response.pagination
         this.unreadCount = await NotificationService.getUnreadCount()
       } catch (error) {
         console.error('Erreur chargement notifications:', error)
         toastService.error('Erreur lors du chargement des notifications')
       } finally {
         this.loading = false
+        // Ajouter les gestionnaires pour les pseudos cliquables après le rendu
+        this.addUsernameClickHandlers()
       }
     },
 
@@ -228,19 +241,19 @@ export default {
         console.error('Erreur marquage toutes notifications:', error)
         toastService.error('Erreur lors du marquage des notifications')
       }
-    },
-
-    async refreshNotifications() {
+    },    async refreshNotifications() {
       // Actualisation silencieuse sans afficher le loader
       try {
         const response = await NotificationService.getNotifications(this.currentPage, 10)
         this.groupedNotifications = response.notifications
         this.pagination = response.pagination
-          const newUnreadCount = await NotificationService.getUnreadCount()
+        const newUnreadCount = await NotificationService.getUnreadCount()
         if (newUnreadCount !== this.unreadCount) {
           this.unreadCount = newUnreadCount          // Émettre l'événement pour actualiser les autres composants
           eventBus.emit(NotificationEvents.UNREAD_COUNT_CHANGED, newUnreadCount)
         }
+        // Ajouter les gestionnaires pour les pseudos cliquables après l'actualisation
+        this.addUsernameClickHandlers()
       } catch (error) {
         console.error('Erreur actualisation notifications:', error)
       }
@@ -263,10 +276,47 @@ export default {
     
     getNotificationIcon(type) {
       return NotificationService.getNotificationIcon(type)
-    },
-    
+    },    
     getNotificationColor(type) {
       return NotificationService.getNotificationColor(type)
+    },
+
+    // Nouvelle méthode pour formater le message avec pseudo cliquable
+    formatNotificationMessage(notification) {
+      let message = notification.message;
+      
+      // Si on a les données de l'utilisateur qui a déclenché la notification
+      if (notification.triggerUser) {
+        const username = notification.triggerUser.username;
+        const profileToken = notification.triggerUser.profileToken;
+        
+        // Remplacer le nom d'utilisateur par un lien cliquable
+        message = message.replace(
+          username,
+          `<span class="clickable-username" data-profile-token="${profileToken}">${username}</span>`
+        );
+      }
+      
+      return message;
+    },    // Navigation vers le profil d'un utilisateur
+    navigateToProfile(profileToken) {
+      if (profileToken) {
+        this.$router.push(`/profile/${profileToken}`);
+      }
+    },
+
+    // Ajouter des gestionnaires d'événements pour les pseudos cliquables
+    addUsernameClickHandlers() {
+      this.$nextTick(() => {
+        const clickableUsernames = document.querySelectorAll('.clickable-username');
+        clickableUsernames.forEach(element => {
+          element.addEventListener('click', (e) => {
+            e.stopPropagation();
+            const profileToken = element.getAttribute('data-profile-token');
+            this.navigateToProfile(profileToken);
+          });
+        });
+      });
     }
   }
 }
@@ -393,6 +443,31 @@ export default {
   justify-content: center;
 }
 
+/* Nouveau style pour l'avatar de l'utilisateur déclencheur */
+.notification-avatar {
+  margin-right: 16px;
+  min-width: 40px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.trigger-user-avatar {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  object-fit: cover;
+  cursor: pointer;
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+  border: 2px solid #fff;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.trigger-user-avatar:hover {
+  transform: scale(1.1);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+}
+
 .notif-content {
   flex: 1;
 }
@@ -402,6 +477,23 @@ export default {
   font-size: 1rem;
   color: #1f2937;
   line-height: 1.5;
+}
+
+/* Style pour les pseudos cliquables dans les messages */
+.notif-message :deep(.clickable-username) {
+  color: #E48700;
+  font-weight: 600;
+  cursor: pointer;
+  text-decoration: none;
+  transition: color 0.2s ease;
+  border-radius: 3px;
+  padding: 1px 3px;
+}
+
+.notif-message :deep(.clickable-username:hover) {
+  color: #c76d00;
+  background-color: rgba(228, 135, 0, 0.1);
+  text-decoration: underline;
 }
 
 .notif-date {
