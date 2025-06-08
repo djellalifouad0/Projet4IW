@@ -112,11 +112,15 @@
           </div>
         </div><div class="chat-messages">
           <div v-for="msg in messages" :key="msg.id" :class="['chat-message', msg.fromMe ? 'me' : 'other', msg.isAppointment ? 'appointment-message' : '']">
-            <span>{{ msg.text }}</span>
-            <div v-if="msg.fromMe" class="message-status">
+            <span>{{ msg.text }}</span>            <div v-if="msg.fromMe" class="message-status">
               <span v-if="msg.status === 'sent'" class="status-icon">•</span>
-              <span v-else-if="msg.status === 'delivered'" class="status-icon">✓</span>
-              <span v-else-if="msg.status === 'read'" class="status-icon">✓✓</span>
+              <span v-else-if="msg.status === 'delivered'" class="status-icon">
+                <img src="@/assets/icons/check.svg" alt="Livré" class="status-check-icon" />
+              </span>
+              <span v-else-if="msg.status === 'read'" class="status-icon">
+                <img src="@/assets/icons/check.svg" alt="Lu" class="status-check-icon" />
+                <img src="@/assets/icons/check.svg" alt="Lu" class="status-check-icon status-check-double" />
+              </span>
             </div>
           </div>
           <!-- Indicateur de frappe -->
@@ -1534,6 +1538,33 @@ body, html, #app {
 
 .btn-confirm:hover {
   background: #c82333;
+}
+
+/* Status check icon styles */
+.status-check-icon {
+  width: 12px;
+  height: 12px;
+  margin-left: 2px;
+  filter: brightness(0) saturate(100%) invert(48%) sepia(79%) saturate(2476%) hue-rotate(86deg) brightness(118%) contrast(119%);
+}
+
+.status-check-double {
+  margin-left: -6px;
+  position: relative;
+  z-index: 1;
+}
+
+.message-status {
+  display: flex;
+  align-items: center;
+  margin-top: 4px;
+  font-size: 0.75rem;
+  color: #666;
+}
+
+.status-icon {
+  display: flex;
+  align-items: center;
 }
 
 @media (max-width: 900px) {

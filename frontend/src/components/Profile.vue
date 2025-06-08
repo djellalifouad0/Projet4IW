@@ -7,12 +7,13 @@
       <div class="profile-card-bottom-v2">        <div class="profile-avatar-block">
           <img class="profile-avatar-v2" :src="user?.avatar || `https://ui-avatars.com/api/?name=${encodeURIComponent(user?.username || 'User')}&background=ECBC76&color=fff&size=128&bold=true`" alt="Avatar utilisateur" />
           <div class="profile-name-v2">{{ user?.username || '' }}</div>
-          <!-- Moyenne des avis intégrée dans le profil -->
-          <div v-if="user?.ratingStats && user.ratingStats.totalRatings > 0" class="profile-rating-inline">
-            <div class="stars-display-inline">
-              <span v-for="star in 5" :key="star" 
-                    :class="['star-inline', getStarClass(star, user.ratingStats.averageRating)]">
-                ★
+          <!-- Moyenne des avis intégrée dans le profil -->          <div v-if="user?.ratingStats && user.ratingStats.totalRatings > 0" class="profile-rating-inline">            <div class="stars-display-inline">
+              <span v-for="star in 5" :key="star" class="star-inline">
+                <img 
+                  :src="star <= user.ratingStats.averageRating ? '/src/assets/icons/star-filled.svg' : '/src/assets/icons/star-empty.svg'" 
+                  alt="étoile" 
+                  class="star-icon-inline" 
+                />
               </span>
             </div>
             <span class="rating-text-inline">{{ user.ratingStats.averageRating.toFixed(1) }} • {{ user.ratingStats.totalRatings }} avis</span>
@@ -55,14 +56,14 @@
           @click="activeTab = 'calendar'"
           v-if="user?.profileToken === loggedInUser?.profileToken"
         >
+        Calendrier
           <img src="@/assets/icons/agenda.svg" alt="Calendrier" class="tab-icon" />
-          Calendrier
         </button>
         <button 
           :class="['tab-button', { active: activeTab === 'ratings' }]"
           @click="activeTab = 'ratings'; loadUserRatings()"
         >
-          <img src="@/assets/icons/star.svg" alt="Avis" class="tab-icon" />
+          <!-- <img src="@/assets/icons/star.svg" alt="Avis" class="tab-icon" /> -->
           Avis ({{ user?.ratingStats?.totalRatings || 0 }})
         </button>
       </div>      <!-- Contenu de l'onglet Posts -->
@@ -252,41 +253,37 @@
                 <!-- Actions pour les rendez-vous dans le calendrier -->
                 <div class="month-appointment-actions">
                   <!-- Actions pour les rendez-vous en attente -->
-                  <div v-if="appointment.status === 'pending'" class="appointment-quick-actions">
-                    <button 
+                  <div v-if="appointment.status === 'pending'" class="appointment-quick-actions">                    <button 
                       v-if="appointment.receiverId === loggedInUser.id" 
                       @click="updateAppointmentStatus(appointment.id, 'accepted')"
                       class="quick-btn accept-quick"
                       title="Accepter"
                     >
-                      ✓
-                    </button>
-                    <button 
+                      <img src="@/assets/icons/check.svg" alt="Accepter" class="quick-action-icon" />
+                    </button>                    <button 
                       v-if="appointment.receiverId === loggedInUser.id" 
                       @click="updateAppointmentStatus(appointment.id, 'declined')"
                       class="quick-btn decline-quick"
                       title="Refuser"
                     >
-                      ✗
-                    </button>
-                    <button 
+                      <img src="@/assets/icons/close.svg" alt="Refuser" class="quick-action-icon" />
+                    </button>                    <button 
                       v-if="appointment.requesterId === loggedInUser.id" 
                       @click="updateAppointmentStatus(appointment.id, 'cancelled')"
                       class="quick-btn cancel-quick"
                       title="Annuler"
                     >
-                      ✗
+                      <img src="@/assets/icons/close.svg" alt="Annuler" class="quick-action-icon" />
                     </button>
                   </div>
-                  
-                  <!-- Actions pour les rendez-vous acceptés -->
+                    <!-- Actions pour les rendez-vous acceptés -->
                   <div v-else-if="appointment.status === 'accepted'" class="appointment-quick-actions">
                     <button 
                       @click="updateAppointmentStatus(appointment.id, 'cancelled')"
                       class="quick-btn cancel-quick"
                       title="Annuler ce rendez-vous"
                     >
-                      ✗
+                      <img src="@/assets/icons/close.svg" alt="Annuler" class="quick-action-icon" />
                     </button>
                   </div>
                 </div>
@@ -308,11 +305,13 @@
                   />
                   <span class="rating-username">{{ rating.rater?.username }}</span>
                 </div>                  <div class="rating-score-actions">
-                    <div class="rating-score">
-                      <div class="stars-display-small">
-                        <span v-for="star in 5" :key="star" 
-                              :class="['star-small', getStarClass(star, rating.rating)]">
-                          ★
+                    <div class="rating-score">                      <div class="stars-display-small">
+                        <span v-for="star in 5" :key="star" class="star-small">
+                          <img 
+                            :src="star <= rating.rating ? '/src/assets/icons/star-filled.svg' : '/src/assets/icons/star-empty.svg'" 
+                            alt="étoile" 
+                            class="star-icon-small" 
+                          />
                         </span>
                       </div>
                       <span class="rating-value">{{ rating.rating }}/5</span>
@@ -378,17 +377,19 @@
         </div>
         <div class="modal-body">
           <div class="rating-form">            <div class="rating-stars">
-              <label>Note :</label>
-              <div class="stars-input">
+              <label>Note :</label>              <div class="stars-input">
                 <span v-for="star in 5" :key="star" 
-                      :class="['star-input', { 
-                        active: star <= newRating.rating,
-                        hover: star <= hoverRating 
-                      }]"
+                      :class="['star-input']"
                       @click="newRating.rating = star"
                       @mouseenter="hoverRating = star"
                       @mouseleave="hoverRating = 0">
-                  ★
+                  <img 
+                    :src="(hoverRating > 0 ? star <= hoverRating : star <= newRating.rating) 
+                          ? '/src/assets/icons/star-filled.svg' 
+                          : '/src/assets/icons/star-empty.svg'" 
+                    alt="étoile" 
+                    class="star-icon-input" 
+                  />
                 </span>
               </div>
             </div>
@@ -2399,20 +2400,16 @@ export default {
 }
 
 .star-input {
-  font-size: 2rem;
-  color: #ddd;
   cursor: pointer;
-  transition: color 0.2s;
+  transition: all 0.2s ease;
 }
 
-.star-input:hover,
-.star-input.active,
-.star-input.hover {
-  color: #ffc107;
+.star-input .star-icon-input {
+  transition: transform 0.2s ease;
 }
 
-.star-input.hover {
-  color: #ffdd54;
+.star-input:hover .star-icon-input {
+  transform: scale(1.1);
 }
 
 .rating-comment label {
@@ -2650,5 +2647,36 @@ export default {
     transform: scale(1);
     opacity: 1;
   }
+}
+
+/* Styles pour les icônes de remplacement des emojis */
+.quick-action-icon {
+  width: 16px;
+  height: 16px;
+  vertical-align: middle;
+  transition: filter 0.2s;
+}
+
+.quick-action-icon:hover {
+  filter: brightness(1.1);
+}
+
+.star-icon-small {
+  width: 14px;
+  height: 14px;
+  vertical-align: middle;
+}
+
+.star-icon-input {
+  width: 24px;
+  height: 24px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.star-icon-inline {
+  width: 16px;
+  height: 16px;
+  vertical-align: middle;
 }
 </style>
