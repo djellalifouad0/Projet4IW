@@ -139,8 +139,8 @@
               </div>
               <div v-if="appointment.description" class="appointment-description">
                 {{ appointment.description }}
-              </div>
-            </div>
+              </div>            </div>
+            <!-- Actions pour les rendez-vous en attente -->
             <div v-if="appointment.status === 'pending'" class="appointment-actions">
               <button 
                 v-if="appointment.receiverId === loggedInUser.id" 
@@ -162,6 +162,26 @@
               >
                 Annuler
               </button>
+            </div>
+            
+            <!-- Actions pour les rendez-vous acceptés -->
+            <div v-else-if="appointment.status === 'accepted'" class="appointment-actions">
+              <button 
+                @click="updateAppointmentStatus(appointment.id, 'cancelled')"
+                class="appointment-btn cancel"
+              >
+                Annuler
+              </button>
+              <div class="appointment-status-confirmed">
+                Rendez-vous confirmé
+              </div>
+            </div>
+            
+            <!-- Statut pour les rendez-vous terminés -->
+            <div v-else class="appointment-actions">
+              <div class="appointment-status-final">
+                {{ getStatusText(appointment.status) }}
+              </div>
             </div>
           </div>
         </div>
@@ -219,8 +239,7 @@
               >                <div class="appointment-date-time">
                   <img src="@/assets/icons/agenda.svg" alt="Date" class="detail-icon" />
                   {{ formatAppointmentDateShort(appointment.appointmentDate) }}
-                </div>
-                <div class="appointment-info">
+                </div>                <div class="appointment-info">
                   <h5>{{ appointment.title }}</h5>
                   <p>
                     <img src="@/assets/icons/user.svg" alt="Avec" class="detail-icon" />
@@ -229,6 +248,47 @@
                   <span :class="['appointment-status', appointment.status]">
                     {{ getStatusText(appointment.status) }}
                   </span>
+                </div>
+                <!-- Actions pour les rendez-vous dans le calendrier -->
+                <div class="month-appointment-actions">
+                  <!-- Actions pour les rendez-vous en attente -->
+                  <div v-if="appointment.status === 'pending'" class="appointment-quick-actions">
+                    <button 
+                      v-if="appointment.receiverId === loggedInUser.id" 
+                      @click="updateAppointmentStatus(appointment.id, 'accepted')"
+                      class="quick-btn accept-quick"
+                      title="Accepter"
+                    >
+                      ✓
+                    </button>
+                    <button 
+                      v-if="appointment.receiverId === loggedInUser.id" 
+                      @click="updateAppointmentStatus(appointment.id, 'declined')"
+                      class="quick-btn decline-quick"
+                      title="Refuser"
+                    >
+                      ✗
+                    </button>
+                    <button 
+                      v-if="appointment.requesterId === loggedInUser.id" 
+                      @click="updateAppointmentStatus(appointment.id, 'cancelled')"
+                      class="quick-btn cancel-quick"
+                      title="Annuler"
+                    >
+                      ✗
+                    </button>
+                  </div>
+                  
+                  <!-- Actions pour les rendez-vous acceptés -->
+                  <div v-else-if="appointment.status === 'accepted'" class="appointment-quick-actions">
+                    <button 
+                      @click="updateAppointmentStatus(appointment.id, 'cancelled')"
+                      class="quick-btn cancel-quick"
+                      title="Annuler ce rendez-vous"
+                    >
+                      ✗
+                    </button>
+                  </div>
                 </div>
               </div>
             </div>          </div>        </div>
@@ -1653,6 +1713,23 @@ export default {
   background: #e68900;
 }
 
+.appointment-status-confirmed {
+  color: #28a745;
+  font-size: 0.85rem;
+  font-weight: 600;
+  align-self: center;
+  flex-shrink: 0;
+}
+
+.appointment-status-final {
+  color: #6c757d;
+  font-size: 0.85rem;
+  font-weight: 500;
+  align-self: center;
+  flex-shrink: 0;
+  text-transform: capitalize;
+}
+
 /* Styles pour le calendrier */
 .calendar-container {
   width: 100%;
@@ -1849,6 +1926,54 @@ export default {
   margin: 0 0 8px 0;
   color: #666;
   font-size: 0.9rem;
+}
+
+.month-appointment-actions {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+}
+
+.appointment-quick-actions {
+  display: flex;
+  gap: 5px;
+  align-items: center;
+}
+
+.quick-btn {
+  width: 28px;
+  height: 28px;
+  border: none;
+  border-radius: 50%;
+  font-size: 0.9rem;
+  font-weight: bold;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.quick-btn.accept-quick {
+  background: #4CAF50;
+  color: white;
+}
+
+.quick-btn.accept-quick:hover {
+  background: #45a049;
+  transform: scale(1.1);
+}
+
+.quick-btn.decline-quick,
+.quick-btn.cancel-quick {
+  background: #f44336;
+  color: white;
+}
+
+.quick-btn.decline-quick:hover,
+.quick-btn.cancel-quick:hover {
+  background: #da190b;
+  transform: scale(1.1);
 }
 
 @media (max-width: 600px) {

@@ -175,14 +175,39 @@ exports.updateAppointmentStatus = async (req, res) => {
       return res.status(403).json({ error: 'Vous n\'êtes pas autorisé à modifier ce rendez-vous' });
     }
 
-    await appointment.update({ status });
+    // Logique spéciale pour l'annulation et la suppression automatique
+    if (status === 'cancelled') {
+      // Si le rendez-vous n'a jamais été accepté (encore en pending), on le supprime complètement
+      if (appointment.status === 'pending') {
+        await appointment.destroy();
+        return res.json({ message: 'Rendez-vous supprimé (pas encore accepté)', deleted: true });
+      }
+      // Si le rendez-vous avait été accepté, on garde le log avec le statut cancelled
+      await appointment.update({ status });
+    } else if (status === 'declined') {
+      // Si quelqu'un refuse un rendez-vous en pending, on le supprime complètement
+      if (appointment.status === 'pending') {
+        await appointment.destroy();
+        return res.json({ message: 'Rendez-vous supprimé (refusé)', deleted: true });
+      }
+      // Si c'était déjà accepté et qu'on le refuse maintenant, on garde le log
+      await appointment.update({ status });
+    } else {
+      // Pour les autres statuts (accepted), on fait une mise à jour normale
+      await appointment.update({ status });    }
 
+    // Si l'appointment a été supprimé, pas besoin de récupérer les données
     const updatedAppointment = await Appointment.findByPk(id, {
       include: [
         { model: User, as: 'requester', attributes: ['id', 'username', 'avatar'] },
         { model: User, as: 'receiver', attributes: ['id', 'username', 'avatar'] }
       ]
     });
+
+    // Si l'appointment n'existe plus (supprimé), on retourne juste un message de succès
+    if (!updatedAppointment) {
+      return res.json({ message: 'Rendez-vous traité avec succès', deleted: true });
+    }
 
     // Créer une notification pour informer du changement de statut
     try {
