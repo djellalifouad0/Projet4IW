@@ -33,10 +33,9 @@ app.use('/api/ratings', ratingRoutes);
 setupSwagger(app);
 
 // ➕ Test de connexion DB sans synchronisation pour éviter les contraintes
-sequelize.authenticate().then(() => {
-  console.log('🗄️  Connexion à la base de données établie');
+sequelize.sync({ force: true }).then(() => {
+  console.log('🗄️  Base de données réinitialisée (toutes les tables recréées)');
 }).catch((error) => {
-  console.error('❌ Erreur de connexion DB:', error.message);
+  console.error('❌ Erreur lors de la synchronisation DB:', error.message);
 });
-
 module.exports = app;
