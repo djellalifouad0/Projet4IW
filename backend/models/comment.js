@@ -1,7 +1,5 @@
 const { DataTypes } = require('sequelize');
 const sequelize = require('../config/db');
-const User = require('./user');
-const Skill = require('./skill');
 
 const Comment = sequelize.define('Comment', {
   id: {
@@ -31,14 +29,5 @@ const Comment = sequelize.define('Comment', {
     onDelete: 'CASCADE'
   }
 });
-
-Skill.hasMany(Comment, { foreignKey: 'skillId', onDelete: 'CASCADE' });
-Comment.belongsTo(Skill, { foreignKey: 'skillId' });
-User.hasMany(Comment, { foreignKey: 'userId' });
-Comment.belongsTo(User, { foreignKey: 'userId' });
-
-// Association pour les réponses imbriquées
-Comment.hasMany(Comment, { as: 'replies', foreignKey: 'parentId' });
-Comment.belongsTo(Comment, { as: 'parent', foreignKey: 'parentId' });
 
 module.exports = Comment;

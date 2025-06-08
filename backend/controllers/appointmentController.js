@@ -1,5 +1,6 @@
 const { Appointment, User, Conversation } = require('../models/associations');
 const { Op } = require('sequelize');
+const NotificationService = require('../services/notificationService');
 
 /**
  * @swagger
@@ -45,9 +46,7 @@ exports.createAppointment = async (req, res) => {
     // Vérifier que l'utilisateur ne peut pas créer un rendez-vous avec lui-même
     if (requesterId === receiverId) {
       return res.status(400).json({ error: 'Vous ne pouvez pas créer un rendez-vous avec vous-même' });
-    }
-
-    // Vérifier que la date est dans le futur
+    }    // Vérifier que la date est dans le futur
     if (new Date(appointmentDate) <= new Date()) {
       return res.status(400).json({ error: 'La date du rendez-vous doit être dans le futur' });
     }
@@ -69,7 +68,20 @@ exports.createAppointment = async (req, res) => {
         { model: User, as: 'requester', attributes: ['id', 'username', 'avatar'] },
         { model: User, as: 'receiver', attributes: ['id', 'username', 'avatar'] }
       ]
-    });
+    });    // Créer une notification pour le destinataire
+    try {
+      const requesterName = createdAppointment.requester.username;
+      const io = req.app.get('socketio'); // Récupérer l'instance WebSocket
+      await NotificationService.createAppointmentNotification(
+        receiverId,
+        'created',
+        requesterName,
+        title,
+        io
+      );
+    } catch (notifError) {
+      console.error('Erreur création notification rendez-vous:', notifError);
+    }
 
     res.status(201).json(createdAppointment);
   } catch (error) {
@@ -159,9 +171,7 @@ exports.updateAppointmentStatus = async (req, res) => {
 
     // Vérifier que l'utilisateur peut modifier ce rendez-vous
     const canUpdate = appointment.receiverId === userId || 
-                     (appointment.requesterId === userId && status === 'cancelled');
-
-    if (!canUpdate) {
+                     (appointment.requesterId === userId && status === 'cancelled');    if (!canUpdate) {
       return res.status(403).json({ error: 'Vous n\'êtes pas autorisé à modifier ce rendez-vous' });
     }
 
@@ -173,6 +183,36 @@ exports.updateAppointmentStatus = async (req, res) => {
         { model: User, as: 'receiver', attributes: ['id', 'username', 'avatar'] }
       ]
     });
+
+    // Créer une notification pour informer du changement de statut
+    try {
+      let notificationRecipientId;
+      let notificationSenderName;
+      let notificationType;
+
+      if (status === 'accepted' || status === 'declined') {
+        // Le receveur a accepté/refusé, notifier le demandeur
+        notificationRecipientId = appointment.requesterId;
+        notificationSenderName = updatedAppointment.receiver.username;
+        notificationType = status === 'accepted' ? 'accepted' : 'rejected';
+      } else if (status === 'cancelled') {
+        // Le demandeur a annulé, notifier le receveur
+        notificationRecipientId = appointment.receiverId;
+        notificationSenderName = updatedAppointment.requester.username;
+        notificationType = 'rejected'; // On utilise 'rejected' pour l'annulation
+      }      if (notificationRecipientId && notificationSenderName) {
+        const io = req.app.get('socketio'); // Récupérer l'instance WebSocket
+        await NotificationService.createAppointmentNotification(
+          notificationRecipientId,
+          notificationType,
+          notificationSenderName,
+          appointment.title,
+          io
+        );
+      }
+    } catch (notifError) {
+      console.error('Erreur création notification statut rendez-vous:', notifError);
+    }
 
     res.json(updatedAppointment);
   } catch (error) {

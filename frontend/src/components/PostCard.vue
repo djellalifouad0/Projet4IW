@@ -184,6 +184,7 @@
 <script>
 import api from '../services/api'
 import toast from '../services/toast'
+import NotificationService from '../services/notificationService'
 
 export default {
   name: 'PostCard',  props: {
@@ -322,8 +323,7 @@ export default {
         this.successComment = '';
         try {
           const response = await api.post(`/skills/${this.postId}/comments`, { content: this.newComment });
-          
-          // Afficher le toast avec le message du serveur
+            // Afficher le toast avec le message du serveur
           if (response.data.message) {
             toast.success(response.data.message);
           }
@@ -332,6 +332,9 @@ export default {
           this.newComment = '';
           await this.fetchComments();
           this.$emit('comment-posted'); // Ajout : notifie le parent
+          
+          // Déclencher une vérification des notifications
+          NotificationService.triggerNotificationCheck();
           
           // Scroll vers le nouveau commentaire après un petit délai
           this.$nextTick(() => {
@@ -365,10 +368,12 @@ export default {
           if (response.data.message) {
             toast.success(response.data.message);
           }
-          
-          this.replyText = '';
+            this.replyText = '';
           this.replyingTo = null;
           await this.fetchComments();
+          
+          // Déclencher une vérification des notifications
+          NotificationService.triggerNotificationCheck();
           
           // Scroll vers la nouvelle réponse après un petit délai
           this.$nextTick(() => {

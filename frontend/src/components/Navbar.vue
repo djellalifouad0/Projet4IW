@@ -29,14 +29,15 @@
           <span class="nav-label">Carte</span>
         </router-link>
       </li>
-    </ul>
-    <!-- Ajout Notification et Paramètres -->
+    </ul>    <!-- Ajout Notification et Paramètres -->
     <ul class="navbar-actions">
       <li>
-        <router-link to="/notifications" exact-active-class="active">
-          <img src="../assets/icons/notification.svg" alt="Notification" class="nav-icon" />
-          <span class="nav-label">Notification</span>
-          <span class="notif-badge">12</span>
+        <router-link to="/notifications" exact-active-class="active" class="notification-link">
+          <div class="notification-wrapper">
+            <img src="../assets/icons/notification.svg" alt="Notifications" class="nav-icon" />
+            <span v-if="notificationCount > 0" class="notification-count">{{ notificationCount > 99 ? '99+' : notificationCount }}</span>
+          </div>
+          <span class="nav-label">Notifications</span>
         </router-link>
       </li>
       <li>
@@ -46,7 +47,7 @@
         </router-link>
       </li>
     </ul>
-    <div class="navbar-profile" @click="navigateToMyProfile" style="cursor:pointer; position: relative;">
+    <div class="navbar-profile" @click="navigateToMyProfile" style="cursor: pointer; position: relative;">
       <img class="avatar" :src="user?.avatar || `https://ui-avatars.com/api/?name=${encodeURIComponent(user?.username || 'User')}&background=ECBC76&color=fff&size=64&bold=true`" alt="avatar" />
       <div class="profile-info">
         <span class="username" :title="user ? user.username : ''">{{ user ? user.username : 'Non connecté' }}</span>
@@ -62,49 +63,215 @@
 
 <script>
 import api from '../services/api'
+import authService from '../services/authService'
 import unreadMessagesService from '../services/unreadMessages'
+import NotificationService from '../services/notificationService'
+import eventBus, { NotificationEvents, ProfileEvents } from '../services/eventBus'
 
 export default {
-  name: 'Navbar',
-  data() {
+  name: 'Navbar',  data() {
     return {
       user: null,
-      showMenu: false
+      showMenu: false,
+      notificationCount: 0,
+      refreshInterval: null,
+      isUserActive: true,
+      lastActivity: Date.now(),
+      activityCheckInterval: null,
+      updateActivityHandler: null
     }
   },
   computed: {
     unreadCount() {
       return unreadMessagesService.getCount();
     }
-  },
-  async mounted() {
+  },  async mounted() {
     const token = localStorage.getItem('token');
     if (!token) {
       this.$router.push('/login');
       return;
-    }
-    try {
-      const res = await api.get('/auth/me');
-      this.user = res.data;
+    }    try {
+      // Utiliser authService qui gère automatiquement l'initialisation WebSocket
+      this.user = await authService.getUserInfo();
       console.log('User data:', this.user); // Debugging line to verify user data
-      
-      // Charger le compteur de messages non lus
+        // Charger le compteur de messages non lus
       await unreadMessagesService.fetchUnreadCount();
+        // Charger le compteur de notifications
+      await this.loadNotificationCount();
+        // Configurer les écouteurs d'événements
+      this.setupEventListeners();
+      
+      // Configurer la détection automatique WebSocket des notifications
+      NotificationService.setupAutoNotificationDetection();
+      
+      // Démarrer l'actualisation automatique intelligente
+      this.startSmartAutoRefresh();
+      
+      // Configurer la détection d'activité utilisateur
+      this.setupActivityDetection();
     } catch (e) {
       this.user = null;
       this.$router.push('/login');
     }
     document.addEventListener('click', this.handleClickOutside)
-  },
-  beforeUnmount() {
+  },  beforeUnmount() {
     document.removeEventListener('click', this.handleClickOutside)
+    this.stopAutoRefresh()
+    this.removeEventListeners()
+    this.cleanupActivityDetection()
+    // Nettoyer les écouteurs WebSocket
+    NotificationService.cleanupAutoNotificationDetection()
   },
   methods: {
-    handleLogout() {
-      localStorage.removeItem('token')
-      this.user = null
-      this.$router.push('/login')
+    async loadNotificationCount() {
+      try {
+        this.notificationCount = await NotificationService.getUnreadCount();
+      } catch (error) {
+        console.error('Erreur chargement compteur notifications:', error);
+      }    },
+    
+    setupEventListeners() {
+      // Écouter les événements de notification
+      eventBus.on(NotificationEvents.NOTIFICATION_READ, () => {
+        this.notificationCount = Math.max(0, this.notificationCount - 1);
+      });
+
+      eventBus.on(NotificationEvents.ALL_NOTIFICATIONS_READ, () => {
+        this.notificationCount = 0;
+      });
+
+      eventBus.on(NotificationEvents.UNREAD_COUNT_CHANGED, (newCount) => {
+        this.notificationCount = newCount;
+      });      eventBus.on(NotificationEvents.NEW_NOTIFICATION, () => {
+        this.notificationCount += 1;
+        // Rafraîchir immédiatement pour avoir les données les plus récentes
+        this.loadNotificationCount();
+      });
+
+      // Écouter les événements de mise à jour du profil
+      eventBus.on(ProfileEvents.PROFILE_UPDATED, (profileData) => {
+        console.log('Mise à jour du profil reçue:', profileData);
+        if (this.user) {
+          this.user.username = profileData.username;
+          this.user.avatar = profileData.avatar;
+          // Forcer la réactivité de Vue
+          this.$forceUpdate();
+        }
+      });
+
+      eventBus.on(ProfileEvents.USERNAME_CHANGED, (newUsername) => {
+        console.log('Nom d\'utilisateur changé:', newUsername);
+        if (this.user) {
+          this.user.username = newUsername;
+          this.$forceUpdate();
+        }
+      });
+
+      eventBus.on(ProfileEvents.AVATAR_CHANGED, (newAvatar) => {
+        console.log('Avatar changé:', newAvatar);
+        if (this.user) {
+          this.user.avatar = newAvatar;
+          this.$forceUpdate();
+        }
+      });
+
+      // Écouter les événements qui peuvent déclencher des notifications
+      eventBus.on('action-completed', () => {
+        // Vérifier les nouvelles notifications après une action
+        setTimeout(() => this.loadNotificationCount(), 1000);
+      });
+    },    removeEventListeners() {
+      // Nettoyer les écouteurs d'événements
+      eventBus.off(NotificationEvents.NOTIFICATION_READ);
+      eventBus.off(NotificationEvents.ALL_NOTIFICATIONS_READ);
+      eventBus.off(NotificationEvents.UNREAD_COUNT_CHANGED);
+      eventBus.off(NotificationEvents.NEW_NOTIFICATION);
+      eventBus.off(ProfileEvents.PROFILE_UPDATED);
+      eventBus.off(ProfileEvents.USERNAME_CHANGED);
+      eventBus.off(ProfileEvents.AVATAR_CHANGED);
+      eventBus.off('action-completed');
     },
+
+    startAutoRefresh() {
+      // Actualiser le compteur toutes les 30 secondes
+      this.refreshInterval = setInterval(async () => {
+        await this.loadNotificationCount();
+      }, 30000);
+    },
+    
+    stopAutoRefresh() {
+      if (this.refreshInterval) {
+        clearInterval(this.refreshInterval);
+      }
+      if (this.activityCheckInterval) {
+        clearInterval(this.activityCheckInterval);
+      }
+    },    // Système d'actualisation intelligent basé sur l'activité utilisateur
+    startSmartAutoRefresh() {
+      // Polling plus fréquent quand l'utilisateur est actif
+      this.refreshInterval = setInterval(async () => {
+        const interval = this.isUserActive ? 10000 : 60000; // 10s si actif, 1min si inactif
+        await this.loadNotificationCount();
+      }, this.isUserActive ? 10000 : 60000);
+    },
+    
+    // Détecter l'activité utilisateur
+    setupActivityDetection() {
+      this.updateActivityHandler = () => {
+        this.lastActivity = Date.now();
+        this.isUserActive = true;
+      };
+
+      // Événements qui indiquent une activité utilisateur
+      ['mousedown', 'mousemove', 'keypress', 'scroll', 'touchstart', 'click'].forEach(event => {
+        document.addEventListener(event, this.updateActivityHandler, true);
+      });
+
+      // Vérifier périodiquement si l'utilisateur est inactif
+      this.activityCheckInterval = setInterval(() => {
+        const timeSinceLastActivity = Date.now() - this.lastActivity;
+        this.isUserActive = timeSinceLastActivity < 30000; // Inactif après 30s
+        
+        // Redémarrer le polling avec le bon intervalle si nécessaire
+        if (this.refreshInterval) {
+          clearInterval(this.refreshInterval);
+          this.startSmartAutoRefresh();
+        }      }, 5000);
+    },
+    
+    // Nettoyer la détection d'activité
+    cleanupActivityDetection() {
+      if (this.updateActivityHandler) {
+        ['mousedown', 'mousemove', 'keypress', 'scroll', 'touchstart', 'click'].forEach(event => {
+          document.removeEventListener(event, this.updateActivityHandler, true);
+        });
+      }
+      
+      if (this.activityCheckInterval) {
+        clearInterval(this.activityCheckInterval);
+      }
+    },
+
+    // Méthode publique pour actualiser le compteur depuis l'extérieur
+    async refreshNotificationCount() {
+      await this.loadNotificationCount();
+    },
+
+    // Méthode pour réduire le compteur quand une notification est lue
+    decrementNotificationCount() {
+      this.notificationCount = Math.max(0, this.notificationCount - 1);
+    },
+
+    // Méthode pour remettre le compteur à zéro
+    resetNotificationCount() {
+      this.notificationCount = 0;
+    },    handleLogout() {
+      this.stopAutoRefresh();
+      localStorage.removeItem('token');
+      this.user = null;
+      this.$router.push('/login');
+    },
+    
     handleClickOutside(e) {
       // Ferme le menu si on clique en dehors du menu ou de l'icône
       if (!this.$el.querySelector('.dropdown-menu')) return;
@@ -113,12 +280,15 @@ export default {
       if (this.showMenu && !menu.contains(e.target) && !dots.contains(e.target)) {
         this.showMenu = false;
       }
-    },    getProfileLink() {
+    },
+    
+    getProfileLink() {
       if (this.user && this.user.profileToken) {
         return `/profile/${this.user.profileToken}`;
       }
       return '/profile';
     },
+    
     navigateToMyProfile() {
       const profileLink = this.getProfileLink();
       console.log('Navigating to profile:', profileLink);
@@ -261,6 +431,29 @@ export default {
   padding: 2px 8px;
   margin-left: 8px;
   display: inline-block;
+}
+
+.notification-wrapper {
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+
+.notification-count {
+  position: absolute;
+  top: -8px;
+  right: -8px;
+  background: #ef4444;
+  color: white;
+  border-radius: 10px;
+  padding: 2px 6px;
+  font-size: 0.75rem;
+  font-weight: bold;
+  min-width: 18px;
+  text-align: center;
+  line-height: 1.2;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+  border: 2px solid white;
 }
 
 .unread-badge {

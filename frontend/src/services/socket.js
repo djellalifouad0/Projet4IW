@@ -174,10 +174,46 @@ class SocketService {
       });
     }
   }
-
   onMessageStatus(callback) {
     if (this.socket) {
       this.socket.on('message-status', callback);
+    }
+  }
+
+  // === GESTION DES NOTIFICATIONS ===
+  
+  // Écouter les nouvelles notifications
+  onNewNotification(callback) {
+    if (this.socket) {
+      this.socket.on('new-notification', callback);
+    }
+  }
+
+  // Arrêter d'écouter les nouvelles notifications
+  offNewNotification() {
+    if (this.socket) {
+      this.socket.off('new-notification');
+    }
+  }
+
+  // Demander une vérification des notifications
+  requestNotificationCheck() {
+    if (this.socket && this.connected) {
+      this.socket.emit('check-notifications');
+    }
+  }
+
+  // Écouter les mises à jour du compteur de notifications
+  onNotificationCountUpdate(callback) {
+    if (this.socket) {
+      this.socket.on('notification-count-update', callback);
+    }
+  }
+
+  // Arrêter d'écouter les mises à jour du compteur
+  offNotificationCountUpdate() {
+    if (this.socket) {
+      this.socket.off('notification-count-update');
     }
   }
 

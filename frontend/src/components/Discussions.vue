@@ -12,8 +12,7 @@
       <div v-if="error" class="error">{{ error }}</div>      <div v-for="conv in conversations" :key="conv.id" class="discussion-item" :class="{ active: selectedConversation && selectedConversation.id === conv.id }" @click="selectConversation(conv)">
         <div class="avatar-container">
           <img :src="conv.avatar" class="avatar" />
-          <div v-if="isUserOnline(conv.userId)" class="online-indicator"></div>
-        </div>
+          <div v-if="isUserOnline(conv.userId)" class="online-indicator"></div>        </div>
         <div class="info">
           <div class="name">{{ conv.name }}</div>
           <div class="last-message">{{ conv.lastMessage }}</div>
@@ -23,10 +22,9 @@
     <div class="chat-window">      <template v-if="selectedConversation">        <div class="chat-header">
           <div class="avatar-container">
             <img :src="selectedConversation.avatar" class="avatar" />
-            <div v-if="isUserOnline(selectedConversation.userId)" class="online-indicator"></div>
-          </div>
+            <div v-if="isUserOnline(selectedConversation.userId)" class="online-indicator"></div>          </div>
           <div class="user-info">
-            <span class="name">{{ selectedConversation.name }}</span>
+            <span class="name clickable-name" @click="goToProfile(selectedConversation.profileToken)">{{ selectedConversation.name }}</span>
             <span v-if="isUserOnline(selectedConversation.userId)" class="status online">En ligne</span>
             <span v-else class="status offline">Hors ligne</span>
           </div>
@@ -45,9 +43,8 @@
               <div v-if="appointment.location" class="appointment-location">
                 <img src="../assets/icons/carte.svg" class="location-icon" alt="Location"> {{ appointment.location }}
               </div>
-              <div v-if="appointment.description" class="appointment-description">{{ appointment.description }}</div>
-              <div class="appointment-requester">
-                Proposé par {{ appointment.requester.username }}
+              <div v-if="appointment.description" class="appointment-description">{{ appointment.description }}</div>              <div class="appointment-requester">
+                Proposé par <span class="clickable-name" @click="goToProfile(appointment.requester.profileToken)">{{ appointment.requester.username }}</span>
               </div>
             </div>
             <div v-if="isAppointmentReceiver(appointment)" class="appointment-actions">              <button 
@@ -184,6 +181,7 @@
 import api from '../services/api'
 import socketService from '../services/socket'
 import unreadMessagesService from '../services/unreadMessages'
+import NotificationService from '../services/notificationService'
 
 export default {
   name: 'Discussions',  data() {    return {
@@ -373,8 +371,10 @@ export default {
             this.conversations[convIndex].lastMessage = messageContent;
             this.conversations[convIndex].lastMessageAt = response.data.createdAt;
           }
+            this.newMessage = '';
           
-          this.newMessage = '';
+          // Déclencher la vérification des notifications après envoi d'un message
+          NotificationService.triggerNotificationCheck();
           
           // Scroll to bottom
           this.$nextTick(() => {
@@ -572,11 +572,13 @@ export default {
     async updateAppointmentStatus(appointmentId, status) {
       try {
         await api.patch(`/appointments/${appointmentId}/status`, { status });
-        
-        // Recharger les rendez-vous de la conversation
+          // Recharger les rendez-vous de la conversation
         if (this.selectedConversation) {
           await this.loadConversationAppointments(this.selectedConversation.id);
         }
+        
+        // Déclencher la vérification des notifications après mise à jour du statut
+        NotificationService.triggerNotificationCheck();
         
         // Ajouter un message de confirmation dans le chat
         const statusMessages = {
@@ -660,10 +662,11 @@ export default {
         const response = await api.post('/appointments', appointmentData);
         
         // Fermer le modal et réinitialiser le formulaire
-        this.closeAppointmentModal();
-
-        // Recharger les rendez-vous de la conversation
+        this.closeAppointmentModal();        // Recharger les rendez-vous de la conversation
         await this.loadConversationAppointments(this.selectedConversation.id);
+        
+        // Déclencher la vérification des notifications après création du rendez-vous
+        NotificationService.triggerNotificationCheck();
         
         // Ajouter un message système dans la conversation pour informer du rendez-vous
         const systemMessage = `Rendez-vous proposé: "${this.appointmentForm.title}" le ${new Date(appointmentDateTime).toLocaleDateString('fr-FR')} à ${this.appointmentForm.time}`;
@@ -684,12 +687,16 @@ export default {
           if (messagesContainer) {
             messagesContainer.scrollTop = messagesContainer.scrollHeight;
           }
-        });
-
-        console.log('Rendez-vous créé:', response.data);
+        });        console.log('Rendez-vous créé:', response.data);
       } catch (error) {
         this.error = 'Erreur lors de la création du rendez-vous';
         console.error('Error creating appointment:', error);
+      }
+    },
+    // Méthode pour naviguer vers le profil d'un utilisateur
+    goToProfile(profileToken) {
+      if (profileToken) {
+        this.$router.push(`/profile/${profileToken}`);
       }
     },
   }
@@ -824,6 +831,14 @@ body, html, #app {
   font-weight: 600;
   color: #28303F;
   font-size: 1.08rem;
+}
+.clickable-name {
+  cursor: pointer;
+  transition: color 0.2s ease;
+}
+.clickable-name:hover {
+  color: #ECBC76;
+  text-decoration: underline;
 }
 .last-message {
   color: #888;

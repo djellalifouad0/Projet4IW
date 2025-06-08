@@ -16,6 +16,17 @@ const Notification = sequelize.define('Notification', {
     type: DataTypes.STRING,
     allowNull: false
   },
+  data: {
+    type: DataTypes.TEXT,
+    allowNull: true,
+    get() {
+      const rawValue = this.getDataValue('data');
+      return rawValue ? JSON.parse(rawValue) : null;
+    },
+    set(value) {
+      this.setDataValue('data', value ? JSON.stringify(value) : null);
+    }
+  },
   read: {
     type: DataTypes.BOOLEAN,
     defaultValue: false

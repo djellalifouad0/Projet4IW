@@ -1,5 +1,6 @@
 const { User, Conversation, Message } = require('../models/associations');
 const { Op } = require('sequelize');
+const NotificationService = require('../services/notificationService');
 
 /**
  * @swagger
@@ -304,13 +305,21 @@ exports.sendMessage = async (req, res) => {
       content: content.trim(),
       senderId: userId,
       conversationId
-    });
-
-    // Mettre à jour la conversation
+    });    // Mettre à jour la conversation
     await conversation.update({
       lastMessageId: message.id,
       lastMessageAt: new Date()
-    });    // Récupérer le message avec les informations de l'expéditeur
+    });    // Créer une notification pour le destinataire
+    try {
+      const recipientId = conversation.user1Id === userId ? conversation.user2Id : conversation.user1Id;
+      const senderName = req.user.username;
+      const io = req.app.get('socketio'); // Récupérer l'instance WebSocket
+      await NotificationService.createNewMessageNotification(recipientId, senderName, io);
+    } catch (notifError) {
+      console.error('Erreur création notification message:', notifError);
+    }
+
+    // Récupérer le message avec les informations de l'expéditeur
     const messageWithSender = await Message.findByPk(message.id, {
       include: [
         {

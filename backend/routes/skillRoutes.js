@@ -2,10 +2,11 @@ const express = require('express');
 const router = express.Router();
 const skillController = require('../controllers//skillController')
 const { addComment, getComments, updateComment, deleteComment } = require('../controllers/commentController');
-const { authenticate } = require('../middlewares/authMiddleware'); // <-- ton fichier
+const { likeSkill, unlikeSkill } = require('../controllers/likeController');
+const { authenticate, optionalAuthenticate } = require('../middlewares/authMiddleware'); // <-- ton fichier
 
 router.get('/', authenticate, skillController.getAllSkills);
-router.get('/:id', skillController.getSkillById);
+router.get('/:id', optionalAuthenticate, skillController.getSkillById);
 
 
 router.post('/', authenticate, skillController.createSkill);
@@ -19,5 +20,9 @@ router.get('/:id/comments', getComments);
 // Routes pour modifier et supprimer les commentaires
 router.patch('/comments/:id', authenticate, updateComment);
 router.delete('/comments/:id', authenticate, deleteComment);
+
+// Routes pour like/unlike
+router.post('/:id/like', authenticate, likeSkill);
+router.delete('/:id/unlike', authenticate, unlikeSkill);
 
 module.exports = router;

@@ -1,6 +1,7 @@
 const Skill = require('../models/skill');
 const User = require('../models/user'); // Import du modèle User
 const Like = require('../models/like'); // Import du modèle Like
+const Comment = require('../models/comment'); // Import du modèle Comment
 
 /**
  * @swagger
@@ -30,9 +31,7 @@ exports.getAllSkills = async (req, res) => {
       if (user) {
         whereClause.userId = user.id; // Filter posts by userId corresponding to the profileToken
       }
-    }
-
-    const skills = await Skill.findAll({
+    }    const skills = await Skill.findAll({
       where: whereClause,      include: [
         {
           model: User,
@@ -42,17 +41,24 @@ exports.getAllSkills = async (req, res) => {
           model: Like,
           attributes: ['userId'],
           required: false
+        },
+        {
+          model: Comment,
+          attributes: ['id'],
+          required: false
         }
       ],
     });
-    // Ajout des infos de like pour le front
+    // Ajout des infos de like et commentaires pour le front
     const result = skills.map(skill => {
       const likes = skill.Likes ? skill.Likes.length : 0;
       const likedByMe = userId ? skill.Likes.some(l => l.userId === userId) : false;
+      const commentsCount = skill.Comments ? skill.Comments.length : 0;
       return {
         ...skill.toJSON(),
         likes,
-        likedByMe
+        likedByMe,
+        commentsCount
       };
     });
     res.json(result);
@@ -81,14 +87,40 @@ exports.getAllSkills = async (req, res) => {
  */
 exports.getSkillById = async (req, res) => {
   try {
-    const skill = await Skill.findByPk(req.params.id, {
-      include: [{
-        model: require('../models/user'),
-        attributes: ['username']
-      }]
+    const userId = req.user ? req.user.id : null;    const skill = await Skill.findByPk(req.params.id, {
+      include: [
+        {
+          model: User,
+          attributes: ['username', 'avatar', 'profileToken'], // Inclure l'avatar et profileToken
+        },
+        {
+          model: Like,
+          attributes: ['userId'],
+          required: false
+        },
+        {
+          model: Comment,
+          attributes: ['id'],
+          required: false
+        }
+      ]
     });
+    
     if (!skill) return res.status(404).json({ error: 'Compétence non trouvée' });
-    res.json(skill);
+    
+    // Ajout des infos de like et commentaires pour le front
+    const likes = skill.Likes ? skill.Likes.length : 0;
+    const likedByMe = userId ? skill.Likes.some(l => l.userId === userId) : false;
+    const commentsCount = skill.Comments ? skill.Comments.length : 0;
+    
+    const result = {
+      ...skill.toJSON(),
+      likes,
+      likedByMe,
+      commentsCount
+    };
+    
+    res.json(result);
   } catch (error) {
     res.status(500).json({ error: 'Erreur serveur' });
   }

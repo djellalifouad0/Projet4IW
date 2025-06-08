@@ -2,6 +2,7 @@ const crypto = require('crypto');
 const User = require('../models/user');
 const Rating = require('../models/rating');
 const { Sequelize } = require('sequelize');
+const NotificationService = require('../services/notificationService');
 
 // Generate a unique profile token for a user
 function generateProfileToken() {
@@ -72,9 +73,13 @@ exports.updateUserProfile = async (req, res) => {
     user.bio = bio || user.bio;
     user.address = address || user.address;
     user.avatar = avatar || user.avatar;
-    user.cover = cover || user.cover;
-
-    await user.save();
+    user.cover = cover || user.cover;    await user.save();    // Créer une notification de mise à jour de profil
+    try {
+      const io = req.app.get('socketio'); // Récupérer l'instance WebSocket
+      await NotificationService.createProfileUpdateNotification(userId, io);
+    } catch (notifError) {
+      console.error('Erreur création notification profil:', notifError);
+    }
 
     res.json({ message: 'Profil mis à jour avec succès', user });
   } catch (error) {

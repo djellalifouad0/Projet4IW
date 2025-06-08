@@ -1,4 +1,7 @@
 const Like = require('../models/like');
+const Skill = require('../models/skill');
+const User = require('../models/user');
+const NotificationService = require('../services/notificationService');
 
 /**
  * @swagger
@@ -25,9 +28,33 @@ exports.likeSkill = async (req, res) => {
       where: { userId: req.user.id, skillId: req.params.id }
     });
     console.log('LIKE RESULT:', like, 'CREATED:', created);
+
+    // Récupérer les informations de la compétence pour la notification
+    const skill = await Skill.findByPk(req.params.id, {
+      include: [{ model: User, attributes: ['id', 'username'] }]
+    });
+
+    // Créer une notification pour le propriétaire de la compétence (si ce n'est pas lui qui like)
+    // Même si le like existait déjà, on crée une nouvelle notification pour actualiser l'heure
+    if (skill && skill.User && skill.User.id !== req.user.id) {
+      try {
+        const likerName = req.user.username;
+        const io = req.app.get('socketio');
+        await NotificationService.createNewLikeNotification(
+          skill.User.id,
+          likerName,
+          skill.description,
+          req.user.id,
+          io
+        );
+      } catch (notifError) {
+        console.error('Erreur création notification like:', notifError);
+      }
+    }
+
     res.json({ 
-      liked: created, 
-      message: created ? 'Compétence ajoutée à vos favoris !' : 'Vous avez déjà aimé cette compétence'
+      liked: true, // Toujours retourner true car l'action de like a été effectuée
+      message: created ? 'Compétence ajoutée à vos favoris !' : 'Compétence toujours dans vos favoris !'
     });
   } catch (error) {
     console.error('LIKE ERROR:', error);
