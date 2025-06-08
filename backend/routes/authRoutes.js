@@ -61,11 +61,14 @@ router.post('/register', authController.register);
  *                 type: string
  *               password:
  *                 type: string
+ *               otp:
+ *                 type: string
+ *                 description: Code TOTP si 2FA est activée
  *     responses:
  *       200:
  *         description: Connexion réussie avec token JWT
  *       401:
- *         description: Identifiants invalides
+ *         description: Identifiants invalides ou OTP incorrect
  *       403:
  *         description: Utilisateur désactivé
  *       500:
@@ -103,10 +106,39 @@ router.post('/google', authController.googleAuthCallback);
 
 /**
  * @swagger
+ * /api/auth/enable-2fa:
+ *   post:
+ *     summary: Activer l'authentification à deux facteurs (2FA) pour un utilisateur connecté
+ *     tags: [Auth]
+ *     security:
+ *       - bearerAuth: []
+ *     responses:
+ *       200:
+ *         description: Clé secrète 2FA générée avec otpauthUrl (à scanner dans Google Authenticator)
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 secret:
+ *                   type: string
+ *                 otpauthUrl:
+ *                   type: string
+ *       404:
+ *         description: Utilisateur non trouvé
+ *       500:
+ *         description: Erreur serveur
+ */
+router.post('/enable-2fa', authenticate, authController.enable2FA);
+
+/**
+ * @swagger
  * /api/auth/me:
  *   get:
  *     summary: Récupérer l'utilisateur connecté
  *     tags: [Auth]
+ *     security:
+ *       - bearerAuth: []
  *     responses:
  *       200:
  *         description: Utilisateur connecté récupéré
@@ -117,7 +149,9 @@ router.post('/google', authController.googleAuthCallback);
  */
 router.get('/me', authenticate, (req, res) => {
   const User = require('../models/user');
-  User.findByPk(req.user.id, { attributes: ['id', 'username', 'email', 'avatar', 'cover', 'profileToken'] })
+  User.findByPk(req.user.id, {
+    attributes: ['id', 'username', 'email', 'avatar', 'cover', 'profileToken']
+  })
     .then(user => {
       if (!user) return res.status(404).json({ error: 'Utilisateur non trouvé' });
       res.json(user);

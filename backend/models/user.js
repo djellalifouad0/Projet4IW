@@ -81,6 +81,10 @@ const User = sequelize.define('User', {
     allowNull: true,
     description: 'URL of the user avatar image'
   },
+  totpSecret: {
+  type: DataTypes.STRING,
+  allowNull: true,
+}, 
   cover: {
     type: DataTypes.STRING,
     allowNull: true,
