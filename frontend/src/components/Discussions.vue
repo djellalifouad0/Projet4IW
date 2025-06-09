@@ -1,5 +1,8 @@
 <template>  <div class="discussions-page">
-    <div class="discussions-list">
+    <div class="discussions-list" :class="{ 'mobile-hidden': selectedConversation && isMobile }">
+      <div class="discussions-header">
+        <h2>Discussions</h2>
+      </div>
       <div v-if="loading" class="loading">Chargement...</div>
       <div v-if="error" class="error">{{ error }}</div><div v-for="conv in conversations" :key="conv.id" class="discussion-item" :class="{ active: selectedConversation && selectedConversation.id === conv.id }" @click="selectConversation(conv)">
         <div class="avatar-container">
@@ -9,9 +12,15 @@
           <div class="name">{{ conv.name }}</div>
           <div class="last-message">{{ conv.lastMessage }}</div>
         </div>
-      </div>
-    </div>
-    <div class="chat-window">      <template v-if="selectedConversation">        <div class="chat-header">
+      </div>    </div>
+    <div class="chat-window" :class="chatWindowClasses">
+      <template v-if="selectedConversation">
+        <div class="chat-header">
+          <button v-if="isMobile" @click="goBackToDiscussions" class="back-button">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M19 12H5M12 19l-7-7 7-7"/>
+            </svg>
+          </button>
           <div class="avatar-container">
             <img :src="selectedConversation.avatar" class="avatar" />
             <div v-if="isUserOnline(selectedConversation.userId)" class="online-indicator"></div>          </div>
@@ -20,7 +29,7 @@
             <span v-if="isUserOnline(selectedConversation.userId)" class="status online">En ligne</span>
             <span v-else class="status offline">Hors ligne</span>
           </div>
-        </div>        <!-- Section Rendez-vous en attente -->
+        </div><!-- Section Rendez-vous en attente -->
         <div v-if="pendingAppointments.length > 0" class="pending-appointments" :class="{ collapsed: !showPendingAppointments }">
           <div class="pending-appointments-header" @click="showPendingAppointments = !showPendingAppointments">
             <div class="pending-appointments-title">
@@ -98,13 +107,18 @@
           >
             <img src="../assets/icons/agenda.svg" class="appointment-icon" alt="Calendar">
           </button>
-          <button @click="sendMessage" :disabled="!newMessage.trim()">Envoyer</button>
+          <button @click="sendMessage" :disabled="!newMessage.trim()" class="send-btn">
+            <span v-if="!isMobile" class="send-text">Envoyer</span>
+            <svg v-else class="send-icon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="m22 2-7 20-4-9-9-4z"/>
+              <path d="m22 2-11 11"/>
+            </svg>
+          </button>
         </div>
-      </template>
-      <template v-else>
-        <div class="chat-placeholder">
+      </template>      <template v-else>
+        <div class="chat-placeholder" :class="{ 'mobile-hidden': isMobile }">
           <p>Sélectionnez une discussion pour commencer à échanger !</p>
-        </div>      </template>
+        </div></template>
     </div>
 
     <!-- Modal pour créer un rendez-vous -->
@@ -179,6 +193,7 @@ import api from '../services/api'
 import socketService from '../services/socket'
 import unreadMessagesService from '../services/unreadMessages'
 import NotificationService from '../services/notificationService'
+import eventBus from '../services/eventBus'
 
 export default {
   name: 'Discussions',  data() {    return {      conversations: [],
@@ -191,15 +206,16 @@ export default {
       typingTimeout: null,
       onlineUsers: new Set(),
       reconnecting: false,
+      isMobile: false, // Détection mobile
       showAppointmentModal: false,
       appointmentForm: {
         title: '',
         date: '',
         time: '',
         location: '',
-        description: ''
-      },      conversationAppointments: [], // Nouveau: rendez-vous de la conversation actuelle
-      showPendingAppointments: true // Nouveau: contrôle l'affichage des rendez-vous
+        description: ''      },      conversationAppointments: [], // Nouveau: rendez-vous de la conversation actuelle
+      showPendingAppointments: true, // Nouveau: contrôle l'affichage des rendez-vous
+      isNavbarHidden: false // Nouvel état pour tracker si la navbar est cachée
     }
   },
   computed: {
@@ -211,15 +227,23 @@ export default {
       return this.appointmentForm.title.trim() && 
              this.appointmentForm.date && 
              this.appointmentForm.time;
-    },
-    // Nouveau: rendez-vous en attente pour la conversation actuelle
+    },    // Nouveau: rendez-vous en attente pour la conversation actuelle
     pendingAppointments() {
       return this.conversationAppointments.filter(appointment => 
         appointment.status === 'pending'
       );
+    },
+    // Classes CSS pour la fenêtre de chat en mode mobile
+    chatWindowClasses() {
+      return {
+        'mobile-visible': this.selectedConversation && this.isMobile,
+        'mobile-hidden': !this.selectedConversation && this.isMobile,
+        'navbar-hidden': this.isNavbarHidden && this.isMobile && this.selectedConversation
+      };
     }
-  },
-  async created() {
+  },async created() {
+    this.checkMobile();
+    window.addEventListener('resize', this.checkMobile);
     await this.initializeWebSocket();
     await this.loadConversations();
   },
@@ -240,6 +264,8 @@ export default {
     unreadMessagesService.cleanup();
     // Déconnecter le WebSocket
     socketService.disconnect();
+    // Nettoyer l'event listener de resize
+    window.removeEventListener('resize', this.checkMobile);
   },watch: {
     // Surveiller les changements de route pour recharger les conversations
     '$route'() {
@@ -296,6 +322,11 @@ export default {
       try {
         this.selectedConversation = conv;
         this.error = '';
+          // Émettre l'événement pour cacher la navbar en mode mobile
+        if (this.isMobile) {
+          this.isNavbarHidden = true;
+          eventBus.emit('discussion-mobile-chat-opened');
+        }
         
         // Informer le service unreadMessages de la conversation active
         unreadMessagesService.setActiveConversation(conv.id);
@@ -669,11 +700,23 @@ export default {
         this.error = 'Erreur lors de la création du rendez-vous';
         console.error('Error creating appointment:', error);
       }
-    },
-    // Méthode pour naviguer vers le profil d'un utilisateur
+    },    // Méthode pour naviguer vers le profil d'un utilisateur
     goToProfile(profileToken) {
       if (profileToken) {
         this.$router.push(`/profile/${profileToken}`);
+      }
+    },
+    
+    // Méthodes pour la responsivité mobile
+    checkMobile() {
+      this.isMobile = window.innerWidth <= 902;
+    },    goBackToDiscussions() {
+      this.selectedConversation = null;
+      
+      // Émettre l'événement pour réafficher la navbar en mode mobile
+      if (this.isMobile) {
+        this.isNavbarHidden = false;
+        eventBus.emit('discussion-mobile-chat-closed');
       }
     },
   }
@@ -705,6 +748,19 @@ export default {
   height: 100%;
   min-height: 0;
   overflow-y: auto;
+}
+
+.discussions-header {
+  padding: 0 22px 16px 22px;
+  border-bottom: 1px solid #f0d08a;
+  margin-bottom: 8px;
+}
+
+.discussions-header h2 {
+  margin: 0;
+  color: #28303F;
+  font-size: 1.3rem;
+  font-weight: 600;
 }
 .loading {
   text-align: center;
@@ -805,6 +861,7 @@ export default {
   min-width: 0;
   height: 100%;
   min-height: 0;
+  position: relative; /* Nécessaire pour le positionnement absolu des rendez-vous */
 }
 .chat-header {
   display: flex;
@@ -813,13 +870,33 @@ export default {
   padding: 18px 24px;
   border-bottom: 1.5px solid #eee;
 }
+
+.back-button {
+  background: none;
+  border: none;
+  color: #28303F;
+  cursor: pointer;
+  padding: 8px;
+  border-radius: 8px;
+  display: none; /* Hidden by default on desktop */
+  align-items: center;
+  justify-content: center;
+  transition: background 0.2s;
+  margin-right: 8px;
+}
+
+.back-button:hover {
+  background: #f5f5f5;
+}
 .chat-messages {
   flex: 1;
   padding: 18px 24px;
+  padding-top: 100px; /* Espace pour les rendez-vous en position absolue */
   overflow-y: auto;
   display: flex;
   flex-direction: column;
   gap: 10px;
+  min-height: 200px; /* Hauteur minimale pour éviter les problèmes */
 }
 .chat-message {
   max-width: 70%;
@@ -968,6 +1045,43 @@ export default {
   cursor: not-allowed !important;
 }
 
+/* Bouton d'envoi */
+.send-btn {
+  background: #ECBC76 !important;
+  color: #28303F !important;
+  border: none;
+  border-radius: 10px;
+  padding: 10px 22px;
+  font-size: 1rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 48px;
+  height: 48px;
+}
+
+.send-btn:hover:not(:disabled) {
+  background: #e4a94f !important;
+}
+
+.send-btn:disabled {
+  background: #ccc !important;
+  cursor: not-allowed !important;
+}
+
+.send-text {
+  font-weight: 600;
+}
+
+.send-icon {
+  width: 20px;
+  height: 20px;
+  stroke: currentColor;
+}
+
 /* Modal styles */
 .modal-overlay {
   position: fixed;
@@ -1087,16 +1201,37 @@ export default {
   background: linear-gradient(135deg, #4A90E2, #357ABD) !important;
 }
 
-/* Styles pour les rendez-vous en attente */
+/* SOLUTION POSITION ABSOLUTE : Les rendez-vous flottent et ne prennent jamais de place */
 .pending-appointments {
+  position: absolute;
+  top: 93px; /* Juste en dessous du header */
+  left: 0;
+  right: 0;
+  z-index: 50;
   background: #fff9e6;
   border-bottom: 1px solid #f0d08a;
   transition: all 0.3s ease;
+  max-height: 300px;
   overflow: hidden;
 }
 
 .pending-appointments.collapsed {
-  max-height: 50px;
+  max-height: 50px; /* Garde juste le header visible pour pouvoir cliquer */
+}
+
+.pending-appointments.collapsed .pending-appointments-content {
+  display: none; /* Cache seulement le contenu, pas le header */
+}
+
+/* Quand il n'y a pas de rendez-vous, on cache complètement */
+.pending-appointments:empty {
+  display: none !important;
+}
+
+/* Ajuster le padding des messages selon l'état des rendez-vous */
+.chat-window:not(:has(.pending-appointments)) .chat-messages,
+.chat-window:has(.pending-appointments.collapsed) .chat-messages {
+  padding-top: 18px; /* Padding normal quand pas de rendez-vous ou collapsés */
 }
 
 .pending-appointments-header {
@@ -1295,85 +1430,540 @@ export default {
   }
 }
 
+@media (max-width: 1350px) {
+  .discussions-page {
+    max-width: 95%;
+    padding: 15px;
+    gap: 20px;
+    height: calc(100vh - 100px);
+  }
+}
+
 @media (max-width: 1200px) {
   .discussions-page {
     max-width: 95%;
     padding: 15px;
     gap: 20px;
-  }
-}
-
-@media (max-width: 900px) {
-  .discussions-page {
-    flex-direction: column;
-    gap: 15px;
-    padding: 15px;
-    height: calc(100vh - 100px); /* Adjust for mobile navbar */
+    height: calc(100vh - 100px);
   }
   
   .discussions-list {
-    width: 100%;
-    height: 35vh;
-    min-height: 250px;
+    width: 280px;
   }
   
-  .chat-window {
+  .appointment-modal {
+    width: 85%;
+    max-width: 450px;
+  }
+}
+
+@media (max-width: 902px) {
+  .discussions-page {
+    flex-direction: column;
+    gap: 0;
+    padding: 10px;
+    height: calc(100vh - 80px); /* Account for bottom navbar */
+    max-width: 100%;
+  }
+    .discussions-list {
     width: 100%;
-    height: 60vh;
-    min-height: 300px;
+    height: calc(100vh - 96px); /* Prend toute la hauteur disponible sur mobile */
+    min-height: calc(100vh - 96px);
+    border-radius: 12px;
+    margin-bottom: 0;
+    transition: transform 0.3s ease;
+  }
+  
+  .discussions-list.mobile-hidden {
+    transform: translateX(-100%);
+    position: absolute;
+    z-index: -1;
+    opacity: 0;
+  }  .chat-window {
+    width: 100%;
+    height: 80vh;
+    min-height: 350px;
+    border-radius: 0 0 12px 12px;
+    border-top: 1px solid #ddd;
+    transition: transform 0.3s ease;
+  }.chat-window.mobile-visible {
+    width: 100vw; /* Force full viewport width */
+    height: calc(100vh - 80px);
+    border-radius: 0; /* Remove border radius for full coverage */
+    border-top: none;
+    display: flex;
+    flex-direction: column;
+    position: fixed; /* Fix position to cover entire screen */
+    top: 0;
+    left: 0;
+    z-index: 100;
+    margin: 0;
+    padding: 0;
+  }
+    /* When navbar is hidden in mobile chat mode */
+  .chat-window.mobile-visible.navbar-hidden {
+    height: 100vh;
+    width: 100vw;
+    position: fixed;
+    top: 0;
+    left: 0;
+    border-radius: 0;
+  }
+    .chat-window.mobile-visible .chat-messages {
+    flex: 1;
+    overflow-y: auto;
+    margin-bottom: 0;
+    padding-bottom: 20px; /* Reduced padding for tight spacing */
+    height: calc(100vh - 160px); /* viewport - navbar(80px) - input field space(80px) */
+    max-height: calc(100vh - 160px);
+    min-height: 200px;
+  }
+  /* When navbar is hidden, messages take full height minus input */  .chat-window.mobile-visible.navbar-hidden .chat-messages {    height: 80vh !important;
+    max-height: 80vh !important;
+    padding-bottom: 10px;
+  }
+    .chat-window.mobile-visible .chat-input {
+    position: fixed;
+    bottom: 80px; /* Position just above the mobile navbar */
+    left: 0;
+    right: 0;
+    background: white;
+    border-top: 1px solid #eee;
+    z-index: 101;
+    flex-shrink: 0;
+    margin: 0;
+    padding: 14px 18px;
+  }
+  
+  /* When navbar is hidden, position input at very bottom */
+  .chat-window.mobile-visible.navbar-hidden .chat-input {
+    bottom: 0; /* At the very bottom when navbar is hidden */
+    padding: 12px 16px; /* Slightly reduced padding */
+  }
+    .back-button {
+    display: flex !important;
+  }
+  
+  .mobile-hidden {
+    display: none !important;
+  }
+  
+  .mobile-visible {
+    display: block !important;
+  }
+  
+  .chat-header {
+    padding: 14px 18px;
+    border-bottom: 1px solid #eee;
+  }
+    .chat-messages {
+    padding: 14px 18px;
+    padding-top: 80px; /* Espace ajusté pour mobile avec rendez-vous */
+    gap: 8px;
+  }
+  
+  /* Ajuster le padding pour mobile selon l'état des rendez-vous */
+  .chat-window:not(:has(.pending-appointments)) .chat-messages,
+  .chat-window:has(.pending-appointments.collapsed) .chat-messages {
+    padding-top: 14px; /* Padding normal mobile quand pas de rendez-vous ou collapsés */
+  }
+  
+  .chat-input {
+    padding: 14px 18px;
+    gap: 12px;
+  }
+  
+  .chat-input input {
+    font-size: 16px; /* Prevents zoom on iOS */
+    padding: 12px 14px;
+  }
+  
+  .chat-input button {
+    padding: 12px 18px;
+    white-space: nowrap;
+  }
+  
+  .appointment-btn {
+    width: 44px !important;
+    height: 44px !important;
+    min-width: 44px;
+  }
+  
+  .appointment-icon {
+    width: 20px;
+    height: 20px;
+  }
+    .chat-message {
+    max-width: 85%;
+    padding: 12px 16px;
+    font-size: 15px;
+    line-height: 1.4;
+  }
+  
+  .pending-appointments {
+    top: 69px; /* Position ajustée pour le header mobile plus petit */
+    border-radius: 8px;
+  }
+  
+  .pending-appointment-card {
+    margin: 8px 12px;
+  }
+  
+  .pending-appointments-header {
+    padding: 14px 16px;
+  }
+  
+  .pending-appointments-content {
+    padding: 0 16px 14px 16px;
+  }
+  
+  .pending-appointment-card {
+    padding: 14px;
+    margin-bottom: 12px;
+  }
+  
+  .appointment-actions {
+    flex-direction: column;
+    gap: 8px;
+    margin-top: 12px;
+  }
+  
+  .accept-btn, .decline-btn {
+    width: 100%;
+    justify-content: center;
+    padding: 10px 16px;
+    font-size: 14px;
   }
 }
 
 @media (max-width: 600px) {
   .discussions-page {
-    padding: 10px;
-    gap: 10px;
-    height: calc(100vh - 80px); /* Account for bottom navbar on mobile */
+    padding: 8px;
+    gap: 0;
+    height: calc(100vh - 74px); /* Account for mobile bottom navbar */
   }
-  
-  .discussions-list {
-    height: 30vh;
-    min-height: 200px;
+    .discussions-list {
+    height: calc(100vh - 90px); /* Prend toute la hauteur disponible */
+    min-height: calc(100vh - 90px);
     padding: 12px 0;
+    border-radius: 12px;
   }
   
   .chat-window {
     height: 65vh;
-    min-height: 250px;
+    min-height: 300px;
+    border-radius: 0 0 8px 8px;
   }
   
   .discussion-item {
-    padding: 10px 15px;
+    padding: 12px 16px;
+    margin: 0 8px;
+    border-radius: 8px;
+  }
+  
+  .discussion-item .avatar {
+    width: 45px;
+    height: 45px;
+  }
+  
+  .discussion-item .info .name {
+    font-size: 15px;
+    font-weight: 600;
+  }
+  
+  .discussion-item .info .last-message {
+    font-size: 13px;
+    line-height: 1.3;
   }
   
   .chat-header {
     padding: 12px 16px;
   }
   
+  .chat-header .avatar {
+    width: 40px;
+    height: 40px;
+  }
+  
+  .chat-header .name {
+    font-size: 16px;
+    font-weight: 600;
+  }
+  
+  .chat-header .status {
+    font-size: 13px;
+  }
+  
   .chat-messages {
+    padding: 12px 16px;
+    gap: 6px;
+  }
+  .chat-input {
+    padding: 12px 16px;
+    gap: 10px;
+  }
+  .chat-window.mobile-visible .chat-input {
+    position: fixed;
+    bottom: 85px; /* Positioned just above bottom navbar for 600px screens */
+    left: 0;
+    right: 0;
+    background: white;
+    border-top: 1px solid #eee;
+    z-index: 101; /* Higher than chat window */
+    margin: 0;
     padding: 12px 16px;
   }
   
-  .chat-input {
+  /* When navbar is hidden at 600px breakpoint */
+  .chat-window.mobile-visible.navbar-hidden .chat-input {
+    bottom: 0; /* At the very bottom when navbar is hidden */
+    padding: 10px 14px;
+  }
+  
+  .chat-window.mobile-visible.navbar-hidden {
+    height: 100vh;
+  }
+    .chat-window.mobile-visible.navbar-hidden .chat-messages {
+    height: calc(100vh - 80px); /* Full viewport minus input field (estimate 80px total) */
+    max-height: calc(100vh - 80px);
+    padding-bottom: 15px; /* Tight spacing */
+  }
+  
+  .chat-input input {
+    font-size: 16px; /* Prevents zoom on iOS */
+    padding: 12px 14px;
+    border-radius: 8px;
+  }
+  
+  .chat-input button {
     padding: 12px 16px;
+    border-radius: 8px;
+    font-size: 14px;
+  }
+  
+  .appointment-btn {
+    width: 42px !important;
+    height: 42px !important;
+    min-width: 42px;
   }
   
   .appointment-modal {
     width: 95%;
     max-width: none;
-    margin: 20px;
+    margin: 10px;
+    padding: 20px;
+    border-radius: 12px;
+    max-height: 85vh;
+  }
+  
+  .appointment-modal h3 {
+    font-size: 1.2rem;
+    margin-bottom: 16px;
+  }
+  
+  .form-group {
+    margin-bottom: 16px;
+  }
+  
+  .form-group label {
+    font-size: 14px;
+    margin-bottom: 6px;
+  }
+  
+  .form-group input,
+  .form-group textarea {
+    font-size: 16px; /* Prevents zoom on iOS */
+    padding: 12px;
+    border-radius: 8px;
+  }
+  
+  .modal-actions {
+    flex-direction: column;
+    gap: 10px;
+  }
+  
+  .modal-actions button {
+    width: 100%;
+    padding: 12px;
+    font-size: 16px;
+  }
+  
+  .pending-appointments {
+    /* margin: 6px 8px; */
+    border-radius: 6px;
   }
   
   .pending-appointments-header {
-    padding: 12px 16px;
-  }
-  
-  .pending-appointments-content {
-    padding: 0 16px 12px 16px;
+    padding: 12px 14px;
   }
   
   .pending-appointments-title {
-    font-size: 0.9rem;
+    font-size: 0.85rem;
+  }
+  
+  .pending-appointments-content {
+    padding: 0 14px 12px 14px;
+  }
+  
+  .pending-appointment-card {
+    padding: 12px;
+    margin-bottom: 10px;
+    border-radius: 6px;
+  }
+  
+  .appointment-title {
+    font-size: 14px;
+    font-weight: 600;
+  }
+  
+  .appointment-date,
+  .appointment-location,
+  .appointment-description,
+  .appointment-requester {
+    font-size: 13px;
+    line-height: 1.3;
+  }
+  
+  .typing-indicator {
+    font-size: 13px;
+    padding: 6px 10px;
+  }
+  
+  .online-indicator {
+    width: 12px;
+    height: 12px;
+    bottom: 2px;
+    right: 2px;
+  }
+}
+
+@media (max-width: 480px) {  .discussions-page {
+    padding: 5px;
+    height: 80vh;
+  }
+    .discussions-list {
+    height: calc(100vh - 80px); /* Prend toute la hauteur disponible */
+    min-height: calc(100vh - 80px);
+    padding: 8px 0;
+  }
+  
+  .chat-window {
+    height: 68vh;
+    min-height: 280px;
+  }  .chat-window.mobile-visible {    width: 100vw;
+    height: 80vh;
+    display: flex;
+    flex-direction: column;
+    position: fixed;
+    top: 0;
+    left: 0;
+    z-index: 100;
+    border-radius: 0;
+    margin: 0;
+    padding: 0;
+  }
+  .chat-window.mobile-visible .chat-messages {
+    flex: 1;
+    overflow-y: auto;
+    height: calc(100vh - 160px); /* viewport - navbar(90px) - input field space(70px) */
+    max-height: calc(100vh - 160px);
+    min-height: 180px;
+    padding-bottom: 15px; /* Tight spacing */
+  }.chat-window.mobile-visible .chat-input {
+    position: fixed;
+    bottom: 90px; /* Positioned just above bottom navbar for 480px screens */
+    left: 0;
+    right: 0;
+    background: white;
+    border-top: 1px solid #eee;
+    z-index: 101;
+    flex-shrink: 0;
+    margin: 0;
+    padding: 10px 12px;
+  }
+    /* When navbar is hidden at 480px breakpoint */
+  .chat-window.mobile-visible.navbar-hidden .chat-input {
+    bottom: 0; /* At the very bottom when navbar is hidden */
+    padding: 8px 10px;
+  }
+  
+  .chat-window.mobile-visible.navbar-hidden {
+    height: 100vh;
+    width: 100vw;
+    position: fixed;
+    top: 0;
+    left: 0;
+    border-radius: 0;
+  }  .chat-window.mobile-visible.navbar-hidden .chat-messages {    height: 80vh;
+    max-height: 80vh;
+    padding-bottom: 10px; /* Very tight spacing */
+  }
+  
+  .discussion-item {
+    padding: 10px 12px;
+    margin: 0 6px;
+  }
+  
+  .discussion-item .avatar {
+    width: 42px;
+    height: 42px;
+  }
+  
+  .chat-header {
+    padding: 10px 12px;
+  }
+  
+  .chat-messages {
+    padding: 10px 12px;
+  }
+    .chat-input {
+    padding: 10px 12px;
+    gap: 8px;
+  }
+  
+  .chat-input input {
+    padding: 10px 12px;
+    font-size: 16px;
+  }
+  
+  .chat-input button {
+    padding: 10px 14px;
+    font-size: 13px;
+  }
+  
+  .appointment-btn {
+    width: 40px !important;
+    height: 40px !important;
+    min-width: 40px;
+  }
+  
+  .appointment-icon {
+    width: 18px;
+    height: 18px;
+  }
+  
+  .chat-message {
+    max-width: 90%;
+    padding: 10px 14px;
+    font-size: 14px;
+  }
+  
+  .appointment-modal {
+    margin: 5px;
+    padding: 16px;
+    max-height: 90vh;
+  }
+  
+  /* .pending-appointments {
+    margin: 4px 6px;
+  } */
+  
+  .pending-appointments-header {
+    padding: 10px 12px;
+  }
+  
+  .pending-appointments-content {
+    padding: 0 12px 10px 12px;
   }
 }
 </style>
