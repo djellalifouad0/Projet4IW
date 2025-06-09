@@ -63,11 +63,14 @@
         </span>
         <!-- Suppression de l'heure ici -->
       </div>
-    </div>
-
-    <!-- MODALE -->
+    </div>    <!-- MODALE -->
     <div v-if="showModal" class="modal-overlay" @click="closeModal">
-      <div :class="['modal-card', paid ? 'card-paid' : 'card-orange']" @click.stop>        <div class="card-header">
+      <div :class="['modal-card', paid ? 'card-paid' : 'card-orange']" @click.stop>        <!-- Bouton de fermeture mobile -->
+        <button class="mobile-close-btn" @click="closeModal" aria-label="Fermer">
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <path d="M19 12H5M12 19L5 12L12 5" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+          </svg>
+        </button><div class="card-header">
           <img class="avatar" :src="avatar || `https://ui-avatars.com/api/?name=${encodeURIComponent(name || 'User')}&background=ECBC76&color=fff&size=64&bold=true`" alt="avatar" />          <div>
             <div class="name" @click.stop="handleProfileClick" style="cursor:pointer;">
               {{ name }}
@@ -739,9 +742,9 @@ export default {
 /* MODALE */
 .modal-overlay {
   position: fixed;
-  z-index: 99;
+  z-index: 9999;
   inset: 0;
-  background: rgba(0,0,0,0.36);
+  background: rgba(0,0,0,0.8);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -764,6 +767,22 @@ export default {
   display: flex;
   flex-direction: column;
   background: #fff !important;
+}
+
+/* Cacher le bouton de fermeture sur desktop */
+.mobile-close-btn {
+  display: none;
+}
+
+/* Reset pour forcer le fullscreen sur mobile */
+@media (max-width: 600px) {
+  html, body {
+    overflow-x: hidden !important;
+  }
+  
+  .modal-overlay {
+    overflow: hidden !important;
+  }
 }
 /* Espaces verticaux dans la modale */
 .modal-card .card-header {
@@ -1096,8 +1115,7 @@ export default {
   }
 }
 @media (max-width: 600px) {
-  .card,
-  .modal-card {
+  .card {
     width: 85vw;
     max-width: 100%;
     padding: 18px 12px 18px 12px;
@@ -1106,12 +1124,106 @@ export default {
     box-sizing: border-box;
     margin-bottom: 10px;
   }
+  
+  .modal-card {
+    width: 100vw !important;
+    height: 100vh !important;
+    max-width: 100vw !important;
+    max-height: 100vh !important;
+    min-width: 100vw !important;
+    min-height: 100vh !important;
+    border-radius: 0 !important;
+    padding: 70px 15px 15px 15px !important;
+    box-shadow: none !important;
+    position: fixed !important;
+    top: 0 !important;
+    left: 0 !important;
+    right: 0 !important;
+    bottom: 0 !important;
+    overflow-y: auto;
+    animation: slideInFromBottom 0.3s ease-out;
+    background: #fff !important;
+    margin: 0 !important;
+    border: none !important;
+    box-sizing: border-box !important;
+  }
+  
+  @keyframes slideInFromBottom {
+    from {
+      transform: translateY(100%);
+      opacity: 0;
+    }
+    to {
+      transform: translateY(0);
+      opacity: 1;
+    }
+  }
+  .modal-overlay {
+    align-items: stretch !important;
+    justify-content: stretch !important;
+    background: rgba(0,0,0,0.8) !important;
+    z-index: 9999 !important;
+    padding: 0 !important;
+    margin: 0 !important;
+    width: 100vw !important;
+    height: 100vh !important;
+    position: fixed !important;
+    top: 0 !important;
+    left: 0 !important;
+    right: 0 !important;
+    bottom: 0 !important;
+  }  /* Bouton de fermeture mobile */
+  .mobile-close-btn {
+    display: flex;
+    position: fixed;
+    top: 15px;
+    left: 15px;
+    width: 40px;
+    height: 40px;
+    background: transparent;
+    border: none;
+    cursor: pointer;
+    z-index: 10001;
+    transition: all 0.2s ease;
+    color: #f59c1a;
+    align-items: center;
+    justify-content: center;
+  }
+    .mobile-close-btn:hover {
+    color: #A64530;
+  }
+  
+  .mobile-close-btn svg {
+    width: 24px;
+    height: 24px;
+  }
+  
+  /* Ajustements pour le contenu de la modale mobile */
+  .modal-card .card-header {
+    margin-bottom: 15px;
+  }
+  
+  .modal-card .card-body {
+    margin-bottom: 18px;
+  }
+  
+  .modal-card .card-footer {
+    margin-bottom: 15px;
+  }
+  
   .modal-comments {
-    max-height: 40vh;
+    max-height: 55vh;
+    min-height: 200px;
+  }
+  
+  .comments-scroll-area {
+    max-height: calc(55vh - 70px);
+  }.modal-comments {
+    max-height: 60vh;
     min-height: 200px;
   }
   .comments-scroll-area {
-    max-height: calc(40vh - 70px);
+    max-height: calc(60vh - 70px);
   }
   .comments-footer {
     padding: 12px 0 0 0;

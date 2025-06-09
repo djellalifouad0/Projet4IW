@@ -1,6 +1,5 @@
 <template>
-  <div class="carte-page">
-    <div class="carte-header-fixed">
+  <div class="carte-page">    <div class="carte-header-fixed">
       <div class="carte-header-inner">
         <div class="carte-logo-bar" @click="$router.push('/')" style="cursor:pointer">
           <img
@@ -11,13 +10,22 @@
           <span class="carte-brand">SkillSwap</span>
         </div>
         <SearchBar class="carte-search" />
+        
+        <!-- Bouton toggle mobile dans le header -->
+        <button 
+          class="mobile-toggle-btn-header" 
+          @click="toggleMobileList"
+          :class="{ active: showMobileList }"
+          title="Afficher/masquer les posts"
+        >
+          <span class="toggle-icon">{{ showMobileList ? '✕' : '☰' }}</span>
+        </button>
       </div>
-    </div>
-    <div class="carte-content">
-      <div class="carte-list">
+    </div>    <div class="carte-content">
+      <div class="carte-list" :class="{ 'mobile-hidden': !showMobileList }">
         <button class="btn-retour" @click="$router.push('/')">
           ← Retour à l'accueil
-        </button>        <PostCard
+        </button><PostCard
           v-for="(post, i) in posts"
           :key="i"
           :name="post.name"
@@ -65,11 +73,11 @@ import NotificationService from '../services/notificationService'
 
 export default {
   name: 'Carte',
-  components: { PostCard, SearchBar },
-  data() {
+  components: { PostCard, SearchBar },  data() {
     return {
       posts: [],
-      mapUrl: 'https://www.openstreetmap.org/export/embed.html?bbox=2.3775%2C48.8495%2C2.3865%2C48.8535&layer=mapnik'
+      mapUrl: 'https://www.openstreetmap.org/export/embed.html?bbox=2.3775%2C48.8495%2C2.3865%2C48.8535&layer=mapnik',
+      showMobileList: false
     }
   },
   async mounted() {
@@ -243,10 +251,14 @@ export default {
         this.$forceUpdate();
       }
     },
-    
-    handlePostDeleted(postId) {
+      handlePostDeleted(postId) {
       // Suppression instantanée du post de la liste
       this.posts = this.posts.filter(p => p.postId !== postId);
+    },
+    
+    // === GESTION DU TOGGLE MOBILE ===
+    toggleMobileList() {
+      this.showMobileList = !this.showMobileList;
     },
   },
 }
@@ -260,7 +272,7 @@ export default {
   position: fixed;
   top: 0;
   left: 0;
-  z-index: 10;
+  z-index: 0;
   background: #fefcf6;
   box-shadow: 0 2px 16px #0001;
   padding-top: 20px;
@@ -332,6 +344,43 @@ export default {
   justify-content: stretch;
   padding: 0;
 }
+
+/* === BOUTON TOGGLE MOBILE DANS LE HEADER === */
+.mobile-toggle-btn-header {
+  display: none;
+  align-items: center;
+  justify-content: center;
+  width: 40px;
+  height: 40px;
+  border-radius: 8px;
+  background: #C6553B;
+  border: none;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.2);
+  cursor: pointer;
+  transition: all 0.2s ease;
+  margin-left: 15px;
+  flex-shrink: 0;
+}
+
+.mobile-toggle-btn-header:hover {
+  background: #A64530;
+  transform: scale(1.05);
+}
+
+.mobile-toggle-btn-header.active {
+  background: #28303F;
+}
+
+.mobile-toggle-btn-header .toggle-icon {
+  color: white;
+  font-size: 16px;
+  font-weight: bold;
+}
+
+/* Ancien bouton mobile - maintenant caché */
+.mobile-toggle-btn {
+  display: none !important;
+}
 .btn-retour {
   background: #fff;
   color: #C6553B;
@@ -351,29 +400,211 @@ export default {
   background: #ECBC76;
   color: #fff;
 }
-@media (max-width: 1100px) {
+
+/* === RESPONSIVE DESIGN === */
+
+/* Large screens et desktop (1200px+) - Default styles above */
+
+/* Tablets et écrans moyens (768px - 1199px) */
+@media (max-width: 1199px) {
+  .carte-header-inner {
+    width: 100%;
+    padding: 0 20px;
+    gap: 20px;
+  }
+  
+  .carte-list {
+    width: 500px;
+  }
+}
+
+/* Tablettes en portrait et petits écrans (768px - 1023px) */
+@media (max-width: 1023px) {
+  .mobile-toggle-btn-header {
+    display: flex;
+  }
+  
   .carte-content {
     flex-direction: column;
     height: auto;
     position: relative;
     top: 0;
   }
-  .carte-list {
-    width: 100%;
-    height: auto;
-    border-right: none;
-    border-bottom: 2px solid #eee;
+  
+  .carte-page {
+    padding-top: 0;
   }
+    .carte-list {
+    position: fixed;
+    top: 140px;
+    left: 0;
+    width: 100vw;
+    height: calc(100vh - 140px);
+    z-index: 15;
+    background: #fff4e3;
+    transform: translateX(-100%);
+    transition: transform 0.3s ease;
+    border-right: none;
+    border-bottom: none;
+    overflow-y: auto;
+  }
+  
+  .carte-list:not(.mobile-hidden) {
+    transform: translateX(0);
+  }
+  
   .carte-map {
-    height: 400px;
+    width: 100vw;
+    height: calc(100vh - 140px);
+    position: fixed;
+    top: 140px;
+    left: 0;
   }
 }
-@media (max-width: 700px) {
-  .carte-list {
+
+/* Smartphones en paysage et petites tablettes (576px - 767px) */
+@media (max-width: 767px) {
+  .mobile-toggle-btn-header {
+    width: 36px;
+    height: 36px;
+    margin-left: 10px;
+  }
+  
+  .mobile-toggle-btn-header .toggle-icon {
+    font-size: 14px;
+  }
+  
+  .carte-header-fixed {
+    padding-top: 15px;
+    padding-bottom: 15px;
+  }
+  
+  .carte-header-inner {
+    gap: 15px;
+    padding: 0 15px;
+  }
+  
+  .carte-logo {
+    width: 40px;
+    height: 40px;
+  }
+  
+  .carte-brand {
+    font-size: 1.1rem;
+  }
+  
+  .carte-search {
+    max-width: none;
+  }
+    .carte-list {
+    top: 110px;
+    height: calc(100vh - 110px);
     padding: 15px;
   }
+  
   .carte-map {
-    height: 300px;
+    top: 110px;
+    height: calc(100vh - 110px);
+  }
+  
+  .btn-retour {
+    font-size: 1rem;
+    padding: 8px 18px;
+    margin-top: 10px;
+    margin-bottom: 15px;
+  }
+}
+
+/* Smartphones en portrait (jusqu'à 575px) */
+@media (max-width: 575px) {
+  .carte-header-inner {
+    flex-direction: row;
+    gap: 15px;
+    align-items: center;
+    justify-content: space-between;
+  }
+  
+  .carte-logo-bar {
+    justify-content: flex-start;
+    position: static;
+  }
+  
+  .mobile-toggle-btn-header {
+    position: static;
+    width: 32px;
+    height: 32px;
+    margin: 0;
+    border-radius: 6px;
+    transform: none;
+    flex-shrink: 0;
+  }
+  
+  .mobile-toggle-btn-header .toggle-icon {
+    font-size: 12px;
+  }
+  
+  .carte-search {
+    width: 100%;
+    margin-top: 10px;
+    order: 3;
+    flex-basis: 100%;
+  }
+  
+  .carte-header-inner {
+    flex-wrap: wrap;
+  }
+    .carte-list {
+    top: 160px;
+    height: calc(100vh - 160px);
+    padding: 12px;
+  }
+  
+  .carte-map {
+    top: 160px;
+    height: calc(100vh - 160px);
+  }
+  
+  .btn-retour {
+    font-size: 0.95rem;
+    padding: 8px 15px;
+    margin-top: 8px;
+    margin-bottom: 12px;
+  }
+}
+
+/* Très petits écrans (jusqu'à 400px) */
+@media (max-width: 400px) {
+  .mobile-toggle-btn-header {
+    width: 28px;
+    height: 28px;
+    border-radius: 4px;
+  }
+  
+  .mobile-toggle-btn-header .toggle-icon {
+    font-size: 10px;
+  }
+  
+  .carte-header-fixed {
+    padding-top: 10px;
+    padding-bottom: 10px;
+  }
+  
+  .carte-header-inner {
+    padding: 0 10px;
+  }
+  
+  .carte-logo {
+    width: 36px;
+    height: 36px;
+  }
+  
+  .carte-brand {
+    font-size: 1rem;
+  }
+    .carte-list {
+    top: 140px;
+    height: calc(100vh - 140px);
+    margin-bottom: 10px;
   }
 }
 </style>
