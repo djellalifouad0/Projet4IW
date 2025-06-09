@@ -272,11 +272,12 @@ export default {
   position: fixed;
   top: 0;
   left: 0;
-  z-index: 0;
-  background: #fefcf6;
-  box-shadow: 0 2px 16px #0001;
+  z-index: 100;
+  background: var(--bg-primary);
+  box-shadow: 0 2px 16px rgba(0, 0, 0, 0.1);
   padding-top: 20px;
   padding-bottom: 20px;
+  transition: background 0.3s ease, box-shadow 0.3s ease;
 }
 .carte-header-inner {
   width: 1200px;
@@ -294,13 +295,15 @@ export default {
 .carte-logo {
   width: 48px;
   height: 48px;
+  transition: filter 0.3s ease;
 }
 .carte-brand {
   font-family: 'Feather', 'Poppins', sans-serif;
   font-weight: 700;
   font-size: 1.3rem;
-  color: #C6553B;
+  color: var(--accent-primary);
   letter-spacing: 1px;
+  transition: color 0.3s ease;
 }
 .carte-search {
   flex: 1;
@@ -309,11 +312,12 @@ export default {
 .carte-page {
   width: 100vw;
   min-height: 100vh;
-  background: #fefcf6;
+  background: var(--bg-primary);
   display: flex;
   flex-direction: column;
   align-items: center;
   padding-top: 120px;
+  transition: background 0.3s ease;
 }
 .carte-content {
   display: flex;
@@ -326,7 +330,7 @@ export default {
 }
 .carte-list {
   width: 600px;
-  background: #fff4e3;
+  background: var(--card-bg);
   padding: 20px;
   display: flex;
   flex-direction: column;
@@ -334,15 +338,17 @@ export default {
   overflow-y: auto;
   height: 100%;
   border-right: none;
+  transition: background 0.3s ease;
 }
 .carte-map {
   flex: 1;
   height: 100%;
-  background: #f5f5f5;
+  background: var(--bg-secondary);
   display: flex;
   align-items: stretch;
   justify-content: stretch;
   padding: 0;
+  transition: background 0.3s ease;
 }
 
 /* === BOUTON TOGGLE MOBILE DANS LE HEADER === */
@@ -353,7 +359,7 @@ export default {
   width: 40px;
   height: 40px;
   border-radius: 8px;
-  background: #C6553B;
+  background: var(--accent-primary);
   border: none;
   box-shadow: 0 2px 8px rgba(0,0,0,0.2);
   cursor: pointer;
@@ -363,16 +369,16 @@ export default {
 }
 
 .mobile-toggle-btn-header:hover {
-  background: #A64530;
+  background: var(--accent-secondary);
   transform: scale(1.05);
 }
 
 .mobile-toggle-btn-header.active {
-  background: #28303F;
+  background: var(--text-primary);
 }
 
 .mobile-toggle-btn-header .toggle-icon {
-  color: white;
+  color: var(--bg-primary);
   font-size: 16px;
   font-weight: bold;
 }
@@ -382,9 +388,9 @@ export default {
   display: none !important;
 }
 .btn-retour {
-  background: #fff;
-  color: #C6553B;
-  border: 1.5px solid #ECBC76;
+  background: var(--bg-secondary);
+  color: var(--accent-secondary);
+  border: 1.5px solid var(--accent-primary);
   border-radius: 10px;
   padding: 10px 22px;
   font-size: 1.08rem;
@@ -392,13 +398,13 @@ export default {
   margin-top: 15px;
   margin-bottom: 18px;
   cursor: pointer;
-  box-shadow: 0 2px 8px #0001;
-  transition: background 0.18s, color 0.18s;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  transition: background 0.18s, color 0.18s, border 0.3s ease;
   width: 100%;
 }
 .btn-retour:hover {
-  background: #ECBC76;
-  color: #fff;
+  background: var(--accent-primary);
+  color: var(--text-primary);
 }
 
 /* === RESPONSIVE DESIGN === */
@@ -434,16 +440,16 @@ export default {
   .carte-page {
     padding-top: 0;
   }
-    .carte-list {
+  .carte-list {
     position: fixed;
     top: 140px;
     left: 0;
     width: 100vw;
     height: calc(100vh - 140px);
     z-index: 15;
-    background: #fff4e3;
+    background: var(--card-bg);
     transform: translateX(-100%);
-    transition: transform 0.3s ease;
+    transition: transform 0.3s ease, background 0.3s ease;
     border-right: none;
     border-bottom: none;
     overflow-y: auto;
@@ -616,7 +622,13 @@ export default {
     font-size: 0.9rem;
     padding: 6px 12px;
     margin-top: 5px;
-    margin-bottom: 10px;
+    margin-bottom: 10px;  }
+}
+
+/* Dark mode icon filter for logo */
+@media (prefers-color-scheme: dark) {
+  .carte-logo {
+    filter: var(--icon-filter, brightness(0) invert(1));
   }
 }
 </style>

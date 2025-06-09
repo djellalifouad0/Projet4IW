@@ -738,9 +738,9 @@ export default {
 }
 .discussions-list {
   width: 320px;
-  background: #fff4e3;
+  background: var(--card-bg);
   border-radius: 16px;
-  box-shadow: 0 2px 8px #0001;
+  box-shadow: var(--shadow);
   padding: 18px 0;
   display: flex;
   flex-direction: column;
@@ -748,32 +748,36 @@ export default {
   height: 100%;
   min-height: 0;
   overflow-y: auto;
+  transition: background-color 0.3s ease;
 }
 
 .discussions-header {
   padding: 0 22px 16px 22px;
-  border-bottom: 1px solid #f0d08a;
+  border-bottom: 1px solid var(--border-light);
   margin-bottom: 8px;
 }
 
 .discussions-header h2 {
   margin: 0;
-  color: #28303F;
+  color: var(--text-primary);
   font-size: 1.3rem;
   font-weight: 600;
+  transition: color 0.3s ease;
 }
 .loading {
   text-align: center;
-  color: #888;
+  color: var(--text-secondary);
   padding: 20px;
+  transition: color 0.3s ease;
 }
 .error {
-  color: #d00;
+  color: var(--danger);
   text-align: center;
   padding: 10px;
   margin: 0 18px;
-  background: #fee;
+  background: var(--bg-tertiary);
   border-radius: 8px;
+  transition: color 0.3s ease, background-color 0.3s ease;
 }
 .discussion-item {
   display: flex;
@@ -785,11 +789,11 @@ export default {
   transition: background 0.15s;
 }
 .discussion-item:hover {
-  background: #ffe7c2;
+  background: var(--hover-bg);
 }
 .discussion-item.active {
-  background: #ffe7c2;
-  box-shadow: 0 2px 8px #ecbc76aa;
+  background: var(--active-bg);
+  box-shadow: var(--shadow);
 }
 .avatar-container {
   position: relative;
@@ -809,31 +813,33 @@ export default {
   width: 48px;
   height: 48px;
   border-radius: 50%;
-  border: 2px solid #ecbc76;
+  border: 2px solid var(--primary-light);
 }
 .info {
   flex: 1;
 }
 .name {
   font-weight: 600;
-  color: #28303F;
+  color: var(--text-primary);
   font-size: 1.08rem;
+  transition: color 0.3s ease;
 }
 .clickable-name {
   cursor: pointer;
   transition: color 0.2s ease;
 }
 .clickable-name:hover {
-  color: #ECBC76;
+  color: var(--accent);
   text-decoration: underline;
 }
 .last-message {
-  color: #888;
+  color: var(--text-secondary);
   font-size: 0.97rem;
   margin-top: 2px;
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
+  transition: color 0.3s ease;
 }
 .user-info {
   display: flex;
@@ -852,9 +858,9 @@ export default {
 }
 .chat-window {
   flex: 1;
-  background: #fff;
+  background: var(--card-bg);
   border-radius: 16px;
-  box-shadow: 0 2px 8px #0001;
+  box-shadow: var(--shadow);
   display: flex;
   flex-direction: column;
   padding: 0 0 0 0;
@@ -862,31 +868,33 @@ export default {
   height: 100%;
   min-height: 0;
   position: relative; /* Nécessaire pour le positionnement absolu des rendez-vous */
+  transition: background-color 0.3s ease;
 }
 .chat-header {
   display: flex;
   align-items: center;
   gap: 14px;
   padding: 18px 24px;
-  border-bottom: 1.5px solid #eee;
+  border-bottom: 1.5px solid var(--border-color);
+  transition: border-color 0.3s ease;
 }
 
 .back-button {
   background: none;
   border: none;
-  color: #28303F;
+  color: var(--text-primary);
   cursor: pointer;
   padding: 8px;
   border-radius: 8px;
   display: none; /* Hidden by default on desktop */
   align-items: center;
   justify-content: center;
-  transition: background 0.2s;
+  transition: background 0.2s, color 0.3s ease;
   margin-right: 8px;
 }
 
 .back-button:hover {
-  background: #f5f5f5;
+  background: var(--hover-bg);
 }
 .chat-messages {
   flex: 1;
@@ -906,11 +914,13 @@ export default {
   margin-bottom: 4px;
   word-break: break-word;
   align-self: flex-start;
-  background: #f5f5f5;
+  background: var(--bg-tertiary);
+  color: var(--text-primary);
+  transition: background-color 0.3s ease, color 0.3s ease;
 }
 .chat-message.me {
-  background: #ecbc76;
-  color: #28303F;
+  background: var(--active-bg);
+  color: var(--text-primary);
   align-self: flex-end;
 }
 
@@ -960,24 +970,28 @@ export default {
   display: flex;
   gap: 8px;
   padding: 18px 24px;
-  border-top: 1.5px solid #eee;
+  border-top: 1.5px solid var(--border-color);
+  transition: border-color 0.3s ease;
 }
 .chat-input input {
   flex: 1;
   padding: 10px 16px;
   border-radius: 10px;
-  border: 1.5px solid #ecbc76;
+  border: 1.5px solid var(--input-border);
   font-size: 1rem;
   cursor: text;
+  background: var(--input-bg);
+  color: var(--text-primary);
+  transition: border-color 0.3s ease, background-color 0.3s ease, color 0.3s ease;
 }
 .chat-input input:disabled {
-  background: #f5f5f5;
-  color: #999;
+  background: var(--bg-tertiary);
+  color: var(--text-secondary);
   cursor: not-allowed;
 }
 .chat-input input:focus {
   outline: none;
-  border-color: #d4a562;
+  border-color: var(--input-focus);
   cursor: text;
 }
 .chat-input button {
@@ -1005,8 +1019,9 @@ export default {
   justify-content: center;
   padding: 18px 24px;
   text-align: center;
-  color: #888;
+  color: var(--text-secondary);
   font-size: 1.1rem;
+  transition: color 0.3s ease;
 }
 .message-status {
   font-size: 0.75rem;
@@ -1089,7 +1104,7 @@ export default {
   left: 0;
   right: 0;
   bottom: 0;
-  background: rgba(0, 0, 0, 0.5);
+  background: var(--modal-overlay);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -1097,7 +1112,7 @@ export default {
 }
 
 .appointment-modal {
-  background: white;
+  background: var(--modal-bg);
   border-radius: 16px;
   padding: 24px;
   width: 90%;
@@ -1105,12 +1120,14 @@ export default {
   max-height: 90vh;
   overflow-y: auto;
   box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
+  transition: background-color 0.3s ease;
 }
 
 .appointment-modal h3 {
   margin: 0 0 20px 0;
-  color: #28303F;
+  color: var(--text-primary);
   font-size: 1.4rem;
+  transition: color 0.3s ease;
 }
 
 .form-group {
@@ -1121,23 +1138,27 @@ export default {
   display: block;
   margin-bottom: 6px;
   font-weight: 600;
-  color: #28303F;
+  color: var(--text-primary);
+  transition: color 0.3s ease;
 }
 
 .form-group input,
 .form-group textarea {
   width: 100%;
   padding: 10px 12px;
-  border: 1.5px solid #ecbc76;
+  border: 1.5px solid var(--input-border);
   border-radius: 8px;
   font-size: 1rem;
   box-sizing: border-box;
+  background: var(--input-bg);
+  color: var(--text-primary);
+  transition: border-color 0.3s ease, background-color 0.3s ease, color 0.3s ease;
 }
 
 .form-group input:focus,
 .form-group textarea:focus {
   outline: none;
-  border-color: #d4a562;
+  border-color: var(--input-focus);
 }
 
 .form-group textarea {
@@ -1153,19 +1174,19 @@ export default {
 }
 
 .cancel-btn {
-  background: #f5f5f5;
-  color: #28303F;
+  background: var(--bg-tertiary);
+  color: var(--text-primary);
   border: none;
   border-radius: 8px;
   padding: 10px 20px;
   font-size: 1rem;
   font-weight: 600;
   cursor: pointer;
-  transition: background 0.15s;
+  transition: background 0.15s, color 0.3s ease;
 }
 
 .cancel-btn:hover {
-  background: #e0e0e0;
+  background: var(--hover-bg);
 }
 
 .submit-btn {
@@ -1208,8 +1229,8 @@ export default {
   left: 0;
   right: 0;
   z-index: 50;
-  background: #fff9e6;
-  border-bottom: 1px solid #f0d08a;
+  background: var(--card-bg);
+  border-bottom: 1px solid var(--border-color);
   transition: all 0.3s ease;
   max-height: 300px;
   overflow: hidden;
@@ -1245,16 +1266,17 @@ export default {
 }
 
 .pending-appointments-header:hover {
-  background: #f5f0d6;
+  background: var(--hover-bg);
 }
 
 .pending-appointments-title {
   font-weight: 600;
-  color: #b8860b;
+  color: var(--accent-secondary);
   font-size: 0.95rem;
   display: flex;
   align-items: center;
   gap: 8px;
+  transition: color 0.3s ease;
 }
 
 .toggle-appointments-btn {
@@ -1292,8 +1314,8 @@ export default {
 }
 
 .pending-appointment-card {
-  background: white;
-  border: 1px solid #e6cc80;
+  background: var(--bg-secondary);
+  border: 1px solid var(--border-color);
   border-radius: 8px;
   padding: 12px;
   margin-bottom: 8px;
@@ -1301,6 +1323,7 @@ export default {
   justify-content: space-between;
   align-items: flex-start;
   gap: 12px;
+  transition: background 0.3s ease, border 0.3s ease;
 }
 
 .pending-appointment-card:last-child {
@@ -1313,21 +1336,24 @@ export default {
 
 .appointment-title {
   font-weight: 600;
-  color: #28303F;
+  color: var(--text-primary);
   margin-bottom: 4px;
   font-size: 1rem;
+  transition: color 0.3s ease;
 }
 
 .appointment-date {
-  color: #b8860b;
+  color: var(--accent-secondary);
   font-weight: 500;
   font-size: 0.9rem;
   margin-bottom: 2px;
+  transition: color 0.3s ease;
 }
 
 .appointment-location {
-  color: #666;
+  color: var(--text-muted);
   font-size: 0.85rem;
+  transition: color 0.3s ease;
   margin-bottom: 2px;
 }
 

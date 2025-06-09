@@ -50,11 +50,12 @@ export default {
   padding: 18px 32px 18px 54px;
   border-radius: 18px;
   border: none;
-  background: #fff;
+  background: var(--input-bg);
   font-size: 1.18rem;
-  box-shadow: 0 2px 16px #0001;
-  color: #d48a2f;
+  box-shadow: 0 2px 16px rgba(0, 0, 0, 0.1);
+  color: var(--text-primary);
   font-weight: 500;
+  transition: background 0.3s ease, color 0.3s ease;
 }
 @media (max-width: 900px) {
   .search-input-wrapper {

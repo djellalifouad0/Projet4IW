@@ -1,4 +1,5 @@
 :root {
+  /* Light theme colors */
   --title-color: #C6553B;
   --primary-light: #ECBC76;
   --primary-bg: #FFF4E3;
@@ -8,11 +9,123 @@
   --danger: #be4b4b;
   --border-radius: 8px;
   --shadow: 0 4px 24px rgba(0, 0, 0, 0.1);
+  
+  /* Theme variables */
+  --bg-primary: #fefcf6;
+  --bg-secondary: #ffffff;
+  --bg-tertiary: #FFF4E3;
+  --text-primary: #28303F;
+  --text-secondary: #666666;
+  --text-muted: #888888;
+  --border-color: #e5e7eb;
+  --border-light: #f3f4f6;
+  --card-bg: #ffffff;
+  --navbar-bg: #ffffff;
+  --navbar-border: #e5e7eb;
+  --input-bg: #ffffff;
+  --input-border: #ECBC76;
+  --input-focus: #E48700;
+  --modal-bg: #ffffff;
+  --modal-overlay: rgba(0, 0, 0, 0.5);  --toast-bg: rgba(255, 255, 255, 0.95);  --dropdown-bg: #ffffff;
+  --hover-bg: #f5f5f5;
+  --active-bg: #ECBC76;
+  --accent-primary: #ECBC76;  --accent-secondary: #E48700;
+  --accent-light: #ffe1a1;
+  --error-bg: #fff3f3;
+  --error-border: #ffd6d6;
+  --success-bg: #f0f9ff;
+  --icon-filter: none;
+}
+
+/* Dark theme */
+.dark-mode {
+  --title-color: #ff8a65;
+  --primary-light: #d4a562;
+  --primary-bg: #1a1a1a;
+  --accent: #ffab40;
+  --dark: #e0e0e0;
+  --white: #121212;
+  --danger: #ef5350;
+  --shadow: 0 4px 24px rgba(0, 0, 0, 0.3);
+  
+  /* Dark theme variables */
+  --bg-primary: #121212;
+  --bg-secondary: #1e1e1e;
+  --bg-tertiary: #2a2a2a;
+  --text-primary: #e0e0e0;
+  --text-secondary: #b0b0b0;
+  --text-muted: #888888;
+  --border-color: #3a3a3a;
+  --border-light: #2a2a2a;
+  --card-bg: #1e1e1e;
+  --navbar-bg: #1e1e1e;
+  --navbar-border: #3a3a3a;
+  --input-bg: #2a2a2a;
+  --input-border: #d4a562;
+  --input-focus: #ffab40;
+  --modal-bg: #1e1e1e;
+  --modal-overlay: rgba(0, 0, 0, 0.7);
+  --toast-bg: rgba(30, 30, 30, 0.95);
+  --dropdown-bg: #2a2a2a;
+  --hover-bg: #2a2a2a;
+  --active-bg: #d4a562;
+  --accent-primary: #d4a562;
+  --accent-secondary: #ffab40;  --accent-light: #b8860b;
+  --error-bg: #2d1b1b;
+  --error-border: #4a1f1f;
+  --success-bg: #1e2a2e;
+  --icon-filter: brightness(0) saturate(100%) invert(100%);
+}
+
+/* Light theme (explicit) */
+.light-mode {
+  --title-color: #C6553B;
+  --primary-light: #ECBC76;
+  --primary-bg: #FFF4E3;
+  --accent: #E48700;
+  --dark: #28303F;
+  --white: #ffffff;
+  --danger: #be4b4b;
+  --shadow: 0 4px 24px rgba(0, 0, 0, 0.1);
+  
+  /* Light theme variables */
+  --bg-primary: #fefcf6;
+  --bg-secondary: #ffffff;
+  --bg-tertiary: #FFF4E3;
+  --text-primary: #28303F;
+  --text-secondary: #666666;
+  --text-muted: #888888;
+  --border-color: #e5e7eb;
+  --border-light: #f3f4f6;
+  --card-bg: #ffffff;
+  --navbar-bg: #ffffff;
+  --navbar-border: #e5e7eb;
+  --input-bg: #ffffff;
+  --input-border: #ECBC76;
+  --input-focus: #E48700;
+  --modal-bg: #ffffff;
+  --modal-overlay: rgba(0, 0, 0, 0.5);
+  --toast-bg: rgba(255, 255, 255, 0.95);
+  --dropdown-bg: #ffffff;
+  --hover-bg: #f5f5f5;
+  --active-bg: #ECBC76;
+  --accent-primary: #ECBC76;  --accent-secondary: #E48700;
+  --accent-light: #ffe1a1;
+  --error-bg: #fff3f3;
+  --error-border: #ffd6d6;
+  --icon-filter: none;
 }
 
 body {
-  background-color: var(--primary-bg);
-  color: var(--dark);
+  background-color: var(--bg-primary);
+  color: var(--text-primary);
+  transition: background-color 0.3s ease, color 0.3s ease;
+}
+
+/* Style global pour les icônes en mode sombre */
+.dark-mode img:not(.avatar):not(.profile-avatar):not(.profile-avatar-v2):not(.profile-cover-img):not(.trigger-user-avatar):not(.comment-avatar):not([alt*="avatar"]):not([src*="ui-avatars"]):not([src*="unsplash"]) {
+  filter: var(--icon-filter);
+  transition: filter 0.3s ease;
 }
 
 h1, h2, h3 {

@@ -327,6 +327,9 @@ export default {
   max-width: 800px;
   margin: 0 auto;
   padding: 20px;
+  background: var(--bg-primary);
+  min-height: 100vh;
+  transition: background 0.3s ease;
 }
 
 .notifications-header {
@@ -339,8 +342,9 @@ export default {
 .notifications-title {
   font-size: 2rem;
   font-weight: 600;
-  color: #E48700;
+  color: var(--accent-secondary);
   margin: 0;
+  transition: color 0.3s ease;
 }
 
 .mark-all-read-btn {
@@ -366,18 +370,20 @@ export default {
 .loading {
   text-align: center;
   padding: 40px;
-  color: #6b7280;
+  color: var(--text-muted);
   font-size: 1.1rem;
+  transition: color 0.3s ease;
 }
 
 .empty {
   text-align: center;
   padding: 60px 20px;
-  color: #6b7280;
+  color: var(--text-muted);
   font-size: 1.1rem;
-  background: #f9fafb;
+  background: var(--bg-secondary);
   border-radius: 12px;
-  border: 2px dashed #d1d5db;
+  border: 2px dashed var(--border-color);
+  transition: background 0.3s ease, color 0.3s ease, border 0.3s ease;
 }
 
 .notifications-wrapper {
@@ -391,10 +397,11 @@ export default {
 .date-header {
   font-size: 1.2rem;
   font-weight: 600;
-  color: #E48700;
+  color: var(--accent-secondary);
   margin: 0 0 16px 0;
   padding-bottom: 8px;
-  border-bottom: 2px solid #f3f4f6;
+  border-bottom: 2px solid var(--border-color);
+  transition: color 0.3s ease, border 0.3s ease;
 }
 
 .notification-list {
@@ -408,18 +415,18 @@ export default {
   display: flex;
   align-items: center;
   padding: 16px 20px;
-  border: 1px solid #e5e7eb;
+  border: 1px solid var(--border-color);
   border-radius: 12px;
   margin-bottom: 12px;
-  background: #FFF4E3;
+  background: var(--card-bg);
   cursor: pointer;
   transition: all 0.2s ease;
   position: relative;
 }
 
 .notification-item:hover {
-  background: #f9fafb;
-  border-color: #d1d5db;
+  background: var(--hover-bg);
+  border-color: var(--border-color);
   transform: translateY(-1px);
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
 }
@@ -475,13 +482,14 @@ export default {
 .notif-message {
   margin: 0 0 4px 0;
   font-size: 1rem;
-  color: #1f2937;
+  color: var(--text-primary);
   line-height: 1.5;
+  transition: color 0.3s ease;
 }
 
 /* Style pour les pseudos cliquables dans les messages */
 .notif-message :deep(.clickable-username) {
-  color: #E48700;
+  color: var(--accent-secondary);
   font-weight: 600;
   cursor: pointer;
   text-decoration: none;
@@ -491,14 +499,16 @@ export default {
 }
 
 .notif-message :deep(.clickable-username:hover) {
-  color: #c76d00;
-  background-color: rgba(228, 135, 0, 0.1);
+  color: var(--accent-primary);
+  background-color: var(--hover-bg);
   text-decoration: underline;
 }
 
 .notif-date {
   font-size: 0.875rem;
-  color: #E48700;
+  color: var(--accent-secondary);
+  transition: color 0.3s ease;
+}
 }
 
 .unread-indicator {

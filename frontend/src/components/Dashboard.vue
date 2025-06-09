@@ -43,25 +43,28 @@ export default {
   flex-direction: column;
   align-items: center;
   padding: 1.2rem 1rem 2.2rem 1rem;
-  background: #FFFEF9;
+  background: var(--bg-primary);
   max-width: 700px;
   width: 100%;
   margin: 0 auto;
+  transition: background 0.3s ease;
 }
 .dashboard-title {
   font-size: 2.1rem;
-  color: #E48700;
+  color: var(--accent-secondary);
   margin-bottom: 0.7rem;
   font-weight: bold;
+  transition: color 0.3s ease;
 }
 .dashboard-welcome {
   font-size: 1.15rem;
-  color: #28303F;
+  color: var(--text-primary);
   margin-bottom: 2.2rem;
-  background: #FFF4E3;
+  background: var(--card-bg);
   padding: 1rem 2rem;
   border-radius: 12px;
-  box-shadow: 0 2px 8px #0001;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  transition: background 0.3s ease, color 0.3s ease;
 }
 .dashboard-cards {
   display: flex;
@@ -72,9 +75,9 @@ export default {
   max-width: 900px;
 }
 .dashboard-card {
-  background: #ECBC76;
+  background: var(--accent-primary);
   border-radius: 14px;
-  box-shadow: 0 2px 8px #0001;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
   padding: 1.5rem 2rem;
   display: flex;
   align-items: center;
@@ -85,8 +88,8 @@ export default {
   transition: box-shadow 0.18s, background 0.18s;
 }
 .dashboard-card:hover {
-  box-shadow: 0 4px 16px rgba(0,0,0,0.10);
-  background: #E48700;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.15);
+  background: var(--accent-secondary);
 }
 .dashboard-card img {
   width: 48px;
@@ -96,12 +99,14 @@ export default {
 .card-info h2 {
   margin: 0 0 0.3rem 0;
   font-size: 1.15rem;
-  color: #28303F;
+  color: var(--text-primary);
+  transition: color 0.3s ease;
 }
 .card-info p {
   margin: 0;
-  color: #111;
+  color: var(--text-primary);
   font-size: 1rem;
+  transition: color 0.3s ease;
 }
 @media (max-width: 900px) {
   .dashboard-cards {

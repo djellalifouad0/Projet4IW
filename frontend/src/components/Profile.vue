@@ -980,27 +980,30 @@ export default {
   flex-direction: column;
   align-items: center;
   padding: 1.2rem 1rem 2.2rem 1rem;
-  background: #FFFEF9;
+  background: var(--bg-primary);
   width: 1000px;
   max-width: 100%;
   margin: 0 auto;
+  transition: background 0.3s ease;
 }
 .profile-title {
   font-size: 2.1rem;
-  color: #E48700;
+  color: var(--accent-secondary);
   margin-bottom: 0.7rem;
   font-weight: bold;
+  transition: color 0.3s ease;
 }
 .profile-card-v2 {
-  background: #fff8f2;
+  background: var(--card-bg);
   border-radius: 18px;
-  box-shadow: 0 2px 12px #0001;
+  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.1);
   overflow: hidden;
   max-width: 700px;
   width: 100%;
   margin: 0 auto 2.2rem auto;
   padding: 0;
   position: relative;
+  transition: background 0.3s ease;
 }
 .profile-cover {
   width: 100%;
@@ -1020,13 +1023,14 @@ export default {
   flex-direction: row;
   align-items: center;
   justify-content: space-between;
-  background: #fdf3e6;
+  background: var(--card-bg);
   padding: 0 1.5rem 1.6rem 1.5rem;
   border-bottom-left-radius: 18px;
   border-bottom-right-radius: 18px;
   position: relative;
   gap: 1.1rem;
   min-height: 120px;
+  transition: background 0.3s ease;
 }
 .profile-avatar-block {
   display: flex;
@@ -1046,9 +1050,10 @@ export default {
 .profile-name-v2 {
   font-size: 1.35rem;
   font-weight: bold;
-  color: #181b26;
+  color: var(--text-primary);
   margin: 0; /* Remove unnecessary margins */
   text-align: left; /* Align the username to the left */
+  transition: color 0.3s ease;
 }
 .profile-infos-v2 {
   display: flex;
@@ -1059,8 +1064,9 @@ export default {
 }
 .profile-address-v2 {
   font-size: 0.98rem;
-  color: #888;
+  color: var(--text-muted);
   text-align: left;
+  transition: color 0.3s ease;
 }
 
 /* Styles pour la moyenne des avis intégrée dans le profil */
@@ -1099,12 +1105,13 @@ export default {
 
 .rating-text-inline {
   font-size: 0.85rem;
-  color: #666;
+  color: var(--text-muted);
   font-weight: 500;
+  transition: color 0.3s ease;
 }
 
 .profile-btn-v2 {
-  background: #E48700;
+  background: var(--accent-secondary);
   color: #fff;
   border: none;
   border-radius: 8px;
@@ -1117,8 +1124,8 @@ export default {
   margin-left: auto;
 }
 .profile-btn-v2:hover {
-  background: #c76d00;
-  color: #fff;
+  background: var(--accent-primary);
+  color: var(--text-primary);
 }
 .profile-btn-message {
   background: #4A90E2;
@@ -1132,22 +1139,24 @@ export default {
   margin-left: auto;
 }
 .profile-section {
-  background: #FFF4E3;
+  background: var(--card-bg);
   border-radius: 10px;
-  box-shadow: 0 2px 8px #0001;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
   padding: 1.5rem 2rem;
   max-width: 700px;
   width: 100%;
+  transition: background 0.3s ease;
 }
 .profile-section h3 {
-  color: #E48700;
+  color: var(--accent-secondary);
   margin-bottom: 0.7rem;
+  transition: color 0.3s ease;
 }
 
 /* Styles pour les onglets */
 .profile-tabs {
   display: flex;
-  border-bottom: 2px solid #ECBC76;
+  border-bottom: 2px solid var(--accent-primary);
   margin-bottom: 1.5rem;
 }
 
@@ -1157,7 +1166,7 @@ export default {
   padding: 12px 20px;
   font-size: 1rem;
   font-weight: 600;
-  color: #666;
+  color: var(--text-muted);
   cursor: pointer;
   border-bottom: 3px solid transparent;
   transition: all 0.3s ease;
@@ -1165,12 +1174,12 @@ export default {
 }
 
 .tab-button:hover {
-  color: #E48700;
+  color: var(--accent-secondary);
 }
 
 .tab-button.active {
-  color: #E48700;
-  border-bottom-color: #E48700;
+  color: var(--accent-secondary);
+  border-bottom-color: var(--accent-secondary);
 }
 
 .tab-content {
@@ -1188,9 +1197,10 @@ export default {
   }
 }
 .profile-about {
-  color: #28303F;
+  color: var(--text-primary);
   font-size: 1.08rem;
   margin: 0;
+  transition: color 0.3s ease;
 }
 .profile-posts-list {
   list-style: none;
@@ -1201,17 +1211,18 @@ export default {
 }
 
 .profile-post-item {
-  background: #fff;
+  background: var(--card-bg);
   border-radius: 12px;
   padding: 0;
   margin: 0;
   box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08);
-  border: 1px solid #f0f2f5;
+  border: 1px solid var(--border-color);
   overflow: hidden;
   position: relative;
   display: flex;
   align-items: center;
   min-height: 80px;
+  transition: background 0.3s ease, border 0.3s ease;
 }
 
 /* Styles pour les posts cliquables */
@@ -1223,7 +1234,7 @@ export default {
 .clickable-post:hover {
   box-shadow: 0 4px 20px rgba(0, 0, 0, 0.12);
   transform: translateY(-1px);
-  border-color: #E48700;
+  border-color: var(--accent-secondary);
 }
 
 .clickable-post:hover .post-hover-indicator {
@@ -1251,12 +1262,13 @@ export default {
 }
 
 .profile-post-title {
-  color: #1a1a1a;
+  color: var(--text-primary);
   font-size: 1rem;
   font-weight: 600;
   line-height: 1.4;
   margin: 0;
   flex: 1;
+  transition: color 0.3s ease;
   /* Fallback for browsers that don't support line-clamp */
   max-height: 2.8rem; /* Approximately 2 lines at 1.4 line height */
   overflow: hidden;  /* Modern line-clamp with fallback */
@@ -1288,14 +1300,16 @@ export default {
   display: flex;
   align-items: center;
   gap: 0.4rem;
-  color: #65676b;
+  color: var(--text-muted);
   font-size: 0.85rem;
   font-weight: 500;
+  transition: color 0.3s ease;
 }
 
 .date-icon {
-  color: #65676b;
+  color: var(--text-muted);
   flex-shrink: 0;
+  transition: color 0.3s ease;
 }
 
 /* Styles améliorés pour les statistiques des posts */
@@ -1311,14 +1325,14 @@ export default {
   display: flex;
   align-items: center;
   gap: 0.5rem;
-  background: #f8f9fa;
+  background: var(--bg-secondary);
   padding: 0.5rem 0.75rem;
   border-radius: 8px;
   transition: background-color 0.2s ease;
 }
 
 .post-stat-item:hover {
-  background: #e9ecef;
+  background: var(--hover-bg);
 }
 
 .stat-icon-small {
@@ -1330,20 +1344,22 @@ export default {
 
 .stat-value {
   font-weight: 600;
-  color: #1a1a1a;
+  color: var(--text-primary);
   font-size: 0.9rem;
+  transition: color 0.3s ease;
 }
 
 .stat-label {
-  color: #65676b;
+  color: var(--text-muted);
   font-size: 0.8rem;
   font-weight: 500;
+  transition: color 0.3s ease;
 }
 
 /* Indicateur de hover */
 .post-hover-indicator {
   padding: 1rem;
-  color: #E48700;
+  color: var(--accent-secondary);
   opacity: 0;
   transform: translateX(8px);
   transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
@@ -1383,12 +1399,14 @@ export default {
 }
 .profile-post-title {
   font-size: 1.1rem;
-  color: #28303F;
+  color: var(--text-primary);
   margin: 0 0 0.4rem 0;
+  transition: color 0.3s ease;
 }
 .profile-post-date {
   font-size: 0.9rem;
-  color: #777;
+  color: var(--text-muted);
+  transition: color 0.3s ease;
 }
 .modal-overlay {
   position: fixed;
@@ -1599,11 +1617,12 @@ export default {
 }
 
 .appointment-card {
-  background: #fff;
-  border: 1px solid #ecbc76;
+  background: var(--card-bg);
+  border: 1px solid var(--accent-primary);
   border-radius: 12px;
   padding: 20px;
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  transition: background 0.3s ease, border 0.3s ease;
 }
 
 .appointment-header {
@@ -1615,8 +1634,9 @@ export default {
 
 .appointment-header h4 {
   margin: 0;
-  color: #28303F;
+  color: var(--text-primary);
   font-size: 1.2rem;
+  transition: color 0.3s ease;
 }
 
 .appointment-status {
@@ -1653,21 +1673,25 @@ export default {
 
 .appointment-details > div {
   margin-bottom: 8px;
-  color: #666;
+  color: var(--text-muted);
   font-size: 0.95rem;
+  transition: color 0.3s ease;
 }
 
 .appointment-date {
   font-weight: 600;
-  color: #28303F;
+  color: var(--text-primary);
+  transition: color 0.3s ease;
 }
 
 .appointment-description {
   font-style: italic;
   margin-top: 12px;
   padding: 12px;
-  background: #f9f9f9;
+  background: var(--bg-secondary);
   border-radius: 8px;
+  color: var(--text-primary);
+  transition: background 0.3s ease, color 0.3s ease;
 }
 
 .appointment-actions {
@@ -1745,14 +1769,15 @@ export default {
 
 .calendar-title {
   margin: 0;
-  color: #E48700;
+  color: var(--accent-secondary);
   font-size: 1.5rem;
   font-weight: 600;
   text-transform: capitalize;
+  transition: color 0.3s ease;
 }
 
 .calendar-nav-btn {
-  background: #E48700;
+  background: var(--accent-secondary);
   color: white;
   border: none;
   border-radius: 50%;
@@ -1767,31 +1792,33 @@ export default {
 }
 
 .calendar-nav-btn:hover {
-  background: #c76d00;
+  background: var(--accent-primary);
 }
 
 .calendar-grid {
   display: grid;
   grid-template-columns: repeat(7, 1fr);
   gap: 1px;
-  background: #ddd;
-  border: 1px solid #ddd;
+  background: var(--border-color);
+  border: 1px solid var(--border-color);
   border-radius: 8px;
   overflow: hidden;
   margin-bottom: 30px;
+  transition: background 0.3s ease, border 0.3s ease;
 }
 
 .calendar-day-header {
-  background: #E48700;
+  background: var(--accent-secondary);
   color: white;
   padding: 12px 8px;
   text-align: center;
   font-weight: 600;
   font-size: 0.9rem;
+  transition: background 0.3s ease;
 }
 
 .calendar-day {
-  background: white;
+  background: var(--card-bg);
   min-height: 80px;
   padding: 8px;
   position: relative;
@@ -1801,27 +1828,29 @@ export default {
 }
 
 .calendar-day:hover {
-  background: #f9f9f9;
+  background: var(--hover-bg);
 }
 
 .calendar-day.other-month {
-  background: #f5f5f5;
-  color: #ccc;
+  background: var(--bg-secondary);
+  color: var(--text-muted);
 }
 
 .calendar-day.today {
-  background: #fff3e0;
-  border: 2px solid #E48700;
+  background: var(--accent-light);
+  border: 2px solid var(--accent-secondary);
 }
 
 .calendar-day.has-appointment {
-  background: #e8f5e8;
+  background: var(--success-bg);
 }
 
 .calendar-day-number {
   font-weight: 600;
   font-size: 0.9rem;
   margin-bottom: 4px;
+  color: var(--text-primary);
+  transition: color 0.3s ease;
 }
 
 .calendar-appointments {
@@ -1832,7 +1861,7 @@ export default {
 }
 
 .calendar-appointment {
-  background: #E48700;
+  background: var(--accent-secondary);
   color: white;
   padding: 2px 4px;
   border-radius: 3px;
@@ -1874,18 +1903,20 @@ export default {
 }
 
 .calendar-appointments-list h4 {
-  color: #E48700;
+  color: var(--accent-secondary);
   margin-bottom: 15px;
   font-size: 1.2rem;
+  transition: color 0.3s ease;
 }
 
 .no-appointments {
   text-align: center;
-  color: #666;
+  color: var(--text-muted);
   font-style: italic;
   padding: 20px;
-  background: #f9f9f9;
+  background: var(--bg-secondary);
   border-radius: 8px;
+  transition: background 0.3s ease, color 0.3s ease;
 }
 
 .month-appointments {
@@ -1895,21 +1926,23 @@ export default {
 }
 
 .month-appointment-card {
-  background: white;
-  border: 1px solid #ecbc76;
+  background: var(--card-bg);
+  border: 1px solid var(--accent-primary);
   border-radius: 8px;
   padding: 15px;
   display: flex;
   align-items: center;
   gap: 15px;
   box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+  transition: background 0.3s ease, border 0.3s ease;
 }
 
 .appointment-date-time {
   font-size: 0.9rem;
-  color: #666;
+  color: var(--text-muted);
   font-weight: 600;
   min-width: 120px;
+  transition: color 0.3s ease;
 }
 
 .appointment-info {
@@ -1918,14 +1951,16 @@ export default {
 
 .appointment-info h5 {
   margin: 0 0 5px 0;
-  color: #28303F;
+  color: var(--text-primary);
   font-size: 1rem;
+  transition: color 0.3s ease;
 }
 
 .appointment-info p {
   margin: 0 0 8px 0;
-  color: #666;
+  color: var(--text-muted);
   font-size: 0.9rem;
+  transition: color 0.3s ease;
 }
 
 .month-appointment-actions {
@@ -2272,11 +2307,12 @@ export default {
 }
 
 .rating-card {
-  background: white;
-  border: 1px solid #e0e0e0;
+  background: var(--card-bg);
+  border: 1px solid var(--border-color);
   border-radius: 8px;
   padding: 1.5rem;
   box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+  transition: background 0.3s ease, border 0.3s ease;
 }
 
 .rating-header {
@@ -2301,7 +2337,8 @@ export default {
 
 .rating-username {
   font-weight: 600;
-  color: #333;
+  color: var(--text-primary);
+  transition: color 0.3s ease;
 }
 
 .rating-score {
@@ -2312,31 +2349,35 @@ export default {
 
 .rating-value {
   font-weight: 600;
-  color: #333;
+  color: var(--text-primary);
+  transition: color 0.3s ease;
 }
 
 .rating-comment {
-  background: #f8f9fa;
+  background: var(--bg-secondary);
   padding: 1rem;
   border-radius: 6px;
   margin-bottom: 0.5rem;
-  color: #555;
+  color: var(--text-primary);
+  transition: background 0.3s ease, color 0.3s ease;
 }
 
 .rating-date {
   font-size: 0.85rem;
-  color: #888;
+  color: var(--text-muted);
+  transition: color 0.3s ease;
 }
 
 /* Styles pour la modale de notation */
 .modal-rating {
-  background: white;
+  background: var(--modal-bg);
   border-radius: 12px;
   max-width: 500px;
   width: 90%;
   max-height: 90vh;
   overflow-y: auto;
   position: relative;
+  transition: background 0.3s ease;
 }
 
 .modal-rating .modal-close {
@@ -2347,7 +2388,7 @@ export default {
   background: none;
   border: none;
   font-size: 1.5rem;
-  color: #666;
+  color: var(--text-muted);
   cursor: pointer;
   width: 2rem;
   height: 2rem;
@@ -2360,20 +2401,22 @@ export default {
 }
 
 .modal-rating .modal-close:hover {
-  background: #f5f5f5;
-  color: #333;
+  background: var(--hover-bg);
+  color: var(--text-primary);
 }
 
 .modal-rating .modal-header {
   padding: 1.5rem;
-  border-bottom: 1px solid #e0e0e0;
+  border-bottom: 1px solid var(--border-color);
+  transition: border-color 0.3s ease;
 }
 
 .modal-rating .modal-header h2 {
   margin: 0;
-  color: #333;
+  color: var(--text-primary);
   font-size: 1.3rem;
   line-height: 1.4;
+  transition: color 0.3s ease;
 }
 
 .modal-rating .modal-body {
@@ -2390,7 +2433,8 @@ export default {
   display: block;
   margin-bottom: 0.5rem;
   font-weight: 600;
-  color: #333;
+  color: var(--text-primary);
+  transition: color 0.3s ease;
 }
 
 .stars-input {
@@ -2415,16 +2459,20 @@ export default {
   display: block;
   margin-bottom: 0.5rem;
   font-weight: 600;
-  color: #333;
+  color: var(--text-primary);
+  transition: color 0.3s ease;
 }
 
 .rating-comment textarea {
   width: 100%;
   padding: 0.8rem;
-  border: 1px solid #ddd;
+  border: 1px solid var(--border-color);
   border-radius: 6px;
   resize: vertical;
   font-family: inherit;
+  background: var(--input-bg);
+  color: var(--text-primary);
+  transition: border-color 0.3s ease, background 0.3s ease, color 0.3s ease;
 }
 
 .modal-actions {
@@ -2444,12 +2492,13 @@ export default {
 }
 
 .btn-cancel {
-  background: #f8f9fa;
-  color: #666;
+  background: var(--bg-secondary);
+  color: var(--text-muted);
+  transition: background 0.3s ease, color 0.3s ease;
 }
 
 .btn-cancel:hover {
-  background: #e9ecef;
+  background: var(--hover-bg);
 }
 
 .btn-primary {
@@ -2544,9 +2593,17 @@ export default {
   /* #E48700 color filter */
 }
 
+.dark-mode .tab-button:hover .tab-icon {
+  filter: brightness(0) saturate(100%) invert(75%) sepia(85%) saturate(5068%) hue-rotate(24deg) brightness(95%) contrast(95%);
+}
+
 .tab-button.active .tab-icon {
   filter: brightness(0) saturate(100%) invert(55%) sepia(85%) saturate(5068%) hue-rotate(24deg) brightness(95%) contrast(95%);
   /* #E48700 color filter */
+}
+
+.dark-mode .tab-button.active .tab-icon {
+  filter: brightness(0) saturate(100%) invert(75%) sepia(85%) saturate(5068%) hue-rotate(24deg) brightness(95%) contrast(95%);
 }
 
 .detail-icon {
@@ -2566,10 +2623,20 @@ export default {
 
 .btn-edit .action-icon {
   filter: brightness(0) saturate(100%) invert(18%) sepia(15%) saturate(1239%) hue-rotate(195deg) brightness(96%) contrast(91%);
+  transition: filter 0.2s ease;
+}
+
+.dark-mode .btn-edit .action-icon {
+  filter: brightness(0) saturate(100%) invert(60%) sepia(88%) saturate(1500%) hue-rotate(195deg) brightness(96%) contrast(91%);
 }
 
 .btn-delete .action-icon {
   filter: brightness(0) saturate(100%) invert(27%) sepia(51%) saturate(2878%) hue-rotate(346deg) brightness(104%) contrast(97%);
+  transition: filter 0.2s ease;
+}
+
+.dark-mode .btn-delete .action-icon {
+  filter: brightness(0) saturate(100%) invert(60%) sepia(88%) saturate(2878%) hue-rotate(346deg) brightness(104%) contrast(97%);
 }
 
 .modal-camera-icon {
@@ -2585,23 +2652,26 @@ export default {
 
 /* Styles pour le dialog de confirmation */
 .confirm-dialog {
-  background: white;
+  background: var(--modal-bg);
   border-radius: 12px;
   max-width: 400px;
   width: 90%;
   box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
   animation: fadeInScale 0.2s ease-out;
+  transition: background 0.3s ease;
 }
 
 .confirm-header {
   padding: 1.5rem 1.5rem 1rem;
-  border-bottom: 1px solid #e0e0e0;
+  border-bottom: 1px solid var(--border-color);
+  transition: border-color 0.3s ease;
 }
 
 .confirm-header h3 {
   margin: 0;
-  color: #333;
+  color: var(--text-primary);
   font-size: 1.2rem;
+  transition: color 0.3s ease;
 }
 
 .confirm-body {
@@ -2610,9 +2680,10 @@ export default {
 
 .confirm-body p {
   margin: 0;
-  color: #666;
+  color: var(--text-muted);
   font-size: 1rem;
   line-height: 1.5;
+  transition: color 0.3s ease;
 }
 
 .confirm-actions {
@@ -2656,6 +2727,10 @@ export default {
   transition: filter 0.2s;
 }
 
+.dark-mode .quick-action-icon {
+  filter: var(--icon-filter);
+}
+
 .quick-action-icon:hover {
   filter: brightness(1.1);
 }
@@ -2664,6 +2739,11 @@ export default {
   width: 14px;
   height: 14px;
   vertical-align: middle;
+  transition: filter 0.3s ease;
+}
+
+.dark-mode .star-icon-small {
+  filter: var(--icon-filter);
 }
 
 .star-icon-input {
@@ -2677,5 +2757,10 @@ export default {
   width: 16px;
   height: 16px;
   vertical-align: middle;
+  transition: filter 0.3s ease;
+}
+
+.dark-mode .star-icon-inline {
+  filter: var(--icon-filter);
 }
 </style>

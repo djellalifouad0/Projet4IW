@@ -310,10 +310,11 @@ export default {
   flex-direction: column;
   align-items: center;
   padding: 1.2rem 1rem 2.2rem 1rem;
-  background: #FEFCF6;
+  background: var(--bg-primary);
   overflow-x: hidden; /* Empêche le scroll horizontal */
   max-width: 100vw; /* Limite la largeur à 100% de la vue */
   min-height: 100vh; /* Assure une hauteur minimale pour éviter les problèmes de scroll */
+  transition: background 0.3s ease;
 }
 /* Filters bar + boutons */
 .filters-bar {
@@ -326,22 +327,22 @@ export default {
   margin-top: 10px;
 }
 .filters-bar .filter-btn {
-  background: #ECBC76;
-  color: #111;
+  background: var(--accent-primary);
+  color: var(--text-primary);
   border: none;
   border-radius: 10px;
   padding: 14px 32px;
   font-size: 1.08rem;
   cursor: pointer;
-  box-shadow: 0 2px 8px #0001;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
   font-weight: 500;
-  transition: background 0.18s;
+  transition: background 0.18s, color 0.3s ease;
 }
 .filters-bar .filter-btn span {
   margin-left: 8px;
 }
 .filters-bar .publish-btn {
-  background: #E48700;
+  background: var(--accent-secondary);
   color: #fff;
   border: none;
   border-radius: 24px;
@@ -349,7 +350,7 @@ export default {
   font-size: 1.18rem;
   font-weight: bold;
   cursor: pointer;
-  box-shadow: 0 2px 8px #0001;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
   transition: background 0.18s;
 }
 /* Cards grid */
@@ -406,8 +407,7 @@ export default {
     display: block;
     animation: overlayFadeIn 0.2s ease-out;
   }
-  
-  .filter-dropdown {
+    .filter-dropdown {
     position: fixed;
     top: 50%;
     left: 50%;
@@ -415,11 +415,12 @@ export default {
     width: 90vw;
     max-width: 300px;
     z-index: 1001;
-    background: #fff;
+    background: var(--dropdown-bg);
     border-radius: 12px;
     box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
     margin-top: 0;
     animation: filterDropdownMobileOpen 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+    transition: background 0.3s ease;
   }
   
   @keyframes overlayFadeIn {
@@ -468,21 +469,22 @@ export default {
   z-index: 1000;
 }
 .modal-card {
-  background: #fffbe6;
+  background: var(--modal-bg);
   border-radius: 18px;
   padding: 0 2rem 2rem 2rem;
   width: 95%;
   max-width: 440px;
-  box-shadow: 0 8px 32px rgba(228, 135, 0, 0.13), 0 2px 8px #0001;
+  box-shadow: 0 8px 32px rgba(228, 135, 0, 0.13), 0 2px 8px rgba(0, 0, 0, 0.1);
   position: relative;
   animation: modalPop 0.25s cubic-bezier(.4,1.6,.6,1) 1;
+  transition: background 0.3s ease;
 }
 @keyframes modalPop {
   0% { transform: scale(0.95) translateY(30px); opacity: 0; }
   100% { transform: scale(1) translateY(0); opacity: 1; }
 }
 .modal-header {
-  background: #E48700;
+  background: var(--accent-secondary);
   border-radius: 18px 18px 0 0;
   padding: 1.2rem 0 1rem 0;
   display: flex;
@@ -512,10 +514,11 @@ export default {
 .modal-separator {
   width: 100%;
   height: 3px;
-  background: #ffe1a1;
+  background: var(--accent-light);
   border-radius: 2px;
   margin: 0.5rem 0 1.2rem 0;
-  box-shadow: 0 1px 4px #e4870022;
+  box-shadow: 0 1px 4px rgba(228, 135, 0, 0.13);
+  transition: background 0.3s ease;
 }
 .modal-card form {
   display: flex;
@@ -525,18 +528,19 @@ export default {
 .modal-card input,
 .modal-card textarea {
   padding: 14px 14px 14px 18px;
-  border: 1.5px solid #e6cfa1;
+  border: 1.5px solid var(--input-border);
   border-radius: 10px;
   font-size: 1.04rem;
-  background: #fffef9;
-  transition: border 0.18s, box-shadow 0.18s;
+  background: var(--input-bg);
+  color: var(--text-primary);
+  transition: border 0.18s, box-shadow 0.18s, background 0.3s ease, color 0.3s ease;
   outline: none;
-  box-shadow: 0 1px 4px #e4870022;
+  box-shadow: 0 1px 4px rgba(228, 135, 0, 0.13);
 }
 .modal-card input:focus,
 .modal-card textarea:focus {
-  border-color: #E48700;
-  box-shadow: 0 2px 8px #e4870033;
+  border-color: var(--accent-secondary);
+  box-shadow: 0 2px 8px rgba(228, 135, 0, 0.2);
 }
 .modal-card textarea {
   min-height: 80px;
@@ -563,59 +567,63 @@ export default {
   margin: 0;
 }
 .modal-card button[type="submit"] {
-  background: #E48700;
+  background: var(--accent-secondary);
   color: #fff;
   font-weight: bold;
   letter-spacing: 0.5px;
-  box-shadow: 0 2px 8px #e4870033;
+  box-shadow: 0 2px 8px rgba(228, 135, 0, 0.2);
 }
 .modal-card button[type="submit"]:hover {
-  background: #ECBC76;
-  color: #111;
+  background: var(--accent-primary);
+  color: var(--text-primary);
 }
 .modal-card button[type="button"] {
-  background: #fffbe6;
-  color: #E48700;
+  background: var(--modal-bg);
+  color: var(--accent-secondary);
   font-weight: 500;
-  border: 1.2px solid #e6cfa1;
+  border: 1.2px solid var(--input-border);
+  transition: background 0.18s, color 0.3s ease, border 0.3s ease;
 }
 .modal-card button[type="button"]:hover {
-  background: #ECBC76;
-  color: #b97a00;
+  background: var(--accent-primary);
+  color: var(--text-primary);
 }
 .error-message {
   color: #d32f2f;
   font-size: 1rem;
   text-align: center;
   margin-top: 1.1rem;
-  background: #fff3f3;
+  background: var(--error-bg);
   border-radius: 8px;
   padding: 7px 0;
-  border: 1px solid #ffd6d6;
+  border: 1px solid var(--error-border);
+  transition: background 0.3s ease, border 0.3s ease;
 }
 .city-suggestions {
   position: absolute;
   left: 0;
   right: 0;
   top: 100%;
-  background: #fff;
-  border: 1px solid #e6cfa1;
+  background: var(--dropdown-bg);
+  border: 1px solid var(--input-border);
   border-radius: 0 0 10px 10px;
-  box-shadow: 0 2px 8px #e4870033;
+  box-shadow: 0 2px 8px rgba(228, 135, 0, 0.2);
   z-index: 10;
   list-style: none;
   margin: 0;
   padding: 0;
   max-height: 180px;
   overflow-y: auto;
+  transition: background 0.3s ease, border 0.3s ease;
 }
 .city-suggestions li {
   padding: 10px 16px;
   cursor: pointer;
   transition: background 0.15s;
+  color: var(--text-primary);
 }
 .city-suggestions li:hover {
-  background: #ffe1a1;
+  background: var(--hover-bg);
 }
 
 @media (max-width: 600px) {
@@ -663,10 +671,10 @@ export default {
   position: absolute;
   top: 100%;
   left: 0;
-  background: #fff;
-  border: 1.5px solid #e6cfa1;
+  background: var(--dropdown-bg);
+  border: 1.5px solid var(--input-border);
   border-radius: 10px;
-  box-shadow: 0 2px 12px #e4870033;
+  box-shadow: 0 2px 12px rgba(228, 135, 0, 0.2);
   z-index: 1000;
   min-width: 160px;
   padding: 8px 0;
@@ -676,6 +684,7 @@ export default {
   margin-top: 5px;
   animation: filterDropdownOpen 0.2s cubic-bezier(0.4, 0, 0.2, 1);
   transform-origin: top left;
+  transition: background 0.3s ease, border 0.3s ease;
 }
 
 @keyframes filterDropdownOpen {
@@ -695,14 +704,14 @@ export default {
   text-align: left;
   padding: 12px 18px;
   font-size: 1.05rem;
-  color: #28303F;
+  color: var(--text-primary);
   cursor: pointer;
   transition: background 0.15s, color 0.15s;
   border-radius: 0;
 }
 .filter-dropdown button:hover {
-  background: #ECBC76;
-  color: #fff;
+  background: var(--accent-primary);
+  color: var(--text-primary);
 }
 
 /* Modal icon styling */

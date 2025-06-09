@@ -49,7 +49,7 @@
           <span class="nav-label">Profile</span>
         </div>
       </li>
-    </ul><!-- Ajout Notification et Paramètres -->
+    </ul>    <!-- Ajout Notification et Paramètres -->
     <ul class="navbar-actions">
       <li>
         <router-link to="/notifications" exact-active-class="active" class="notification-link">
@@ -65,6 +65,9 @@
           <img src="../assets/icons/settings.svg" alt="Paramètres" class="nav-icon" />
           <span class="nav-label">Paramètres</span>
         </router-link>
+      </li>
+      <li class="theme-toggle-container">
+        <ThemeToggle class="compact" />
       </li>
     </ul>
     <div class="navbar-profile" @click="navigateToMyProfile" style="cursor: pointer; position: relative;">
@@ -87,9 +90,13 @@ import authService from '../services/authService'
 import unreadMessagesService from '../services/unreadMessages'
 import NotificationService from '../services/notificationService'
 import eventBus, { NotificationEvents, ProfileEvents } from '../services/eventBus'
+import ThemeToggle from './ThemeToggle.vue'
 
 export default {
-  name: 'Navbar',  data() {
+  name: 'Navbar',
+  components: {
+    ThemeToggle
+  },data() {
     return {
       user: null,
       showMenu: false,
@@ -330,18 +337,18 @@ export default {
 .navbar-vertical {
   width: 300px;
   height: 100vh;
-  border-right: 1px solid #eee;
+  border-right: 1px solid var(--navbar-border);
   display: flex;
   flex-direction: column;
   align-items: flex-start;
   padding: 32px 48px 24px 48px;
   font-family: 'Poppins', sans-serif;
-  transition: width 0.2s;
+  transition: width 0.2s, background-color 0.3s ease, border-color 0.3s ease;
   position: fixed;
   top: 0;
   left: 0;
   z-index: 200;
-  background: #fff;
+  background: var(--navbar-bg);
 }
 
 .navbar-logo {
@@ -359,9 +366,9 @@ export default {
   font-family: 'Feather', 'Poppins', sans-serif;
   font-weight: 700;
   font-size: 1.3rem;
-  color: #C6553B;
+  color: var(--title-color);
   letter-spacing: 1px;
-  transition: opacity 0.2s;
+  transition: opacity 0.2s, color 0.3s ease;
 }
 
 .navbar-links {
@@ -386,14 +393,13 @@ export default {
 
 .navbar-links a,
 .profile-link {
-  color: #28303F;
+  color: var(--text-primary);
   text-decoration: none;
   padding: 10px 12px;
   border-radius: 24px;
   display: flex;
-  align-items: center;
-  gap: 12px;
-  transition: color 0.2s;
+  align-items: center;  gap: 12px;
+  transition: color 0.2s, background-color 0.3s ease;
   cursor: pointer;
 }
 
@@ -404,7 +410,7 @@ export default {
 
 .profile-avatar {
   border-radius: 50%;
-  border: 2px solid #C6553B;
+  border: 2px solid var(--title-color);
 }
 
 .nav-label {
@@ -414,9 +420,9 @@ export default {
 
 .navbar-links a.active,
 .navbar-links a.router-link-exact-active {
-  color: #28303F;
+  color: var(--text-primary);
   font-weight: bold;
-  background: none;
+  background: var(--active-bg);
 }
 
 .navbar-actions {
@@ -434,15 +440,14 @@ export default {
 }
 
 .navbar-actions a {
-  color: #28303F;
+  color: var(--text-primary);
   text-decoration: none;
   padding: 10px 12px;
   border-radius: 24px;
   display: flex;
   align-items: center;
   gap: 12px;
-  position: relative;
-  transition: color 0.2s;
+  position: relative;  transition: color 0.2s, background-color 0.3s ease;
 }
 
 .notification-icon-placeholder,
@@ -485,7 +490,7 @@ export default {
   text-align: center;
   line-height: 1.2;
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
-  border: 2px solid white;
+  border: 2px solid var(--navbar-bg);
 }
 
 .unread-badge {
@@ -517,7 +522,7 @@ export default {
   width: 40px;
   height: 40px;
   border-radius: 50%;
-  border: 2px solid #C6553B;
+  border: 2px solid var(--title-color);
 }
 
 .profile-info {
@@ -529,21 +534,23 @@ export default {
 
 .username {
   font-size: 1rem;
-  color: #28303F;
+  color: var(--text-primary);
   font-weight: 500;
   text-overflow: ellipsis;
   overflow: hidden;
   white-space: nowrap;
   max-width: 120px;
   display: block;
+  transition: color 0.3s ease;
 }
 
 .email {
   font-size: 0.92rem;
-  color: #888;
+  color: var(--text-secondary);
   text-overflow: ellipsis;
   overflow: hidden;
   white-space: nowrap;
+  transition: color 0.3s ease;
   max-width: 120px;
   display: block;
 }
@@ -560,13 +567,14 @@ export default {
   position: absolute;
   right: 0;
   bottom: 48px;
-  background: #fff;
-  border: 1px solid #eee;
+  background: var(--dropdown-bg);
+  border: 1px solid var(--border-color);
   border-radius: 8px;
-  box-shadow: 0 2px 8px #0002;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
   z-index: 10;
   min-width: 140px;
   padding: 8px 0;
+  transition: background-color 0.3s ease, border-color 0.3s ease;
 }
 
 .dropdown-menu button {
@@ -576,13 +584,13 @@ export default {
   padding: 10px 16px;
   text-align: left;
   font-size: 1rem;
-  color: #c6553b;
+  color: var(--title-color);
   cursor: pointer;
-  transition: background 0.15s;
+  transition: background 0.15s, color 0.3s ease;
 }
 
 .dropdown-menu button:hover {
-  background: #f5f5f5;
+  background: var(--hover-bg);
 }
 
 /* --- Responsive version Twitter: icons only --- */
@@ -610,11 +618,15 @@ export default {
   .navbar-actions {
     align-items: center;
     margin: 32px 0 18px 0;
-  }
-  .navbar-actions a {
+  }  .navbar-actions a {
     justify-content: center;
     padding: 10px 0;
     gap: 0;
+  }
+  .theme-toggle-container {
+    display: flex;
+    justify-content: center;
+    align-items: center;
   }
   .navbar-profile {
     flex-direction: column;

@@ -598,10 +598,12 @@ export default {
   width: 100%;
 }
 .card-orange {
-  background: #FFF4E3;
+  background: var(--card-bg);
+  transition: background 0.3s ease;
 }
 .card-paid {
-  background: #ECBC76;
+  background: var(--accent-primary);
+  transition: background 0.3s ease;
 }
 .card-header {
   display: flex;
@@ -653,10 +655,11 @@ export default {
 }
 .name {
   font-weight: bold;
-  color: #333;
+  color: var(--text-primary);
   display: flex;
   align-items: center;
   gap: 6px;
+  transition: color 0.3s ease;
 }
 .status-dot {
   display: inline-block;
@@ -668,7 +671,8 @@ export default {
 }
 .address {
   font-size: 0.92rem;
-  color: #888;
+  color: var(--text-muted);
+  transition: color 0.3s ease;
 }
 .rate {
   background: #f59c1a;
@@ -686,8 +690,9 @@ export default {
 }
 .card-body p {
   margin: 0;
-  color: #444;
+  color: var(--text-primary);
   font-size: 1rem;
+  transition: color 0.3s ease;
 }
 .more {
   color: #763D03;
@@ -706,7 +711,7 @@ export default {
   gap: 8px;
 }
 .pastille {
-  background: #ECBC76;
+  background: var(--accent-primary);
   border-radius: 22px;
   padding: 6px 14px 6px 8px;
   display: flex;
@@ -716,17 +721,17 @@ export default {
   cursor: pointer;
 }
 .pastille-paid {
-  background: #FFF4E3 !important;
+  background: var(--card-bg) !important;
 }
 .pastille-paid .icon-number {
-  color: #28303F !important;
+  color: var(--text-primary) !important;
 }
 .pastille:hover {
-  background: #e4a94f;
-  box-shadow: 0 2px 8px #ecbc7640;
+  background: var(--hover-bg);
+  box-shadow: 0 2px 8px rgba(236, 188, 118, 0.25);
 }
 .pastille:hover .icon-number {
-  color: #181b26;
+  color: var(--text-primary);
 }
 .icon-svg {
   width: 30px;
@@ -734,10 +739,11 @@ export default {
   display: block;
 }
 .icon-number {
-  color: #28303F;
+  color: var(--text-primary);
   font-weight: 600;
   font-size: 1rem;
   margin-left: 4px;
+  transition: color 0.3s ease;
 }
 /* MODALE */
 .modal-overlay {
@@ -759,14 +765,15 @@ export default {
   padding: 22px 28px;
   width: 700px;
   max-width: 100%;
-  box-shadow: 0 4px 28px #0002;
+  box-shadow: 0 4px 28px rgba(0, 0, 0, 0.1);
   position: relative;
   height: auto;
   max-height: 90vh;
   overflow-y: auto;
   display: flex;
   flex-direction: column;
-  background: #fff !important;
+  background: var(--modal-bg) !important;
+  transition: background 0.3s ease;
 }
 
 /* Cacher le bouton de fermeture sur desktop */

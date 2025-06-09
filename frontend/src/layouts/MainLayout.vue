@@ -73,10 +73,11 @@ export default {
   flex-direction: row;
   justify-content: center;
   min-height: 100vh;
-  background: #fefcf6;
+  background: var(--bg-primary);
   width: 100vw;
   max-width: 100vw;
   box-sizing: border-box;
+  transition: background-color 0.3s ease;
 }
 
 .main-content {
