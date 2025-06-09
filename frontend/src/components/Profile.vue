@@ -10,7 +10,7 @@
           <!-- Moyenne des avis intégrée dans le profil -->          <div v-if="user?.ratingStats && user.ratingStats.totalRatings > 0" class="profile-rating-inline">            <div class="stars-display-inline">
               <span v-for="star in 5" :key="star" class="star-inline">
                 <img 
-                  :src="star <= user.ratingStats.averageRating ? '/src/assets/icons/star-filled.svg' : '/src/assets/icons/star-empty.svg'" 
+                  :src="star <= user.ratingStats.averageRating ? '/src/assets/icons/star_full.svg' : '/src/assets/icons/star.svg'" 
                   alt="étoile" 
                   class="star-icon-inline" 
                 />
@@ -308,7 +308,7 @@
                     <div class="rating-score">                      <div class="stars-display-small">
                         <span v-for="star in 5" :key="star" class="star-small">
                           <img 
-                            :src="star <= rating.rating ? '/src/assets/icons/star-filled.svg' : '/src/assets/icons/star-empty.svg'" 
+                            :src="star <= rating.rating ? '/src/assets/icons/star_full.svg' : '/src/assets/icons/star.svg'" 
                             alt="étoile" 
                             class="star-icon-small" 
                           />
@@ -382,13 +382,12 @@
                       :class="['star-input']"
                       @click="newRating.rating = star"
                       @mouseenter="hoverRating = star"
-                      @mouseleave="hoverRating = 0">
-                  <img 
+                      @mouseleave="hoverRating = 0">                  <img 
                     :src="(hoverRating > 0 ? star <= hoverRating : star <= newRating.rating) 
-                          ? '/src/assets/icons/star-filled.svg' 
-                          : '/src/assets/icons/star-empty.svg'" 
+                          ? '/src/assets/icons/star_full.svg' 
+                          : '/src/assets/icons/star.svg'" 
                     alt="étoile" 
-                    class="star-icon-input" 
+                    class="star-icon-input"
                   />
                 </span>
               </div>
@@ -1260,10 +1259,10 @@ export default {
   flex: 1;
   /* Fallback for browsers that don't support line-clamp */
   max-height: 2.8rem; /* Approximately 2 lines at 1.4 line height */
-  overflow: hidden;
-  /* Modern line-clamp with fallback */
+  overflow: hidden;  /* Modern line-clamp with fallback */
   display: -webkit-box;
   -webkit-line-clamp: 2;
+  line-clamp: 2;
   -webkit-box-orient: vertical;
   /* Alternative fallback using text-overflow */
   text-overflow: ellipsis;
