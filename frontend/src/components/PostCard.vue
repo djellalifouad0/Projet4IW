@@ -78,6 +78,9 @@
           <div class="header-actions">
             <div class="rate" :class="paid ? 'rate-paid' : ''" v-if="rate">{{ rate }}</div>            <!-- Actions pour le propriétaire du post -->
             <div v-if="isOwnPost" class="post-actions">
+              <button class="post-action-btn" @click.stop.prevent="startInlineEdit" title="Modifier">
+                <img src="@/assets/icons/edit.svg" alt="Modifier" class="action-icon-small" />
+              </button>
               <button class="post-action-btn delete" @click.stop="deletePost" title="Supprimer">
                 <img src="@/assets/icons/trash.svg" alt="Supprimer" class="action-icon-small" />
               </button>
@@ -123,12 +126,14 @@
                       <button @click="cancelCommentEdit">Annuler</button>
                     </div>
                     <div v-else class="comment-text">{{ comment.text }}</div>                    <div class="comment-actions">
-                      <button class="comment-action" @click="replyTo(idx)">Répondre</button>
-                      <button v-if="isOwnComment(comment)" class="comment-action" @click="startEditComment(comment)">
-                        <img src="@/assets/icons/edit.svg" alt="Modifier" class="action-icon-small" /> Modifier
+                      <button class="comment-action-icon" @click="replyTo(idx)" title="Répondre">
+                        <img src="@/assets/icons/comment.svg" alt="Répondre" class="comment-icon" />
                       </button>
-                      <button v-if="isOwnComment(comment)" class="comment-action delete" @click="deleteComment(comment.id)">
-                        <img src="@/assets/icons/trash.svg" alt="Supprimer" class="action-icon-small" /> Supprimer
+                      <button v-if="isOwnComment(comment)" class="comment-action-icon" @click="startEditComment(comment)" title="Modifier">
+                        <img src="@/assets/icons/edit.svg" alt="Modifier" class="comment-icon" />
+                      </button>
+                      <button v-if="isOwnComment(comment)" class="comment-action-icon" @click="deleteComment(comment.id)" title="Supprimer">
+                        <img src="@/assets/icons/trash.svg" alt="Supprimer" class="comment-icon" />
                       </button>
                     </div>
                   </div>
@@ -150,11 +155,11 @@
                       </div>
                       <div v-else class="comment-text">{{ reply.text }}</div>                      <!-- Actions pour les réponses -->
                       <div class="comment-actions" v-if="isOwnComment(reply)">
-                        <button class="comment-action" @click="startEditComment(reply)">
-                          <img src="@/assets/icons/edit.svg" alt="Modifier" class="action-icon-small" /> Modifier
+                        <button class="comment-action-icon" @click="startEditComment(reply)" title="Modifier">
+                          <img src="@/assets/icons/edit.svg" alt="Modifier" class="comment-icon" />
                         </button>
-                        <button class="comment-action delete" @click="deleteComment(reply.id)">
-                          <img src="@/assets/icons/trash.svg" alt="Supprimer" class="action-icon-small" /> Supprimer
+                        <button class="comment-action-icon" @click="deleteComment(reply.id)" title="Supprimer">
+                          <img src="@/assets/icons/trash.svg" alt="Supprimer" class="comment-icon" />
                         </button>
                       </div>
                     </div>
@@ -904,24 +909,33 @@ export default {
   gap: 10px;
   margin-bottom: 2px;
 }
-.comment-action {
+.comment-action-icon {
   background: none;
   border: none;
-  color: #f59c1a;
-  font-size: 0.97rem;
   cursor: pointer;
-  padding: 0 4px;
-  border-radius: 4px;
-  transition: background 0.13s;
+  padding: 8px;
+  border-radius: 50%;
+  transition: background-color 0.2s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 36px;
+  height: 36px;
 }
-.comment-action:hover {
-  background: #fff4e3;
+
+.comment-action-icon:hover {
+  background-color: rgba(236, 188, 118, 0.15);
 }
-.comment-action.delete {
-  color: #dc3545;
+
+.comment-icon {
+  width: 16px;
+  height: 16px;
+  filter: brightness(0) saturate(100%) invert(19%) sepia(8%) saturate(1834%) hue-rotate(203deg) brightness(95%) contrast(88%);
+  transition: transform 0.1s ease;
 }
-.comment-action.delete:hover {
-  background: rgba(220, 53, 69, 0.1);
+
+.comment-action-icon:hover .comment-icon {
+  transform: scale(1.1);
 }
 
 .comment-edit {
