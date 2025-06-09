@@ -604,6 +604,18 @@ export default {
     .carte-list {
     top: 140px;
     height: calc(100vh - 140px);
+    padding: 10px;
+  }
+  
+  .carte-map {
+    top: 140px;
+    height: calc(100vh - 140px);
+  }
+  
+  .btn-retour {
+    font-size: 0.9rem;
+    padding: 6px 12px;
+    margin-top: 5px;
     margin-bottom: 10px;
   }
 }
