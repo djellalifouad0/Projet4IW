@@ -1,15 +1,7 @@
-<template>
-  <div class="discussions-page">
+<template>  <div class="discussions-page">
     <div class="discussions-list">
-      <button class="new-discussion-btn" @click="showNewDiscussion = true">+ Nouvelle discussion</button>
-      <div v-if="showNewDiscussion" class="new-discussion-form">
-        <input v-model="newDiscussionName" placeholder="Nom du contact" />
-        <input v-model="newDiscussionMessage" placeholder="Premier message" @keyup.enter="createDiscussion" />
-        <button @click="createDiscussion">Créer</button>
-        <button @click="showNewDiscussion = false">Annuler</button>
-      </div>
       <div v-if="loading" class="loading">Chargement...</div>
-      <div v-if="error" class="error">{{ error }}</div>      <div v-for="conv in conversations" :key="conv.id" class="discussion-item" :class="{ active: selectedConversation && selectedConversation.id === conv.id }" @click="selectConversation(conv)">
+      <div v-if="error" class="error">{{ error }}</div><div v-for="conv in conversations" :key="conv.id" class="discussion-item" :class="{ active: selectedConversation && selectedConversation.id === conv.id }" @click="selectConversation(conv)">
         <div class="avatar-container">
           <img :src="conv.avatar" class="avatar" />
           <div v-if="isUserOnline(conv.userId)" class="online-indicator"></div>        </div>
@@ -28,15 +20,20 @@
             <span v-if="isUserOnline(selectedConversation.userId)" class="status online">En ligne</span>
             <span v-else class="status offline">Hors ligne</span>
           </div>
-        </div>
-
-        <!-- Section Rendez-vous en attente -->
-        <div v-if="pendingAppointments.length > 0" class="pending-appointments">
-          <div class="pending-appointments-title">
-            <img src="../assets/icons/agenda.svg" class="pending-icon" alt="Calendar">
-            <span>Rendez-vous en attente ({{ pendingAppointments.length }})</span>
+        </div>        <!-- Section Rendez-vous en attente -->
+        <div v-if="pendingAppointments.length > 0" class="pending-appointments" :class="{ collapsed: !showPendingAppointments }">
+          <div class="pending-appointments-header" @click="showPendingAppointments = !showPendingAppointments">
+            <div class="pending-appointments-title">
+              <img src="../assets/icons/agenda.svg" class="pending-icon" alt="Calendar">
+              <span>Rendez-vous en attente ({{ pendingAppointments.length }})</span>
+            </div>            <button class="toggle-appointments-btn" type="button">
+              <span class="toggle-arrow" :class="{ 'collapsed': !showPendingAppointments }">
+                ▼
+              </span>
+            </button>
           </div>
-          <div v-for="appointment in pendingAppointments" :key="appointment.id" class="pending-appointment-card">
+          <div v-if="showPendingAppointments" class="pending-appointments-content">
+            <div v-for="appointment in pendingAppointments" :key="appointment.id" class="pending-appointment-card">
             <div class="appointment-info">
               <div class="appointment-title">{{ appointment.title }}</div>
               <div class="appointment-date">{{ formatAppointmentDate(appointment.appointmentDate) }}</div>
@@ -63,10 +60,10 @@
                 <img src="../assets/icons/trash.svg" class="btn-action-icon" alt="Decline">
                 Refuser
               </button>
-            </div>
-            <div v-else class="appointment-status-waiting">
+            </div>            <div v-else class="appointment-status-waiting">
               En attente de réponse...
             </div>
+          </div>
           </div>
         </div><div class="chat-messages">
           <div v-for="msg in messages" :key="msg.id" :class="['chat-message', msg.fromMe ? 'me' : 'other', msg.isAppointment ? 'appointment-message' : '']">
@@ -184,14 +181,10 @@ import unreadMessagesService from '../services/unreadMessages'
 import NotificationService from '../services/notificationService'
 
 export default {
-  name: 'Discussions',  data() {    return {
-      conversations: [],
+  name: 'Discussions',  data() {    return {      conversations: [],
       selectedConversation: null,
       messages: [],
       newMessage: '',
-      showNewDiscussion: false,
-      newDiscussionName: '',
-      newDiscussionMessage: '',
       loading: false,
       error: '',
       typingUsers: new Set(),
@@ -205,8 +198,8 @@ export default {
         time: '',
         location: '',
         description: ''
-      },
-      conversationAppointments: [] // Nouveau: rendez-vous de la conversation actuelle
+      },      conversationAppointments: [], // Nouveau: rendez-vous de la conversation actuelle
+      showPendingAppointments: true // Nouveau: contrôle l'affichage des rendez-vous
     }
   },
   computed: {
@@ -384,27 +377,11 @@ export default {
             }
           });
         } catch (error) {
-          this.error = 'Erreur lors de l\'envoi du message';
-          console.error('Error sending message:', error);
+          this.error = 'Erreur lors de l\'envoi du message';        console.error('Error sending message:', error);
         }
       }
     },
-    async createDiscussion() {
-      if (this.newDiscussionName.trim() && this.newDiscussionMessage.trim()) {
-        try {
-          this.error = '';
-          // Ici on devrait chercher l'utilisateur par nom d'abord
-          // Pour simplifier, on va juste fermer le modal pour l'instant
-          this.showNewDiscussion = false;
-          this.newDiscussionName = '';
-          this.newDiscussionMessage = '';
-          // Recharger les conversations
-          await this.loadConversations();
-        } catch (error) {
-          this.error = 'Erreur lors de la création de la discussion';
-          console.error('Error creating discussion:', error);
-        }
-      }    },    async initializeWebSocket() {
+    async initializeWebSocket() {
       const token = localStorage.getItem('token');
       if (!token) {
         console.error('Aucun token trouvé pour l\'authentification WebSocket');
@@ -704,10 +681,6 @@ export default {
 </script>
 
 <style scoped>
-body, html, #app {
-  height: 100vh;
-  overflow: hidden;
-}
 .discussions-page {
   display: flex;
   flex-direction: row;
@@ -715,9 +688,10 @@ body, html, #app {
   width: 100%;
   max-width: 1100px;
   margin: 0 auto;
-  padding: 32px 0;
-  height: 93vh;
+  padding: 20px;
+  height: calc(100vh - 120px); /* Account for navbar and padding */
   min-height: 0;
+  box-sizing: border-box;
 }
 .discussions-list {
   width: 320px;
@@ -731,49 +705,6 @@ body, html, #app {
   height: 100%;
   min-height: 0;
   overflow-y: auto;
-}
-.new-discussion-btn {
-  margin: 0 18px 10px 18px;
-  padding: 8px 0;
-  background: #ecbc76;
-  color: #fff;
-  border: none;
-  border-radius: 8px;
-  font-weight: 600;
-  font-size: 1rem;
-  cursor: pointer;
-  transition: background 0.15s;
-}
-.new-discussion-btn:hover {
-  background: #e4a94f;
-}
-.new-discussion-form {
-  display: flex;
-  flex-direction: column;
-  gap: 6px;
-  margin: 0 18px 10px 18px;
-}
-.new-discussion-form input {
-  padding: 8px 10px;
-  border-radius: 8px;
-  border: 1.5px solid #ecbc76;
-  font-size: 1rem;
-}
-.new-discussion-form button {
-  background: #ecbc76;
-  color: #fff;
-  border: none;
-  border-radius: 8px;
-  padding: 8px 0;
-  font-size: 1rem;
-  font-weight: 600;
-  cursor: pointer;
-  transition: background 0.15s;
-}
-.new-discussion-form button:last-child {
-  background: #eee;
-  color: #28303F;
-  margin-top: 2px;
 }
 .loading {
   text-align: center;
@@ -1160,19 +1091,69 @@ body, html, #app {
 .pending-appointments {
   background: #fff9e6;
   border-bottom: 1px solid #f0d08a;
+  transition: all 0.3s ease;
+  overflow: hidden;
+}
+
+.pending-appointments.collapsed {
+  max-height: 50px;
+}
+
+.pending-appointments-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
   padding: 16px 24px;
-  max-height: 300px;
-  overflow-y: auto;
+  cursor: pointer;
+  user-select: none;
+  transition: background-color 0.2s ease;
+}
+
+.pending-appointments-header:hover {
+  background: #f5f0d6;
 }
 
 .pending-appointments-title {
   font-weight: 600;
   color: #b8860b;
-  margin-bottom: 12px;
   font-size: 0.95rem;
   display: flex;
   align-items: center;
   gap: 8px;
+}
+
+.toggle-appointments-btn {
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 4px;
+  border-radius: 4px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: background-color 0.2s ease;
+}
+
+.toggle-appointments-btn:hover {
+  background: rgba(184, 134, 11, 0.1);
+}
+
+.toggle-arrow {
+  font-size: 14px;
+  color: #b8860b;
+  transition: transform 0.3s ease;
+  user-select: none;
+}
+
+.toggle-arrow.collapsed {
+  transform: rotate(-90deg);
+}
+
+.pending-appointments-content {
+  padding: 0 24px 16px 24px;
+  max-height: 300px;
+  overflow-y: auto;
+  animation: slideDown 0.3s ease;
 }
 
 .pending-appointment-card {
@@ -1302,17 +1283,97 @@ body, html, #app {
   filter: brightness(0) saturate(100%) invert(100%) sepia(0%) saturate(0%) hue-rotate(0deg) brightness(100%) contrast(100%);
 }
 
+/* Responsive Design */
+@keyframes slideDown {
+  from {
+    opacity: 0;
+    transform: translateY(-10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@media (max-width: 1200px) {
+  .discussions-page {
+    max-width: 95%;
+    padding: 15px;
+    gap: 20px;
+  }
+}
+
 @media (max-width: 900px) {
   .discussions-page {
     flex-direction: column;
-    gap: 18px;
-    padding: 18px 0;
+    gap: 15px;
+    padding: 15px;
+    height: calc(100vh - 100px); /* Adjust for mobile navbar */
   }
-  .discussions-list, .chat-window {
+  
+  .discussions-list {
     width: 100%;
-    height: 340px;
-    min-width: 0;
-    max-width: 100vw;
+    height: 35vh;
+    min-height: 250px;
+  }
+  
+  .chat-window {
+    width: 100%;
+    height: 60vh;
+    min-height: 300px;
+  }
+}
+
+@media (max-width: 600px) {
+  .discussions-page {
+    padding: 10px;
+    gap: 10px;
+    height: calc(100vh - 80px); /* Account for bottom navbar on mobile */
+  }
+  
+  .discussions-list {
+    height: 30vh;
+    min-height: 200px;
+    padding: 12px 0;
+  }
+  
+  .chat-window {
+    height: 65vh;
+    min-height: 250px;
+  }
+  
+  .discussion-item {
+    padding: 10px 15px;
+  }
+  
+  .chat-header {
+    padding: 12px 16px;
+  }
+  
+  .chat-messages {
+    padding: 12px 16px;
+  }
+  
+  .chat-input {
+    padding: 12px 16px;
+  }
+  
+  .appointment-modal {
+    width: 95%;
+    max-width: none;
+    margin: 20px;
+  }
+  
+  .pending-appointments-header {
+    padding: 12px 16px;
+  }
+  
+  .pending-appointments-content {
+    padding: 0 16px 12px 16px;
+  }
+  
+  .pending-appointments-title {
+    font-size: 0.9rem;
   }
 }
 </style>

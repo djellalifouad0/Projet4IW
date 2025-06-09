@@ -17,8 +17,12 @@
             @click.stop
           >{{ rate }}</div>          <!-- Actions pour le propriétaire du post -->
           <div v-if="isOwnPost" class="post-actions">
-            <button class="post-action-btn" @click.stop.prevent="startInlineEdit" title="Modifier">✏️</button>
-            <button class="post-action-btn delete" @click.stop.prevent="deletePost" title="Supprimer">🗑️</button>
+            <button class="post-action-btn" @click.stop.prevent="startInlineEdit" title="Modifier">
+              <img src="@/assets/icons/edit.svg" alt="Modifier" class="action-icon-small" />
+            </button>
+            <button class="post-action-btn delete" @click.stop.prevent="deletePost" title="Supprimer">
+              <img src="@/assets/icons/trash.svg" alt="Supprimer" class="action-icon-small" />
+            </button>
           </div>
         </div>
       </div>      <div class="card-body">
@@ -74,7 +78,9 @@
           <div class="header-actions">
             <div class="rate" :class="paid ? 'rate-paid' : ''" v-if="rate">{{ rate }}</div>            <!-- Actions pour le propriétaire du post -->
             <div v-if="isOwnPost" class="post-actions">
-              <button class="post-action-btn delete" @click.stop="deletePost" title="Supprimer">🗑️</button>
+              <button class="post-action-btn delete" @click.stop="deletePost" title="Supprimer">
+                <img src="@/assets/icons/trash.svg" alt="Supprimer" class="action-icon-small" />
+              </button>
             </div>
           </div>
         </div>
@@ -116,11 +122,14 @@
                       <button @click="saveCommentEdit(comment.id)">Sauvegarder</button>
                       <button @click="cancelCommentEdit">Annuler</button>
                     </div>
-                    <div v-else class="comment-text">{{ comment.text }}</div>
-                    <div class="comment-actions">
+                    <div v-else class="comment-text">{{ comment.text }}</div>                    <div class="comment-actions">
                       <button class="comment-action" @click="replyTo(idx)">Répondre</button>
-                      <button v-if="isOwnComment(comment)" class="comment-action" @click="startEditComment(comment)">✏️ Modifier</button>
-                      <button v-if="isOwnComment(comment)" class="comment-action delete" @click="deleteComment(comment.id)">🗑️ Supprimer</button>
+                      <button v-if="isOwnComment(comment)" class="comment-action" @click="startEditComment(comment)">
+                        <img src="@/assets/icons/edit.svg" alt="Modifier" class="action-icon-small" /> Modifier
+                      </button>
+                      <button v-if="isOwnComment(comment)" class="comment-action delete" @click="deleteComment(comment.id)">
+                        <img src="@/assets/icons/trash.svg" alt="Supprimer" class="action-icon-small" /> Supprimer
+                      </button>
                     </div>
                   </div>
                 </div>
@@ -139,11 +148,14 @@
                         <button @click="saveCommentEdit(reply.id)">Sauvegarder</button>
                         <button @click="cancelCommentEdit">Annuler</button>
                       </div>
-                      <div v-else class="comment-text">{{ reply.text }}</div>
-                      <!-- Actions pour les réponses -->
+                      <div v-else class="comment-text">{{ reply.text }}</div>                      <!-- Actions pour les réponses -->
                       <div class="comment-actions" v-if="isOwnComment(reply)">
-                        <button class="comment-action" @click="startEditComment(reply)">✏️ Modifier</button>
-                        <button class="comment-action delete" @click="deleteComment(reply.id)">🗑️ Supprimer</button>
+                        <button class="comment-action" @click="startEditComment(reply)">
+                          <img src="@/assets/icons/edit.svg" alt="Modifier" class="action-icon-small" /> Modifier
+                        </button>
+                        <button class="comment-action delete" @click="deleteComment(reply.id)">
+                          <img src="@/assets/icons/trash.svg" alt="Supprimer" class="action-icon-small" /> Supprimer
+                        </button>
                       </div>
                     </div>
                   </li>

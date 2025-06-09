@@ -1,8 +1,8 @@
 <template>
-  <div class="home-content">
-    <div class="filters-bar">
+  <div class="home-content">    <div class="filters-bar">
       <div class="filter-dropdown-wrapper">
         <button class="filter-btn" @click="toggleFilterMenu">Filtrer par <span>▼</span></button>
+        <div v-if="showFilterMenu" class="filter-dropdown-overlay" @click="showFilterMenu = false"></div>
         <div v-if="showFilterMenu" class="filter-dropdown">
           <button @click="setSort('recent')">Plus récent</button>
           <button @click="setSort('ancien')">Plus ancien</button>
@@ -106,8 +106,7 @@ export default {
       sortBy: 'recent',
       userPosition: null
     }
-  },
-  async mounted() {
+  },  async mounted() {
     navigator.geolocation.getCurrentPosition((pos) => {
       this.userPosition = {
         lat: pos.coords.latitude,
@@ -117,6 +116,13 @@ export default {
     }, () => {
       this.fetchPosts();
     });
+    
+    // Ajout du listener pour fermer le menu de filtres
+    document.addEventListener('click', this.handleClickOutside);
+  },
+  
+  beforeDestroy() {
+    document.removeEventListener('click', this.handleClickOutside);
   },
   methods: {
     toggleFilterMenu() {
@@ -281,10 +287,17 @@ export default {
         this.$forceUpdate();
       }
     },
-    
-    handlePostDeleted(postId) {
+      handlePostDeleted(postId) {
       // Suppression instantanée du post de la liste
       this.posts = this.posts.filter(p => p.id !== postId);
+    },
+    
+    // Méthode pour fermer le menu de filtres quand on clique en dehors
+    handleClickOutside(event) {
+      const filterWrapper = this.$el?.querySelector('.filter-dropdown-wrapper');
+      if (filterWrapper && !filterWrapper.contains(event.target)) {
+        this.showFilterMenu = false;
+      }
     },
   }
 }
@@ -297,9 +310,10 @@ export default {
   flex-direction: column;
   align-items: center;
   padding: 1.2rem 1rem 2.2rem 1rem;
-  background: #FFFEF9;
+  background: #FEFCF6;
   overflow-x: hidden; /* Empêche le scroll horizontal */
   max-width: 100vw; /* Limite la largeur à 100% de la vue */
+  min-height: 100vh; /* Assure une hauteur minimale pour éviter les problèmes de scroll */
 }
 /* Filters bar + boutons */
 .filters-bar {
@@ -386,6 +400,46 @@ export default {
   }
   .cards {
     gap: 12px;
+  }
+    /* Ajustements pour le dropdown sur mobile */
+  .filter-dropdown-overlay {
+    display: block;
+    animation: overlayFadeIn 0.2s ease-out;
+  }
+  
+  .filter-dropdown {
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 90vw;
+    max-width: 300px;
+    z-index: 1001;
+    background: #fff;
+    border-radius: 12px;
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+    margin-top: 0;
+    animation: filterDropdownMobileOpen 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+  }
+  
+  @keyframes overlayFadeIn {
+    0% {
+      opacity: 0;
+    }
+    100% {
+      opacity: 1;
+    }
+  }
+  
+  @keyframes filterDropdownMobileOpen {
+    0% {
+      opacity: 0;
+      transform: translate(-50%, -50%) scale(0.9);
+    }
+    100% {
+      opacity: 1;
+      transform: translate(-50%, -50%) scale(1);
+    }
   }
 }
 @media (max-width: 480px) {
@@ -593,20 +647,46 @@ export default {
   position: relative;
   display: inline-block;
 }
+
+.filter-dropdown-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.5);
+  z-index: 999;
+  display: none;
+}
+
 .filter-dropdown {
   position: absolute;
-  top: 110%;
+  top: 100%;
   left: 0;
   background: #fff;
   border: 1.5px solid #e6cfa1;
   border-radius: 10px;
   box-shadow: 0 2px 12px #e4870033;
-  z-index: 20;
+  z-index: 1000;
   min-width: 160px;
   padding: 8px 0;
   display: flex;
   flex-direction: column;
   gap: 0;
+  margin-top: 5px;
+  animation: filterDropdownOpen 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+  transform-origin: top left;
+}
+
+@keyframes filterDropdownOpen {
+  0% {
+    opacity: 0;
+    transform: scaleY(0.8) translateY(-10px);
+  }
+  100% {
+    opacity: 1;
+    transform: scaleY(1) translateY(0);
+  }
 }
 .filter-dropdown button {
   background: none;

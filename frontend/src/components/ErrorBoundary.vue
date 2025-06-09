@@ -43,7 +43,6 @@ export default {
 
 <style scoped>
 .error-boundary {
-  min-height: 100%;
   width: 100%;
 }
 
