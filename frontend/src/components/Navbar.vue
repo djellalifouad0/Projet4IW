@@ -594,6 +594,7 @@ export default {
   }
   .navbar-logo .brand,
   .navbar-links .nav-label,
+  .navbar-actions .nav-label,
   .profile-info {
     display: none !important;
   }
@@ -606,6 +607,15 @@ export default {
     padding: 10px 0;
     gap: 0;
   }
+  .navbar-actions {
+    align-items: center;
+    margin: 32px 0 18px 0;
+  }
+  .navbar-actions a {
+    justify-content: center;
+    padding: 10px 0;
+    gap: 0;
+  }
   .navbar-profile {
     flex-direction: column;
     align-items: center;
@@ -614,9 +624,6 @@ export default {
   }
   .dots-icon {
     margin: 0;
-  }
-  .navbar-actions {
-    display: none !important;
   }
 }
 @media (max-width: 902px) {
