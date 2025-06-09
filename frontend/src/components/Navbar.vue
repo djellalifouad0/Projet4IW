@@ -22,14 +22,34 @@
           <span class="nav-label">Discussions</span>
           <span v-if="unreadCount > 0" class="unread-badge">{{ unreadCount > 99 ? '99+' : unreadCount }}</span>
         </router-link>
-      </li>
-      <li>
+      </li>      <li>
         <router-link to="/carte" exact-active-class="active">
           <img src="../assets/icons/carte.svg" alt="Carte" class="nav-icon" />
           <span class="nav-label">Carte</span>
         </router-link>
       </li>
-    </ul>    <!-- Ajout Notification et Paramètres -->
+      <!-- Ajout des boutons mobile pour Notifications et Paramètres -->
+      <li class="mobile-only">
+        <router-link to="/notifications" exact-active-class="active" class="notification-link">
+          <div class="notification-wrapper">
+            <img src="../assets/icons/notification.svg" alt="Notifications" class="nav-icon" />
+            <span v-if="notificationCount > 0" class="notification-count">{{ notificationCount > 99 ? '99+' : notificationCount }}</span>
+          </div>
+          <span class="nav-label">Notifications</span>
+        </router-link>
+      </li>      <li class="mobile-only">
+        <router-link to="/parametres" exact-active-class="active">
+          <img src="../assets/icons/settings.svg" alt="Paramètres" class="nav-icon" />
+          <span class="nav-label">Paramètres</span>
+        </router-link>
+      </li>
+      <li class="mobile-only">
+        <div @click="navigateToMyProfile" class="profile-link">
+          <img class="nav-icon profile-avatar" :src="user?.avatar || `https://ui-avatars.com/api/?name=${encodeURIComponent(user?.username || 'User')}&background=ECBC76&color=fff&size=64&bold=true`" alt="Profile" />
+          <span class="nav-label">Profile</span>
+        </div>
+      </li>
+    </ul><!-- Ajout Notification et Paramètres -->
     <ul class="navbar-actions">
       <li>
         <router-link to="/notifications" exact-active-class="active" class="notification-link">
@@ -359,7 +379,13 @@ export default {
   font-size: 1.08rem;
 }
 
-.navbar-links a {
+/* Masquer les éléments mobile-only sur desktop */
+.mobile-only {
+  display: none;
+}
+
+.navbar-links a,
+.profile-link {
   color: #28303F;
   text-decoration: none;
   padding: 10px 12px;
@@ -368,11 +394,17 @@ export default {
   align-items: center;
   gap: 12px;
   transition: color 0.2s;
+  cursor: pointer;
 }
 
 .nav-icon {
   width: 25px;
   height: 25px;
+}
+
+.profile-avatar {
+  border-radius: 50%;
+  border: 2px solid #C6553B;
 }
 
 .nav-label {
@@ -607,11 +639,16 @@ export default {
     background: #fff;
     box-shadow: 0 -3px 16px #0001;
   }
-
   .navbar-logo,
   .navbar-profile {
     display: none !important;
   }
+  
+  /* Afficher les éléments mobile-only en responsive */
+  .mobile-only {
+    display: block !important;
+  }
+  
   .navbar-links {
     /* Passe les liens sur une ligne, centrés */
     flex-direction: row;
@@ -624,10 +661,21 @@ export default {
     padding: 0;
   }
   .navbar-links li {
-    width: 25%;
+    width: 16.66%; /* 6 éléments au lieu de 4 */
     text-align: center;
+  }  .navbar-links a {
+    padding: 0;
+    border-radius: 0;
+    background: none !important;
+    justify-content: center;
+    width: 100%;
+    height: 64px;
+    display: flex;
+    align-items: center;
+    gap: 0;
   }
-  .navbar-links a {
+  
+  .profile-link {
     padding: 0;
     border-radius: 0;
     background: none !important;
@@ -642,10 +690,19 @@ export default {
     width: 28px;
     height: 28px;
     margin: 0 auto;
-  }
-  .nav-label {
+  }  .nav-label {
     display: none;
   }
+  
+  /* Ajustement des badges de notification en mode mobile */
+  .notification-count {
+    top: -6px;
+    right: -6px;
+    padding: 1px 5px;
+    font-size: 0.7rem;
+    min-width: 16px;
+  }
+  
   .navbar-actions {
     display: none !important;
   }
