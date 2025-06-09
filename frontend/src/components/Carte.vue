@@ -42,13 +42,12 @@
           @post-updated="handlePostUpdated"
           @post-deleted="handlePostDeleted"
         />
-      </div>
-      <div class="carte-map">
+      </div>      <div class="carte-map">
         <iframe
           width="100%"
           height="100%"
           frameborder="0"
-          style="border:0;border-radius:18px;"
+          style="border:0;"
           :src="mapUrl"
           allowfullscreen
         ></iframe>
@@ -264,8 +263,8 @@ export default {
   z-index: 10;
   background: #fefcf6;
   box-shadow: 0 2px 16px #0001;
-  padding-top: 24px;
-  padding-bottom: 18px;
+  padding-top: 20px;
+  padding-bottom: 20px;
 }
 .carte-header-inner {
   width: 1200px;
@@ -302,15 +301,15 @@ export default {
   display: flex;
   flex-direction: column;
   align-items: center;
-  padding-top: 110px;
+  padding-top: 120px;
 }
 .carte-content {
   display: flex;
   flex-direction: row;
   width: 100vw;
-  height: calc(100vh - 110px);
+  height: calc(100vh - 120px);
   position: fixed;
-  top: 110px;
+  top: 120px;
   left: 0;
 }
 .carte-list {
@@ -322,15 +321,16 @@ export default {
   gap: 18px;
   overflow-y: auto;
   height: 100%;
-  border-right: 2px solid #eee;
+  border-right: none;
 }
 .carte-map {
   flex: 1;
   height: 100%;
   background: #f5f5f5;
   display: flex;
-  align-items: center;
-  justify-content: center;
+  align-items: stretch;
+  justify-content: stretch;
+  padding: 0;
 }
 .btn-retour {
   background: #fff;
@@ -340,6 +340,7 @@ export default {
   padding: 10px 22px;
   font-size: 1.08rem;
   font-weight: 500;
+  margin-top: 15px;
   margin-bottom: 18px;
   cursor: pointer;
   box-shadow: 0 2px 8px #0001;
