@@ -103,7 +103,7 @@
           >
             <img src="@/assets/icons/coeur.svg" alt="likes" class="icon-svg" />
             <span class="icon-number">{{ likes }}</span>
-          </span>          <span :class="['icon', 'pastille', paid ? 'pastille-paid' : '']">
+          </span>          <span :class="['icon', 'pastille', paid ? 'pastille-paid' : '', commentsCount > 0 ? 'has-comments' : '']">
             <img src="@/assets/icons/comment.svg" alt="views" class="icon-svg" />
             <span class="icon-number">{{ commentsCount }}</span>
           </span>
