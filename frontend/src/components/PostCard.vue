@@ -56,8 +56,7 @@
         >
           <img src="@/assets/icons/coeur.svg" alt="likes" class="icon-svg" />
           <span class="icon-number">{{ likes }}</span>
-        </span>
-        <span :class="['icon', 'pastille', paid ? 'pastille-paid' : '']" @click.stop="openModal">
+        </span>        <span :class="['icon', 'pastille', paid ? 'pastille-paid' : '', commentsCount > 0 ? 'has-comments' : '']" @click.stop="openModal">
           <img src="@/assets/icons/comment.svg" alt="views" class="icon-svg" />
           <span class="icon-number">{{ commentsCount }}</span>
         </span>
@@ -104,10 +103,9 @@
           >
             <img src="@/assets/icons/coeur.svg" alt="likes" class="icon-svg" />
             <span class="icon-number">{{ likes }}</span>
-          </span>
-          <span :class="['icon', 'pastille', paid ? 'pastille-paid' : '']">
+          </span>          <span :class="['icon', 'pastille', paid ? 'pastille-paid' : '']">
             <img src="@/assets/icons/comment.svg" alt="views" class="icon-svg" />
-            <span class="icon-number">{{ totalCommentsCount }}</span>
+            <span class="icon-number">{{ commentsCount }}</span>
           </span>
         </div>        <!-- Section Commentaires -->
         <div class="modal-comments">
@@ -289,12 +287,10 @@ export default {
         'juil.', 'août', 'sept.', 'oct.', 'nov.', 'déc.'
       ];
       const moisStr = mois[date.getMonth()];
-      const annee = date.getFullYear();
-      return `${heures}:${minutes} · ${jours} ${moisStr} ${annee}`;
-    },    totalCommentsCount() {
-      // Compte tous les commentaires et leurs réponses
-      return this.comments.reduce((acc, c) => acc + 1 + (c.replies ? c.replies.length : 0), 0);
-    },    isOwnPost() {
+      const annee = date.getFullYear();      return `${heures}:${minutes} · ${jours} ${moisStr} ${annee}`;
+    },
+
+    isOwnPost() {
       // Vérifie si l'utilisateur connecté est le propriétaire du post
       return this.loggedInUser && this.loggedInUser.id === this.userId;
     }

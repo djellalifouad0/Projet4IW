@@ -4,8 +4,7 @@
       <img src="../assets/images/SkillSwap Logo.png" alt="SkillSwap" class="logo" />
       <span class="brand">SkillSwap</span>
     </div>
-    <ul class="navbar-links">
-      <li>
+    <ul class="navbar-links">      <li>
         <router-link to="/" exact-active-class="active">
           <img src="../assets/icons/accueil.svg" alt="Accueil" class="nav-icon" />
           <span class="nav-label">Accueil</span>
@@ -27,6 +26,8 @@
           <img src="../assets/icons/carte.svg" alt="Carte" class="nav-icon" />
           <span class="nav-label">Carte</span>
         </router-link>
+      </li>      <li class="mobile-only">
+        <ThemeToggle />
       </li>
       <!-- Ajout des boutons mobile pour Notifications et Paramètres -->
       <li class="mobile-only">
@@ -37,7 +38,7 @@
           </div>
           <span class="nav-label">Notifications</span>
         </router-link>
-      </li>      <li class="mobile-only">
+      </li><li class="mobile-only">
         <router-link to="/parametres" exact-active-class="active">
           <img src="../assets/icons/settings.svg" alt="Paramètres" class="nav-icon" />
           <span class="nav-label">Paramètres</span>
@@ -49,8 +50,11 @@
           <span class="nav-label">Profile</span>
         </div>
       </li>
-    </ul><!-- Ajout Notification et Paramètres -->
+    </ul>    <!-- Ajout Notification et Paramètres -->
     <ul class="navbar-actions">
+      <li>
+        <ThemeToggle />
+      </li>
       <li>
         <router-link to="/notifications" exact-active-class="active" class="notification-link">
           <div class="notification-wrapper">
@@ -87,9 +91,13 @@ import authService from '../services/authService'
 import unreadMessagesService from '../services/unreadMessages'
 import NotificationService from '../services/notificationService'
 import eventBus, { NotificationEvents, ProfileEvents } from '../services/eventBus'
+import ThemeToggle from './ThemeToggle.vue'
 
 export default {
-  name: 'Navbar',  data() {
+  name: 'Navbar',
+  components: {
+    ThemeToggle
+  },data() {
     return {
       user: null,
       showMenu: false,
@@ -412,11 +420,23 @@ export default {
   white-space: nowrap;
 }
 
-.navbar-links a.active,
-.navbar-links a.router-link-exact-active {
-  color: #28303F;
-  font-weight: bold;
-  background: none;
+.navbar-links a.active {
+  color: #28303F !important;
+  font-weight: bold !important;
+}
+
+/* Désactiver explicitement le style pour router-link-active */
+.navbar-links a.router-link-active:not(.active) {
+  color: #28303F !important;
+  background: transparent !important;
+  font-weight: normal !important;
+}
+
+/* Règle de priorité pour s'assurer que l'active fonctionne */
+.navbar-links a[href="/"].router-link-active:not(.active) {
+  color: #28303F !important;
+  background: transparent !important;
+  font-weight: normal !important;
 }
 
 .navbar-actions {

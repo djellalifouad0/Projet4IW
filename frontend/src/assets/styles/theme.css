@@ -1,0 +1,1098 @@
+/* 
+ * DARK MODE COMPLET - NE TOUCHE PAS AU STYLE LIGHT EXISTANT
+ * Ce fichier contient UNIQUEMENT les styles pour le dark mode
+ * Votre style light mode reste 100% intact
+ */
+
+/* === VARIABLES DARK MODE === */
+.dark-theme {
+  /* Couleurs principales adaptées à votre DA */
+  --bg-primary: #0f1419;           /* Background principal très sombre */
+  --bg-secondary: #1a1f2e;         /* Cards et conteneurs */
+  --bg-tertiary: #242936;          /* Elements plus clairs */
+  --bg-hover: #2d3748;             /* Hover states */
+  --bg-active: #3a4553;            /* Active states */
+  
+  /* Couleurs spécialisées */
+  --bg-sidebar: #161b26;           /* Navbar et sidebars */
+  --bg-header: #0f1419;            /* Headers fixes */
+  --bg-card: #1a1f2e;             /* Cards principale */
+  --bg-input: #242936;             /* Inputs et forms */
+  
+  /* Textes */
+  --text-primary: #e2e8f0;         /* Texte principal */
+  --text-secondary: #cbd5e0;       /* Texte secondaire */
+  --text-tertiary: #a0aec0;        /* Texte tertiaire */
+  --text-muted: #718096;           /* Texte très discret */
+  --text-brand: #F4A474;           /* Couleur de votre marque adaptée */
+  
+  /* Couleurs d'accent inspirées de votre DA */
+  --accent: #F4A474;               /* Orange principal adapté */
+  --accent-hover: #E88B5A;         /* Hover de l'accent */
+  --accent-light: #D4A665;         /* Version claire */
+  
+  /* Bordures et séparateurs */
+  --border-color: #2d3748;         /* Bordures normales */
+  --border-input: #4a5568;         /* Bordures d'inputs */
+  --border-active: #F4A474;        /* Bordures actives */
+  
+  /* Ombres */
+  --shadow-card: 0 4px 16px rgba(0, 0, 0, 0.4);
+  --shadow-modal: 0 8px 32px rgba(0, 0, 0, 0.6);
+  --shadow-input: 0 0 0 2px rgba(244, 164, 116, 0.2);
+  
+  /* Statuts et alertes */
+  --success: #68d391;
+  --warning: #f6e05e;
+  --danger: #fc8181;
+  --info: #63b3ed;
+}
+
+/* === SCRIPT D'INITIALISATION DARK MODE === */
+/* Ce script doit être exécuté le plus tôt possible pour éviter le flash */
+
+/* === LAYOUT PRINCIPAL === */
+.dark-theme body {
+  background-color: var(--bg-primary) !important;
+  color: var(--text-primary) !important;
+}
+
+/* === NAVIGATION === */
+.dark-theme .navbar-vertical {
+  background: var(--bg-sidebar) !important;
+  border-right: 1px solid var(--border-color) !important;
+}
+
+.dark-theme .navbar-logo .brand {
+  color: var(--text-brand) !important;
+}
+
+.dark-theme .navbar-links a,
+.dark-theme .navbar-actions a {
+  color: var(--text-secondary) !important;
+}
+
+.dark-theme .navbar-links a:hover,
+.dark-theme .navbar-actions a:hover {
+  color: var(--accent) !important;
+  background: var(--bg-hover) !important;
+}
+
+/* Fix pour l'active state de l'accueil et tous les liens */
+.dark-theme .navbar-links a.active,
+.dark-theme .navbar-actions a.active {
+  color: var(--accent) !important;
+  background: var(--bg-active) !important;
+  border-radius: 8px !important;
+}
+
+/* Désactiver explicitement le style pour router-link-active en dark mode */
+.dark-theme .navbar-links a.router-link-active:not(.active),
+.dark-theme .navbar-actions a.router-link-active:not(.active) {
+  color: var(--text-secondary) !important;
+  background: transparent !important;
+  font-weight: normal !important;
+}
+
+/* Règle de priorité pour s'assurer que l'active fonctionne en dark mode */
+.dark-theme .navbar-links a[href="/"].router-link-active:not(.active) {
+  color: var(--text-secondary) !important;
+  background: transparent !important;
+  font-weight: normal !important;
+}
+
+.dark-theme .navbar-profile .username {
+  color: var(--text-primary) !important;
+}
+
+.dark-theme .navbar-profile .email {
+  color: var(--text-muted) !important;
+}
+
+.dark-theme .dropdown-menu {
+  background: var(--bg-card) !important;
+  border: 1px solid var(--border-color) !important;
+  box-shadow: var(--shadow-card) !important;
+}
+
+.dark-theme .dropdown-menu button {
+  color: var(--text-primary) !important;
+}
+
+.dark-theme .dropdown-menu button:hover {
+  background: var(--bg-hover) !important;
+  color: var(--accent) !important;
+}
+
+/* === HOME PAGE === */
+.dark-theme .home-content {
+  background: var(--bg-primary) !important;
+}
+
+.dark-theme .filters-bar {
+  background: transparent !important;
+}
+
+.dark-theme .filter-btn {
+  background: var(--accent-light) !important;
+  color: var(--bg-primary) !important;
+  border: none !important;
+}
+
+.dark-theme .filter-btn:hover {
+  background: var(--accent) !important;
+}
+
+.dark-theme .publish-btn {
+  background: var(--accent) !important;
+  color: var(--bg-primary) !important;
+}
+
+.dark-theme .publish-btn:hover {
+  background: var(--accent-hover) !important;
+}
+
+.dark-theme .cards {
+  background: var(--bg-primary) !important;
+}
+
+/* === POST CARDS === */
+.dark-theme .card,
+.dark-theme .card-orange,
+.dark-theme .card-paid {
+  background: var(--bg-card) !important;
+  color: var(--text-primary) !important;
+  border-color: var(--border-color) !important;
+  box-shadow: var(--shadow-card) !important;
+}
+
+.dark-theme .card-header .name {
+  color: var(--text-primary) !important;
+}
+
+.dark-theme .card-header .address {
+  color: var(--text-secondary) !important;
+}
+
+.dark-theme .card-body p {
+  color: var(--text-primary) !important;
+}
+
+.dark-theme .rate {
+  background: var(--accent) !important;
+  color: var(--bg-primary) !important;
+}
+
+.dark-theme .rate-paid {
+  background: var(--text-primary) !important;
+  color: var(--bg-primary) !important;
+}
+
+/* Fond différent pour les pastilles sans commentaires */
+.dark-theme .pastille:not(.pastille-paid) {
+  background: var(--bg-secondary) !important;
+  color: var(--text-primary) !important;
+}
+
+/* Fond coloré pour les pastilles avec commentaires */
+.dark-theme .pastille.has-comments {
+  background: var(--accent-light) !important;
+  color: var(--bg-primary) !important;
+}
+
+.dark-theme .pastille-paid {
+  background: var(--bg-card) !important;
+  border: 1px solid var(--border-color) !important;
+  color: var(--text-primary) !important;
+}
+
+.dark-theme .pastille:hover {
+  background: var(--accent) !important;
+}
+
+.dark-theme .icon-number {
+  color: inherit !important;
+}
+
+.dark-theme .more {
+  color: var(--accent) !important;
+}
+
+.dark-theme .post-time-ago-inline {
+  color: var(--text-muted) !important;
+}
+
+.dark-theme .post-date-time {
+  color: var(--text-secondary) !important;
+}
+
+/* === MODALS === */
+.dark-theme .modal-overlay {
+  background: rgba(0, 0, 0, 0.9) !important;
+}
+
+.dark-theme .modal-card {
+  background: var(--bg-card) !important;
+  color: var(--text-primary) !important;
+  box-shadow: var(--shadow-modal) !important;
+}
+
+.dark-theme .modal-header {
+  background: var(--accent) !important;
+  color: var(--bg-primary) !important;
+}
+
+.dark-theme .modal-card h2 {
+  color: var(--bg-primary) !important;
+}
+
+/* === FORMS ET INPUTS === */
+.dark-theme input,
+.dark-theme textarea,
+.dark-theme select {
+  background: var(--bg-input) !important;
+  color: var(--text-primary) !important;
+  border-color: var(--border-input) !important;
+}
+
+.dark-theme input:focus,
+.dark-theme textarea:focus,
+.dark-theme select:focus {
+  border-color: var(--border-active) !important;
+  box-shadow: var(--shadow-input) !important;
+}
+
+.dark-theme input::placeholder,
+.dark-theme textarea::placeholder {
+  color: var(--text-muted) !important;
+}
+
+.dark-theme label {
+  color: var(--text-primary) !important;
+}
+
+/* === LOGIN/REGISTER FORMS === */
+.dark-theme .login-wrapper {
+  background-color: var(--bg-primary) !important;
+}
+
+.dark-theme .login-left {
+  background-color: var(--accent-light) !important;
+}
+
+.dark-theme .login-logo-title {
+  color: var(--text-brand) !important;
+}
+
+.dark-theme .login-box {
+  background: var(--bg-card) !important;
+  box-shadow: var(--shadow-modal) !important;
+}
+
+.dark-theme .login-box h1,
+.dark-theme .login-box h2 {
+  color: var(--text-primary) !important;
+}
+
+.dark-theme .switch-link {
+  color: var(--text-muted) !important;
+}
+
+.dark-theme .switch-link a {
+  color: var(--accent) !important;
+}
+
+/* === BUTTONS === */
+.dark-theme button.primary {
+  background-color: var(--accent) !important;
+  color: var(--bg-primary) !important;
+}
+
+.dark-theme button.primary:hover {
+  background-color: var(--accent-hover) !important;
+}
+
+.dark-theme .btn-retour {
+  background: var(--bg-card) !important;
+  color: var(--accent) !important;
+  border-color: var(--accent-light) !important;
+}
+
+.dark-theme .btn-retour:hover {
+  background: var(--accent-light) !important;
+  color: var(--bg-primary) !important;
+}
+
+/* === PAGE CARTE === */
+.dark-theme .carte-page {
+  background: var(--bg-primary) !important;
+}
+
+.dark-theme .carte-header-fixed {
+  background: var(--bg-header) !important;
+  border-bottom: 1px solid var(--border-color) !important;
+}
+
+.dark-theme .carte-brand {
+  color: var(--text-brand) !important;
+}
+
+.dark-theme .carte-list {
+  background: var(--bg-sidebar) !important;
+}
+
+/* === DASHBOARD === */
+.dark-theme .dashboard-content {
+  background: var(--bg-primary) !important;
+}
+
+.dark-theme .dashboard-card {
+  background: var(--accent-light) !important;
+  color: var(--bg-primary) !important;
+}
+
+.dark-theme .dashboard-card:hover {
+  background: var(--accent) !important;
+}
+
+.dark-theme .dashboard-card h2,
+.dark-theme .dashboard-card p {
+  color: var(--bg-primary) !important;
+}
+
+/* === PROFILE AMÉLIORÉ === */
+.dark-theme .profile-content {
+  background: var(--bg-primary) !important;
+}
+
+.dark-theme .profile-section,
+.dark-theme .profile-card-bottom-v2 {
+  background: var(--bg-card) !important;
+  border: 1px solid var(--border-color) !important;
+  border-radius: 12px !important;
+  box-shadow: var(--shadow-card) !important;
+  margin-bottom: 16px !important;
+}
+
+.dark-theme .profile-post-item {
+  background: var(--bg-secondary) !important;
+  border-color: var(--border-color) !important;
+}
+
+.dark-theme .profile-post-title {
+  color: var(--text-primary) !important;
+}
+
+.dark-theme .profile-post-date {
+  color: var(--text-muted) !important;
+}
+
+.dark-theme .profile-post-stats {
+  background: var(--bg-secondary) !important;
+}
+
+.dark-theme .post-stat-item {
+  color: var(--text-primary) !important;
+}
+
+/* === CALENDAR === */
+.dark-theme .calendar-nav-btn {
+  background: var(--accent) !important;
+  color: var(--bg-primary) !important;
+}
+
+.dark-theme .calendar-nav-btn:hover {
+  background: var(--accent-hover) !important;
+}
+
+.dark-theme .calendar-title {
+  color: var(--accent) !important;
+}
+
+.dark-theme .calendar-day {
+  background: var(--bg-card) !important;
+  color: var(--text-primary) !important;
+  border-color: var(--border-color) !important;
+}
+
+.dark-theme .calendar-day.other-month {
+  background: var(--bg-secondary) !important;
+  color: var(--text-muted) !important;
+}
+
+.dark-theme .calendar-appointment {
+  background: var(--accent) !important;
+  color: var(--bg-primary) !important;
+}
+
+/* === NOTIFICATIONS === */
+.dark-theme .notifications-content {
+  background: var(--bg-primary) !important;
+}
+
+.dark-theme .notification-item {
+  background: var(--bg-card) !important;
+  border-color: var(--border-color) !important;
+}
+
+.dark-theme .notification-item.unread {
+  background: var(--bg-secondary) !important;
+  border-left-color: var(--accent) !important;
+}
+
+.dark-theme .notif-title {
+  color: var(--text-primary) !important;
+}
+
+.dark-theme .notif-message {
+  color: var(--text-secondary) !important;
+}
+
+.dark-theme .notif-date {
+  color: var(--accent) !important;
+}
+
+.dark-theme .mark-all-read-btn {
+  background: var(--accent) !important;
+  color: var(--bg-primary) !important;
+}
+
+.dark-theme .mark-all-read-btn:hover:not(:disabled) {
+  background: var(--accent-hover) !important;
+}
+
+.dark-theme .mark-all-read-btn:disabled {
+  background: var(--text-muted) !important;
+}
+
+.dark-theme .empty {
+  background: var(--bg-secondary) !important;
+  border-color: var(--border-color) !important;
+  color: var(--text-muted) !important;
+}
+
+/* === DISCUSSIONS AMÉLIORÉES === */
+.dark-theme .discussions-layout {
+  background: var(--bg-primary) !important;
+}
+
+.dark-theme .discussions-list {
+  background: var(--bg-sidebar) !important;
+  border-radius: 12px !important;
+  box-shadow: var(--shadow-card) !important;
+}
+
+.dark-theme .users-list,
+.dark-theme .conversations-list {
+  background: var(--bg-sidebar) !important;
+  border-radius: 12px !important;
+  margin: 16px !important;
+  padding: 16px !important;
+  box-shadow: var(--shadow-card) !important;
+}
+
+.dark-theme .user-item,
+.dark-theme .contact-item,
+.dark-theme .conversation-item {
+  background: var(--bg-card) !important;
+  border-color: var(--border-color) !important;
+  color: var(--text-primary) !important;
+  border-radius: 8px !important;
+  margin-bottom: 8px !important;
+  padding: 12px !important;
+  border: 1px solid var(--border-color) !important;
+}
+
+.dark-theme .discussion-item {
+  background: var(--bg-card) !important;
+  border-color: var(--border-color) !important;
+  color: var(--text-primary) !important;
+}
+
+.dark-theme .discussion-item.active {
+  background: var(--bg-active) !important;
+  border-color: var(--accent) !important;
+  box-shadow: 0 2px 8px rgba(244, 164, 116, 0.3) !important;
+}
+
+/* Rendez-vous dans les conversations */
+.dark-theme .appointment-card,
+.dark-theme .pending-appointment-card,
+.dark-theme .month-appointment-card {
+  background: var(--bg-card) !important;
+  border: 1px solid var(--border-color) !important;
+  border-radius: 8px !important;
+  box-shadow: var(--shadow-card) !important;
+}
+
+.dark-theme .pending-appointments-header {
+  background: var(--bg-secondary) !important;
+  border-color: var(--border-color) !important;
+}
+
+.dark-theme .pending-appointments-content {
+  background: var(--bg-card) !important;
+  border-color: var(--border-color) !important;
+}
+
+.dark-theme .user-item:hover {
+  background: var(--bg-hover) !important;
+}
+
+.dark-theme .user-item.selected {
+  background: var(--bg-active) !important;
+  border-color: var(--accent) !important;
+}
+
+.dark-theme .message-item,
+.dark-theme .message-bubble,
+.dark-theme .chat-message {
+  background: var(--bg-secondary) !important;
+  color: var(--text-primary) !important;
+}
+
+.dark-theme .message.own {
+  background: var(--accent) !important;
+  color: var(--bg-primary) !important;
+}
+
+.dark-theme .message.other {
+  background: var(--bg-secondary) !important;
+  color: var(--text-primary) !important;
+}
+
+/* === COMMENTS === */
+.dark-theme .modal-comments {
+  background: transparent !important;
+}
+
+.dark-theme .comment-item {
+  color: var(--text-primary) !important;
+}
+
+.dark-theme .comment-author {
+  color: var(--text-primary) !important;
+}
+
+.dark-theme .comment-time {
+  color: var(--text-muted) !important;
+}
+
+.dark-theme .comment-text {
+  color: var(--text-secondary) !important;
+}
+
+.dark-theme .no-comments {
+  color: var(--text-muted) !important;
+}
+
+.dark-theme .add-comment input,
+.dark-theme .add-reply input {
+  background: var(--bg-input) !important;
+  border-color: var(--border-input) !important;
+  color: var(--text-primary) !important;
+}
+
+.dark-theme .add-comment button,
+.dark-theme .add-reply button {
+  background: var(--accent) !important;
+  color: var(--bg-primary) !important;
+}
+
+.dark-theme .add-comment button:hover,
+.dark-theme .add-reply button:hover {
+  background: var(--accent-hover) !important;
+}
+
+.dark-theme .comment-edit input {
+  background: var(--bg-input) !important;
+  border-color: var(--border-input) !important;
+  color: var(--text-primary) !important;
+}
+
+.dark-theme .comment-edit button:first-of-type {
+  background: var(--accent) !important;
+  color: var(--bg-primary) !important;
+}
+
+.dark-theme .comment-edit button:first-of-type:hover {
+  background: var(--accent-hover) !important;
+}
+
+/* === INLINE EDITING === */
+.dark-theme .inline-edit-container {
+  background: var(--bg-secondary) !important;
+  border-color: var(--border-active) !important;
+}
+
+.dark-theme .inline-edit-textarea {
+  background: var(--bg-input) !important;
+  color: var(--text-primary) !important;
+  border-color: var(--border-input) !important;
+}
+
+.dark-theme .inline-edit-textarea:focus {
+  border-color: var(--border-active) !important;
+  box-shadow: var(--shadow-input) !important;
+}
+
+.dark-theme .inline-save-btn {
+  background: var(--accent) !important;
+  color: var(--bg-primary) !important;
+}
+
+.dark-theme .inline-save-btn:hover {
+  background: var(--accent-hover) !important;
+}
+
+.dark-theme .inline-cancel-btn {
+  background: var(--text-muted) !important;
+  color: var(--bg-primary) !important;
+}
+
+.dark-theme .inline-edit-hint {
+  color: var(--text-muted) !important;
+}
+
+/* === FILTER DROPDOWN === */
+.dark-theme .filter-dropdown {
+  background: var(--bg-card) !important;
+  border-color: var(--border-color) !important;
+  box-shadow: var(--shadow-card) !important;
+}
+
+.dark-theme .filter-dropdown button {
+  color: var(--text-primary) !important;
+}
+
+.dark-theme .filter-dropdown button:hover {
+  background: var(--accent-light) !important;
+  color: var(--bg-primary) !important;
+}
+
+/* === POST VIEW PAGE === */
+.dark-theme .post-view-container {
+  background: var(--bg-primary) !important;
+}
+
+.dark-theme .post-view-header h1 {
+  color: var(--accent) !important;
+}
+
+.dark-theme .back-btn {
+  background: var(--accent) !important;
+  color: var(--bg-primary) !important;
+}
+
+.dark-theme .back-btn:hover {
+  background: var(--accent-hover) !important;
+}
+
+.dark-theme .post-stats,
+.dark-theme .related-posts {
+  background: var(--bg-card) !important;
+  color: var(--text-primary) !important;
+}
+
+.dark-theme .post-stats h3,
+.dark-theme .related-posts h3 {
+  color: var(--accent) !important;
+  border-bottom-color: var(--accent-light) !important;
+}
+
+.dark-theme .stat-item {
+  color: var(--text-primary) !important;
+}
+
+.dark-theme .stat-label {
+  color: var(--text-secondary) !important;
+}
+
+.dark-theme .related-post-item {
+  background: var(--bg-secondary) !important;
+  border-color: var(--border-color) !important;
+  color: var(--text-primary) !important;
+}
+
+.dark-theme .related-post-item:hover {
+  background: var(--bg-hover) !important;
+  border-color: var(--accent) !important;
+}
+
+.dark-theme .related-post-description {
+  color: var(--text-primary) !important;
+}
+
+.dark-theme .related-post-meta {
+  color: var(--text-secondary) !important;
+}
+
+.dark-theme .related-post-price {
+  background: var(--accent-light) !important;
+  color: var(--bg-primary) !important;
+}
+
+/* === SETTINGS === */
+.dark-theme .settings-content {
+  background: var(--bg-primary) !important;
+}
+
+/* === ERROR MESSAGES === */
+.dark-theme .error-message {
+  background: var(--bg-card) !important;
+  border-color: var(--danger) !important;
+  color: var(--text-primary) !important;
+}
+
+.dark-theme .error-message h3 {
+  color: var(--danger) !important;
+}
+
+.dark-theme .error-message p {
+  color: var(--text-secondary) !important;
+}
+
+/* === CITY SUGGESTIONS === */
+.dark-theme .city-suggestions {
+  background: var(--bg-card) !important;
+  border-color: var(--border-color) !important;
+  box-shadow: var(--shadow-card) !important;
+}
+
+.dark-theme .city-suggestions li {
+  color: var(--text-primary) !important;
+}
+
+.dark-theme .city-suggestions li:hover {
+  background: var(--bg-hover) !important;
+}
+
+/* === CONFIRMATION DIALOG === */
+.dark-theme .confirmation-dialog {
+  background: var(--bg-card) !important;
+  box-shadow: var(--shadow-modal) !important;
+}
+
+.dark-theme .confirmation-content p {
+  color: var(--text-primary) !important;
+}
+
+.dark-theme .confirm-btn {
+  background: var(--danger) !important;
+}
+
+.dark-theme .cancel-btn {
+  background: var(--text-muted) !important;
+}
+
+/* === SCROLLBARS === */
+.dark-theme ::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+.dark-theme ::-webkit-scrollbar-track {
+  background: var(--bg-secondary);
+  border-radius: 4px;
+}
+
+.dark-theme ::-webkit-scrollbar-thumb {
+  background: var(--border-color);
+  border-radius: 4px;
+}
+
+.dark-theme ::-webkit-scrollbar-thumb:hover {
+  background: var(--text-muted);
+}
+
+/* === ICÔNES SPÉCIFIQUES === */
+/* Icônes cœur et commentaire toujours en #28303F */
+.dark-theme .icon-svg {
+  filter: brightness(0) saturate(100%) invert(19%) sepia(8%) saturate(1834%) hue-rotate(203deg) brightness(95%) contrast(88%) !important;
+}
+
+/* Garde les icônes nav en version claire */
+.dark-theme .nav-icon,
+.dark-theme .modal-icon-svg {
+  filter: brightness(0) saturate(100%) invert(80%) sepia(8%) saturate(343%) hue-rotate(185deg) brightness(94%) contrast(88%) !important;
+}
+
+.dark-theme .action-icon-small {
+  filter: brightness(0) saturate(100%) invert(80%) sepia(8%) saturate(343%) hue-rotate(185deg) brightness(94%) contrast(88%) !important;
+}
+
+.dark-theme .comment-icon {
+  filter: brightness(0) saturate(100%) invert(80%) sepia(8%) saturate(343%) hue-rotate(185deg) brightness(94%) contrast(88%) !important;
+}
+
+/* === TABLES === */
+.dark-theme table,
+.dark-theme thead,
+.dark-theme tbody,
+.dark-theme tr,
+.dark-theme td,
+.dark-theme th {
+  background: var(--bg-card) !important;
+  color: var(--text-primary) !important;
+  border-color: var(--border-color) !important;
+}
+
+/* === PAGINATION === */
+.dark-theme .pagination-btn {
+  background: var(--accent) !important;
+  color: var(--bg-primary) !important;
+}
+
+.dark-theme .pagination-btn:hover:not(:disabled) {
+  background: var(--accent-hover) !important;
+}
+
+.dark-theme .pagination-btn:disabled {
+  background: var(--text-muted) !important;
+  color: var(--bg-primary) !important;
+}
+
+/* === BADGES ET INDICATORS === */
+.dark-theme .notification-count,
+.dark-theme .unread-badge {
+  background: var(--danger) !important;
+  color: var(--bg-primary) !important;
+}
+
+.dark-theme .unread-indicator {
+  background: var(--info) !important;
+}
+
+/* === TRANSITIONS FLUIDES === */
+.dark-theme * {
+  transition: background-color 0.3s ease, color 0.3s ease, border-color 0.3s ease, box-shadow 0.3s ease;
+}
+
+/* Éviter les transitions sur certains éléments */
+.dark-theme .modal-overlay,
+.dark-theme .toast,
+.dark-theme .notification-toast {
+  transition: none !important;
+}
+
+/* === HEADINGS === */
+.dark-theme h1,
+.dark-theme h2,
+.dark-theme h3,
+.dark-theme h4,
+.dark-theme h5,
+.dark-theme h6 {
+  color: var(--text-brand) !important;
+}
+
+/* === AMÉLIORATIONS SPÉCIFIQUES === */
+
+/* Améliore les bordures des avatars en dark mode */
+.dark-theme .avatar {
+  border-color: var(--accent) !important;
+}
+
+/* Améliore le style des badges de notification */
+.dark-theme .notification-count,
+.dark-theme .unread-badge {
+  background: var(--danger) !important;
+  border: 2px solid var(--bg-sidebar) !important;
+}
+
+/* Retire l'effet hover sur les cards */
+.dark-theme .card:hover,
+.dark-theme .card-orange:hover,
+.dark-theme .card-paid:hover {
+  box-shadow: var(--shadow-card) !important;
+  transform: none !important;
+}
+
+/* Améliore le status dot (en ligne) */
+.dark-theme .status-dot {
+  background: var(--success) !important;
+  box-shadow: 0 0 0 2px var(--bg-card) !important;
+}
+
+/* Améliore les liens underlined */
+.dark-theme .address {
+  text-decoration-color: var(--text-secondary) !important;
+}
+
+.dark-theme .address:hover {
+  color: var(--accent) !important;
+  text-decoration-color: var(--accent) !important;
+}
+
+/* Améliore les champs de recherche */
+.dark-theme .carte-search input {
+  background: var(--bg-input) !important;
+  color: var(--text-primary) !important;
+  border-color: var(--border-input) !important;
+}
+
+.dark-theme .carte-search input:focus {
+  border-color: var(--border-active) !important;
+  box-shadow: var(--shadow-input) !important;
+}
+
+/* Améliore les suggestions de ville */
+.dark-theme .city-suggestions {
+  background: var(--bg-card) !important;
+  border-color: var(--border-color) !important;
+}
+
+/* Améliore les messages d'erreur */
+.dark-theme .error-message {
+  background: rgba(252, 129, 129, 0.1) !important;
+  border-color: var(--danger) !important;
+  color: var(--text-primary) !important;
+}
+
+/* Améliore les messages de succès */
+.dark-theme .success-message {
+  background: rgba(104, 211, 145, 0.1) !important;
+  border: 1px solid var(--success) !important;
+  color: var(--text-primary) !important;
+}
+
+/* Améliore les tooltips */
+.dark-theme [title]:hover::after {
+  background: var(--bg-card) !important;
+  color: var(--text-primary) !important;
+  border: 1px solid var(--border-color) !important;
+  box-shadow: var(--shadow-card) !important;
+}
+
+/* Améliore les loading states */
+.dark-theme .loading {
+  color: var(--text-muted) !important;
+  background: var(--bg-secondary) !important;
+}
+
+/* Améliore les éléments disabled */
+.dark-theme button:disabled,
+.dark-theme input:disabled,
+.dark-theme textarea:disabled {
+  background: var(--bg-secondary) !important;
+  color: var(--text-muted) !important;
+  border-color: var(--border-color) !important;
+  opacity: 0.6;
+}
+
+/* Améliore les sélections de texte */
+.dark-theme ::selection {
+  background: rgba(244, 164, 116, 0.3) !important;
+  color: var(--text-primary) !important;
+}
+
+/* Améliore les focus outlines */
+.dark-theme *:focus {
+  outline-color: var(--accent) !important;
+}
+
+/* Spécifique aux boutons de toggle mobile */
+.dark-theme .mobile-toggle-btn-header {
+  background: var(--accent) !important;
+  color: var(--bg-primary) !important;
+}
+
+.dark-theme .mobile-toggle-btn-header:hover {
+  background: var(--accent-hover) !important;
+}
+
+.dark-theme .mobile-toggle-btn-header.active {
+  background: var(--text-primary) !important;
+}
+
+/* === AMÉLIORATION DES ANIMATIONS === */
+.dark-theme .modal-card {
+  animation: modalPopDark 0.25s cubic-bezier(.4,1.6,.6,1) 1;
+}
+
+@keyframes modalPopDark {
+  0% { 
+    transform: scale(0.95) translateY(30px); 
+    opacity: 0; 
+    box-shadow: 0 0 0 rgba(244, 164, 116, 0);
+  }
+  100% { 
+    transform: scale(1) translateY(0); 
+    opacity: 1; 
+    box-shadow: var(--shadow-modal);
+  }
+}
+
+/* === AMÉLIORATION POUR LES DIFFÉRENTS ÉTATS === */
+.dark-theme .card.liked {
+  border-color: var(--accent) !important;
+}
+
+.dark-theme .pastille.liked {
+  background: var(--accent) !important;
+  color: var(--bg-primary) !important;
+  box-shadow: 0 0 0 2px rgba(244, 164, 116, 0.3) !important;
+}
+
+/* === CORRECTIONS SPÉCIFIQUES POUR LES ICÔNES === */
+.dark-theme .filter .icon-svg {
+  filter: brightness(0) saturate(100%) invert(15%) sepia(0%) saturate(0%) hue-rotate(0deg) brightness(100%) contrast(100%) !important;
+}
+
+.dark-theme .pastille:hover .icon-svg {
+  filter: brightness(0) saturate(100%) invert(15%) sepia(0%) saturate(0%) hue-rotate(0deg) brightness(100%) contrast(100%) !important;
+}
+
+/* === AMÉLIORATION POUR LE MOBILE === */
+@media (max-width: 768px) {
+  .dark-theme .carte-list {
+    background: var(--bg-primary) !important;
+  }
+  
+  .dark-theme .modal-card {
+    background: var(--bg-primary) !important;
+  }
+}
+
+/* === AMÉLIORATION POUR L'ACCESSIBILITÉ === */
+.dark-theme .sr-only {
+  color: var(--text-primary) !important;
+}
+
+/* Améliore le contraste pour l'accessibilité */
+.dark-theme .high-contrast {
+  --text-primary: #ffffff;
+  --text-secondary: #e2e8f0;
+  --bg-card: #1a202c;
+}
+
+/* === AMÉLIORATIONS FINALES === */
+
+/* Assure que tous les textes héritent de la bonne couleur */
+.dark-theme * {
+  box-sizing: border-box;
+}
+
+.dark-theme body * {
+  color: inherit;
+}
+
+/* Force l'héritage des couleurs pour éviter les conflits */
+.dark-theme p,
+.dark-theme span,
+.dark-theme div:not(.theme-toggle):not(.theme-toggle *) {
+  color: inherit;
+}
+
+/* Assure la cohérence des arrière-plans */
+.dark-theme div:not(.theme-toggle):not(.theme-toggle *) {
+  background-color: inherit;
+}
+
+/* === FIX POUR LES ÉLÉMENTS QUI POURRAIENT RÉSISTER === */
+.dark-theme [style*="color: #000"] {
+  color: var(--text-primary) !important;
+}
+
+.dark-theme [style*="background: #fff"] {
+  background: var(--bg-card) !important;
+}
