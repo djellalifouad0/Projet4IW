@@ -737,6 +737,61 @@
   background: var(--bg-primary) !important;
 }
 
+.dark-theme .settings-title {
+  color: var(--accent) !important;
+}
+
+.dark-theme .settings-section {
+  background: transparent !important;
+}
+
+.dark-theme .section-title {
+  color: var(--text-primary) !important;
+  border-bottom-color: var(--accent-light) !important;
+}
+
+.dark-theme .settings-card {
+  background: var(--bg-card) !important;
+  border: 1px solid var(--border-color) !important;
+  box-shadow: var(--shadow-card) !important;
+}
+
+.dark-theme .setting-item {
+  border-bottom-color: var(--border-color) !important;
+}
+
+.dark-theme .setting-label {
+  color: var(--text-primary) !important;
+}
+
+.dark-theme .setting-description {
+  color: var(--text-secondary) !important;
+}
+
+.dark-theme .form-group label {
+  color: var(--text-primary) !important;
+}
+
+.dark-theme .form-group input {
+  background: var(--bg-input) !important;
+  color: var(--text-primary) !important;
+  border-color: var(--border-input) !important;
+}
+
+.dark-theme .form-group input:focus {
+  border-color: var(--border-active) !important;
+  box-shadow: var(--shadow-input) !important;
+}
+
+.dark-theme .settings-btn {
+  background: var(--accent) !important;
+  color: var(--bg-primary) !important;
+}
+
+.dark-theme .settings-btn:hover {
+  background: var(--accent-hover) !important;
+}
+
 /* === ERROR MESSAGES === */
 .dark-theme .error-message {
   background: var(--bg-card) !important;
@@ -815,6 +870,11 @@
 .dark-theme .nav-icon,
 .dark-theme .modal-icon-svg {
   filter: brightness(0) saturate(100%) invert(80%) sepia(8%) saturate(343%) hue-rotate(185deg) brightness(94%) contrast(88%) !important;
+}
+
+/* Exception pour les avatars - ne pas appliquer de filtre */
+.dark-theme .nav-icon.profile-avatar {
+  filter: none !important;
 }
 
 .dark-theme .action-icon-small {

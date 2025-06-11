@@ -25,10 +25,8 @@
         <router-link to="/carte" exact-active-class="active">
           <img src="../assets/icons/carte.svg" alt="Carte" class="nav-icon" />
           <span class="nav-label">Carte</span>
-        </router-link>
-      </li>      <li class="mobile-only">
-        <ThemeToggle />
-      </li>
+        </router-link>      </li>
+      <!-- ThemeToggle caché en mobile, disponible dans les paramètres -->
       <!-- Ajout des boutons mobile pour Notifications et Paramètres -->
       <li class="mobile-only">
         <router-link to="/notifications" exact-active-class="active" class="notification-link">
@@ -52,7 +50,7 @@
       </li>
     </ul>    <!-- Ajout Notification et Paramètres -->
     <ul class="navbar-actions">
-      <li>
+      <li class="desktop-only">
         <ThemeToggle />
       </li>
       <li>
@@ -392,6 +390,11 @@ export default {
   display: none;
 }
 
+/* Afficher les éléments desktop-only uniquement sur desktop */
+.desktop-only {
+  display: block;
+}
+
 .navbar-links a,
 .profile-link {
   color: #28303F;
@@ -670,10 +673,14 @@ export default {
   .navbar-profile {
     display: none !important;
   }
-  
-  /* Afficher les éléments mobile-only en responsive */
+    /* Afficher les éléments mobile-only en responsive */
   .mobile-only {
     display: block !important;
+  }
+  
+  /* Cacher les éléments desktop-only en responsive */
+  .desktop-only {
+    display: none !important;
   }
   
   .navbar-links {
