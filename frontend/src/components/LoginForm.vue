@@ -48,13 +48,12 @@ export default {
     async handleLogin() {
       this.error = '';
       this.loading = true;
-      try {
-        const res = await api.post('/auth/login', {
+      try {        const res = await api.post('/auth/login', {
           email: this.email,
           password: this.password,
         });
         localStorage.setItem('token', res.data.token);
-        this.$router.push('/dashboard');
+        this.$router.push('/');
       } catch (err) {
         this.error = err.response?.data?.error || 'Erreur de connexion';
       } finally {
