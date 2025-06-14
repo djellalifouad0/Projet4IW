@@ -1222,9 +1222,16 @@ export default {
 }
 
 /* Ajuster le padding des messages selon l'état des rendez-vous */
-.chat-window:not(:has(.pending-appointments)) .chat-messages,
+.chat-window:not(:has(.pending-appointments)) .chat-messages {
+  padding-top: 18px; /* Padding normal quand pas de rendez-vous */
+}
+
 .chat-window:has(.pending-appointments.collapsed) .chat-messages {
-  padding-top: 18px; /* Padding normal quand pas de rendez-vous ou collapsés */
+  padding-top: 68px; /* Header plié = 50px + 18px de marge */
+}
+
+.chat-window:has(.pending-appointments:not(.collapsed)) .chat-messages {
+  padding-top: 100px; /* Header ouvert avec contenu */
 }
 
 .pending-appointments-header {
@@ -1554,11 +1561,17 @@ export default {
     padding-top: 80px; /* Espace ajusté pour mobile avec rendez-vous */
     gap: 8px;
   }
+    /* Ajuster le padding pour mobile selon l'état des rendez-vous */
+  .chat-window:not(:has(.pending-appointments)) .chat-messages {
+    padding-top: 14px; /* Padding normal mobile quand pas de rendez-vous */
+  }
   
-  /* Ajuster le padding pour mobile selon l'état des rendez-vous */
-  .chat-window:not(:has(.pending-appointments)) .chat-messages,
   .chat-window:has(.pending-appointments.collapsed) .chat-messages {
-    padding-top: 14px; /* Padding normal mobile quand pas de rendez-vous ou collapsés */
+    padding-top: 64px; /* Header mobile plié = 50px + 14px de marge */
+  }
+  
+  .chat-window:has(.pending-appointments:not(.collapsed)) .chat-messages {
+    padding-top: 80px; /* Header mobile ouvert avec contenu */
   }
   
   .chat-input {
