@@ -8,7 +8,7 @@
         </button>
       </div>
       <div v-if="loading" class="loading">Chargement...</div>
-      <div v-if="error" class="error">{{ error }}</div><div v-for="conv in conversations" :key="conv.id" class="discussion-item" :class="{ active: selectedConversation && selectedConversation.id === conv.id }">
+      <div v-if="error" class="error">{{ error }}</div>      <div v-for="conv in conversations" :key="conv.id" class="discussion-item" :class="{ active: selectedConversation && selectedConversation.id === conv.id }">
         <div class="discussion-content" @click="selectConversation(conv)">
           <div class="avatar-container">
             <img :src="conv.avatar" class="avatar" />
@@ -17,6 +17,7 @@
           <div class="info">
             <div class="name">{{ conv.name }}</div>
             <div class="last-message">{{ conv.lastMessage }}</div>
+            <div v-if="conv.lastMessageAt" class="time-ago">{{ formatTimeAgo(conv.lastMessageAt) }}</div>
           </div>
         </div>
         <button 
@@ -399,12 +400,45 @@ export default {
       // Logique déplacée vers handleTyping pour éviter les conflits
     }
   },
-  methods: {
-    // Méthode utilitaire pour générer un avatar par défaut personnalisé
+  methods: {    // Méthode utilitaire pour générer un avatar par défaut personnalisé
     getDefaultAvatar(username) {
       return `https://ui-avatars.com/api/?name=${encodeURIComponent(username)}&background=ECBC76&color=fff&size=128&bold=true`;
     },
-    async loadConversations() {
+      // Méthode pour formater le temps écoulé depuis le dernier message
+    formatTimeAgo(dateString) {
+      if (!dateString) return '';
+      
+      const messageDate = new Date(dateString);
+      const now = new Date();
+      const diffInSeconds = Math.floor((now - messageDate) / 1000);
+      
+      if (diffInSeconds < 60) {
+        return 'À l\'instant';
+      } else if (diffInSeconds < 3600) {
+        const minutes = Math.floor(diffInSeconds / 60);
+        return `Il y a ${minutes} min`;
+      } else if (diffInSeconds < 86400) {
+        const hours = Math.floor(diffInSeconds / 3600);
+        return `Il y a ${hours}h`;
+      } else if (diffInSeconds < 604800) {
+        const days = Math.floor(diffInSeconds / 86400);
+        return `Il y a ${days}j`;
+      } else {
+        return messageDate.toLocaleDateString('fr-FR', {
+          day: 'numeric',
+          month: 'short'
+        });
+      }
+    },
+    
+    // Méthode pour trier les conversations par message le plus récent
+    sortConversations() {
+      this.conversations.sort((a, b) => {
+        const dateA = a.lastMessageAt ? new Date(a.lastMessageAt) : new Date(0);
+        const dateB = b.lastMessageAt ? new Date(b.lastMessageAt) : new Date(0);
+        return dateB - dateA; // Tri décroissant (plus récent en premier)
+      });
+    },    async loadConversations() {
       try {
         this.loading = true;
         this.error = '';
@@ -416,6 +450,10 @@ export default {
           userId: conv.otherUser.id,
           lastMessage: conv.lastMessage ? conv.lastMessage.content : 'Aucun message',
           lastMessageAt: conv.lastMessageAt        }));
+        
+        // Trier les conversations par message le plus récent
+        this.sortConversations();
+        
           // Ne plus sélectionner automatiquement une conversation
           // L'utilisateur devra cliquer sur une conversation pour l'ouvrir
       } catch (error) {
@@ -424,7 +462,7 @@ export default {
       } finally {
         this.loading = false;
       }
-    },    async selectConversation(conv) {
+    },async selectConversation(conv) {
       try {
         this.selectedConversation = conv;
         this.error = '';
@@ -517,12 +555,14 @@ export default {
               }
             }, 500);
           }
-          
-          // Mettre à jour le dernier message dans la liste des conversations
+            // Mettre à jour le dernier message dans la liste des conversations
           const convIndex = this.conversations.findIndex(c => c.id === this.selectedConversation.id);
           if (convIndex !== -1) {
             this.conversations[convIndex].lastMessage = messageContent;
             this.conversations[convIndex].lastMessageAt = response.data.createdAt;
+            
+            // Trier les conversations après mise à jour
+            this.sortConversations();
           }
             this.newMessage = '';
           
@@ -615,15 +655,14 @@ export default {
           }
         });
       }
-      
-      // Mettre à jour la liste des conversations si nécessaire
+        // Mettre à jour la liste des conversations si nécessaire
       const convIndex = this.conversations.findIndex(c => c.id == message.conversationId);
       if (convIndex !== -1) {
         this.conversations[convIndex].lastMessage = message.content;
         this.conversations[convIndex].lastMessageAt = message.createdAt;
         
         // Trier les conversations par dernier message
-        this.conversations.sort((a, b) => new Date(b.lastMessageAt) - new Date(a.lastMessageAt));
+        this.sortConversations();
       }
     },handleUserTyping({ userId, isTyping, conversationId }) {
       if (this.selectedConversation && this.selectedConversation.id == conversationId) {
@@ -1239,6 +1278,13 @@ export default {
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
+}
+
+.time-ago {
+  color: #999;
+  font-size: 0.85rem;
+  margin-top: 2px;
+  font-weight: 500;
 }
 .user-info {
   display: flex;
@@ -2283,10 +2329,14 @@ export default {
     font-size: 15px;
     font-weight: 600;
   }
-  
-  .discussion-item .info .last-message {
+    .discussion-item .info .last-message {
     font-size: 13px;
     line-height: 1.3;
+  }
+  
+  .discussion-item .info .time-ago {
+    font-size: 12px;
+    margin-top: 1px;
   }
   
   .chat-header {
