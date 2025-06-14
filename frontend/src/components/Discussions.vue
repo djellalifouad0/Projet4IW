@@ -302,16 +302,9 @@ export default {
           profileToken: conv.otherUser.profileToken,
           userId: conv.otherUser.id,
           lastMessage: conv.lastMessage ? conv.lastMessage.content : 'Aucun message',
-          lastMessageAt: conv.lastMessageAt
-        }));
-          // Sélectionner la première conversation par défaut si elle existe
-        if (this.conversations.length > 0) {
-          // Si on revient de la création d'une conversation, sélectionner la plus récente
-          const mostRecentConv = this.conversations.sort((a, b) => 
-            new Date(b.lastMessageAt) - new Date(a.lastMessageAt)
-          )[0];
-          await this.selectConversation(mostRecentConv);
-        }
+          lastMessageAt: conv.lastMessageAt        }));
+          // Ne plus sélectionner automatiquement une conversation
+          // L'utilisateur devra cliquer sur une conversation pour l'ouvrir
       } catch (error) {
         this.error = 'Erreur lors du chargement des conversations';
         console.error('Error loading conversations:', error);
