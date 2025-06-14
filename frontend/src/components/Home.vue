@@ -24,7 +24,6 @@
         :rate="post.pricePerHour ? post.pricePerHour + '€/h' : ''"
         :likes="post.likes || 0"
         :views="post.views || 0"
-        :online="true"
         :paid="!!post.pricePerHour"
         :description="post.description"
         :createdAt="post.createdAt || ''"
@@ -84,6 +83,7 @@ import PostCard from './PostCard.vue'
 import api from '../services/api'
 import toast from '../services/toast'
 import NotificationService from '../services/notificationService'
+import socketService from '../services/socket'
 
 export default {
   name: 'Home',
@@ -107,6 +107,9 @@ export default {
       userPosition: null
     }
   },  async mounted() {
+    // Initialiser la connexion WebSocket pour les statuts en ligne
+    await this.initializeSocketConnection();
+    
     navigator.geolocation.getCurrentPosition((pos) => {
       this.userPosition = {
         lat: pos.coords.latitude,
@@ -297,6 +300,27 @@ export default {
       const filterWrapper = this.$el?.querySelector('.filter-dropdown-wrapper');
       if (filterWrapper && !filterWrapper.contains(event.target)) {
         this.showFilterMenu = false;
+      }
+    },
+
+    // === MÉTHODES POUR LA CONNEXION WEBSOCKET ===
+    async initializeSocketConnection() {
+      const token = localStorage.getItem('token');
+      if (!token) return;
+
+      try {
+        if (!socketService.isConnected()) {
+          await socketService.connect(token);
+        }
+        
+        // Les PostCard vont automatiquement récupérer les utilisateurs en ligne
+        // via leurs propres écouteurs, mais on peut déclencher la récupération ici
+        setTimeout(() => {
+          socketService.getOnlineUsers();
+        }, 1000); // Délai pour s'assurer que tout est connecté
+        
+      } catch (error) {
+        console.error('Erreur lors de l\'initialisation WebSocket dans Home:', error);
       }
     },
   }

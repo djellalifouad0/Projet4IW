@@ -25,7 +25,7 @@
       <div class="carte-list" :class="{ 'mobile-hidden': !showMobileList }">
         <button class="btn-retour" @click="$router.push('/')">
           ← Retour à l'accueil
-        </button><PostCard
+        </button>        <PostCard
           v-for="(post, i) in posts"
           :key="i"
           :name="post.name"
@@ -34,7 +34,6 @@
           :rate="post.rate"
           :likes="post.likes"
           :views="post.views"
-          :online="post.online"
           :paid="post.paid"
           :description="post.description"
           :createdAt="post.createdAt"
@@ -70,17 +69,20 @@ import SearchBar from './SearchBar.vue'
 import api from '../services/api'
 import toast from '../services/toast'
 import NotificationService from '../services/notificationService'
+import socketService from '../services/socket'
 
 export default {
   name: 'Carte',
-  components: { PostCard, SearchBar },  data() {
+  components: { PostCard, SearchBar },data() {
     return {
       posts: [],
       mapUrl: 'https://www.openstreetmap.org/export/embed.html?bbox=2.3775%2C48.8495%2C2.3865%2C48.8535&layer=mapnik',
       showMobileList: false
     }
-  },
-  async mounted() {
+  },  async mounted() {
+    // Initialiser la connexion WebSocket pour les statuts en ligne
+    await this.initializeSocketConnection();
+    
     // Si une adresse est passée en query, centrer la carte dessus
     const address = this.$route?.query?.address;
     if (address) {
@@ -259,6 +261,26 @@ export default {
     // === GESTION DU TOGGLE MOBILE ===
     toggleMobileList() {
       this.showMobileList = !this.showMobileList;
+    },
+
+    // === MÉTHODES POUR LA CONNEXION WEBSOCKET ===
+    async initializeSocketConnection() {
+      const token = localStorage.getItem('token');
+      if (!token) return;
+
+      try {
+        if (!socketService.isConnected()) {
+          await socketService.connect(token);
+        }
+        
+        // Déclencher la récupération des utilisateurs en ligne
+        setTimeout(() => {
+          socketService.getOnlineUsers();
+        }, 1000);
+        
+      } catch (error) {
+        console.error('Erreur lors de l\'initialisation WebSocket dans Carte:', error);
+      }
     },
   },
 }

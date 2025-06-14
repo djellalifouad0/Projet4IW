@@ -2,14 +2,15 @@
   <div>
     <!-- Post Card -->
     <div :class="['card', paid ? 'card-paid' : 'card-orange']" @click="openModal"><div class="card-header" @click.stop>
-        <img class="avatar" :src="avatar || `https://ui-avatars.com/api/?name=${encodeURIComponent(name || 'User')}&background=ECBC76&color=fff&size=64&bold=true`" alt="avatar" @click.stop />        <div>
-          <div class="name" @click.stop="handleProfileClick" style="cursor:pointer;">
-            {{ name }}
-            <span v-if="online" class="status-dot"></span>
+        <img class="avatar" :src="avatar || `https://ui-avatars.com/api/?name=${encodeURIComponent(name || 'User')}&background=ECBC76&color=fff&size=64&bold=true`" alt="avatar" @click.stop />        <div>          <div class="user-info-row">
+            <div class="name" @click.stop="handleProfileClick" style="cursor:pointer;">
+              {{ name }}
+              <span v-if="isUserOnline" class="status-dot"></span>
+            </div>
             <span v-if="postTimeAgo" class="post-time-ago-inline">{{ postTimeAgo }}</span>
           </div>
           <div class="address" @click.stop="handleAddressClick" style="cursor:pointer;text-decoration:underline;">{{ truncatedAddress }}</div>
-        </div>        <div class="header-actions">
+        </div><div class="header-actions">
           <div
             class="rate"
             :class="paid ? 'rate-paid' : ''"
@@ -70,10 +71,9 @@
             <path d="M19 12H5M12 19L5 12L12 5" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
           </svg>
         </button><div class="card-header">
-          <img class="avatar" :src="avatar || `https://ui-avatars.com/api/?name=${encodeURIComponent(name || 'User')}&background=ECBC76&color=fff&size=64&bold=true`" alt="avatar" />          <div>
-            <div class="name" @click.stop="handleProfileClick" style="cursor:pointer;">
+          <img class="avatar" :src="avatar || `https://ui-avatars.com/api/?name=${encodeURIComponent(name || 'User')}&background=ECBC76&color=fff&size=64&bold=true`" alt="avatar" />          <div>            <div class="name" @click.stop="handleProfileClick" style="cursor:pointer;">
               {{ name }}
-              <span v-if="online" class="status-dot"></span>
+              <span v-if="isUserOnline" class="status-dot"></span>
             </div>
             <div class="address" @click.stop="handleAddressClick" style="cursor:pointer;text-decoration:underline;">{{ truncatedAddress }}</div>
           </div>
@@ -203,6 +203,7 @@
 import api from '../services/api'
 import toast from '../services/toast'
 import NotificationService from '../services/notificationService'
+import socketService from '../services/socket'
 
 export default {
   name: 'PostCard',  props: {
@@ -214,7 +215,6 @@ export default {
     likes: { type: Number, default: 0 },
     views: { type: Number, default: 0 },
     paid: { type: Boolean, default: false },
-    online: { type: Boolean, default: false },
     createdAt: { type: String, required: true },
     postId: { type: Number, required: true },
     likedByMe: { type: Boolean, default: false },
@@ -238,7 +238,9 @@ export default {
         show: false,
         message: '',
         confirmCallback: null
-      }
+      },
+      // Système d'utilisateurs en ligne
+      onlineUsers: new Set()
     }
   },
   computed: {
@@ -288,11 +290,14 @@ export default {
       ];
       const moisStr = mois[date.getMonth()];
       const annee = date.getFullYear();      return `${heures}:${minutes} · ${jours} ${moisStr} ${annee}`;
-    },
-
-    isOwnPost() {
+    },    isOwnPost() {
       // Vérifie si l'utilisateur connecté est le propriétaire du post
       return this.loggedInUser && this.loggedInUser.id === this.userId;
+    },
+
+    // Vérifier si un utilisateur est en ligne
+    isUserOnline() {
+      return this.onlineUsers.has(this.userId);
     }
   },
   methods: {
@@ -559,16 +564,63 @@ export default {
         this.confirmDialog.confirmCallback();
       }
       this.cancelConfirmation();
-    },
-
-    cancelConfirmation() {
+    },    cancelConfirmation() {
       this.confirmDialog.show = false;
       this.confirmDialog.message = '';
       this.confirmDialog.confirmCallback = null;
-    }},
-  mounted() {
+    },
+
+    // === MÉTHODES POUR LE STATUT EN LIGNE ===
+    setupSocketListeners() {
+      if (socketService.isConnected()) {
+        socketService.onOnlineUsers(this.handleOnlineUsers);
+        socketService.onUserConnected(this.handleUserConnected);
+        socketService.onUserDisconnected(this.handleUserDisconnected);
+      }
+    },
+
+    handleOnlineUsers(users) {
+      this.onlineUsers = new Set(users);
+    },
+
+    handleUserConnected(data) {
+      this.onlineUsers.add(data.userId);
+    },
+
+    handleUserDisconnected(data) {
+      this.onlineUsers.delete(data.userId);
+    },    async initializeSocketConnection() {
+      const token = localStorage.getItem('token');
+      if (!token) return;
+
+      try {
+        // Si pas encore connecté, se connecter
+        if (!socketService.isConnected()) {
+          await socketService.connect(token);
+        }
+        
+        // Toujours configurer les écouteurs (même si déjà connecté)
+        this.setupSocketListeners();
+        
+        // Demander la liste actuelle des utilisateurs en ligne
+        // Utiliser un petit délai pour s'assurer que la connexion est stable
+        setTimeout(() => {
+          if (socketService.isConnected()) {
+            socketService.getOnlineUsers();
+          }
+        }, 500);
+        
+      } catch (error) {
+        console.error('Erreur lors de l\'initialisation WebSocket dans PostCard:', error);
+      }
+    }},  mounted() {
     console.log('Avatar prop:', this.avatar);
     this.loadLoggedInUser();
+    this.initializeSocketConnection();
+  },
+  beforeUnmount() {
+    // Note: Les écouteurs WebSocket sont partagés globalement, 
+    // donc on ne les supprime pas ici pour éviter d'affecter d'autres composants
   }
 }
 </script>
@@ -1094,6 +1146,13 @@ export default {
   margin-left: 10px;
   font-weight: 400;
   white-space: nowrap;
+}
+
+/* Nouvelle structure pour séparer le nom et la date */
+.user-info-row {
+  display: flex;
+  align-items: center;
+  gap: 0;
 }
 @media (max-width: 900px) {
   .card,

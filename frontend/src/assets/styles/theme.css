@@ -211,7 +211,7 @@
 }
 
 .dark-theme .icon-number {
-  color: inherit !important;
+  color: #28303F !important;
 }
 
 .dark-theme .more {
@@ -877,12 +877,33 @@
   filter: none !important;
 }
 
+/* Exception pour les trois petits points du profil - les rendre blancs en dark mode */
+.dark-theme .dots-icon {
+  filter: brightness(0) saturate(100%) invert(100%) sepia(0%) saturate(7500%) hue-rotate(180deg) brightness(100%) contrast(100%) !important;
+}
+
 .dark-theme .action-icon-small {
   filter: brightness(0) saturate(100%) invert(80%) sepia(8%) saturate(343%) hue-rotate(185deg) brightness(94%) contrast(88%) !important;
 }
 
 .dark-theme .comment-icon {
   filter: brightness(0) saturate(100%) invert(80%) sepia(8%) saturate(343%) hue-rotate(185deg) brightness(94%) contrast(88%) !important;
+}
+
+/* === LIKES ET HEARTS === */
+/* Nombre de likes avec la même couleur que les icônes cœur en dark mode */
+.dark-theme .icon-number {
+  color: #28303F !important;
+}
+
+/* Règle plus spécifique pour contrer les styles scopés de Vue */
+.dark-theme .icon-number[data-v-a46cdd76] {
+  color: #28303F !important;
+}
+
+/* Règle générale pour tous les attributs data-v-* */
+.dark-theme .icon-number[class*="data-v-"] {
+  color: #28303F !important;
 }
 
 /* === TABLES === */
@@ -1155,4 +1176,132 @@
 
 .dark-theme [style*="background: #fff"] {
   background: var(--bg-card) !important;
+}
+
+/* === HOVER EFFECTS POUR LES NOMS D'UTILISATEURS === */
+
+/* Effet hover underline pour les noms d'utilisateurs dans les posts */
+.name {
+  transition: text-decoration 0.2s ease, color 0.2s ease !important;
+  text-decoration: none !important;
+}
+
+.name:hover {
+  text-decoration: underline !important;
+  text-decoration-color: #000000 !important;
+  text-underline-offset: 3px !important;
+  text-decoration-thickness: 2px !important;
+}
+
+/* Désactiver l'underline sur le span de temps dans les noms */
+.name .post-time-ago-inline,
+.name .post-time-ago-inline:hover,
+.name:hover .post-time-ago-inline {
+  text-decoration: none !important;
+  text-decoration-line: none !important;
+  text-decoration-style: none !important;
+  text-decoration-color: transparent !important;
+}
+
+/* Dark mode hover */
+.dark-theme .name:hover {
+  text-decoration-color: #ffffff !important;
+}
+
+/* S'assurer que le span de temps n'hérite pas de l'underline en dark mode */
+.dark-theme .name .post-time-ago-inline,
+.dark-theme .name .post-time-ago-inline:hover,
+.dark-theme .name:hover .post-time-ago-inline {
+  text-decoration: none !important;
+  text-decoration-line: none !important;
+  text-decoration-style: none !important;
+  text-decoration-color: transparent !important;
+}
+
+/* Noms d'utilisateurs dans les commentaires */
+.comment-author {
+  transition: text-decoration 0.2s ease, color 0.2s ease !important;
+  text-decoration: none !important;
+  cursor: pointer !important;
+}
+
+.comment-author:hover {
+  text-decoration: underline !important;
+  text-decoration-color: #000000 !important;
+  text-underline-offset: 2px !important;
+  text-decoration-thickness: 1.5px !important;
+}
+
+.dark-theme .comment-author:hover {
+  text-decoration-color: #ffffff !important;
+}
+
+/* Noms d'utilisateurs dans les notifications */
+.notif-message .clickable-username {
+  transition: text-decoration 0.2s ease !important;
+  text-decoration: none !important;
+}
+
+.notif-message .clickable-username:hover {
+  text-decoration: underline !important;
+  text-decoration-color: #000000 !important;
+  text-underline-offset: 2px !important;
+  text-decoration-thickness: 1.5px !important;
+}
+
+.dark-theme .notif-message .clickable-username:hover {
+  text-decoration-color: #ffffff !important;
+}
+
+/* Noms d'utilisateurs dans les profils et ratings */
+.rating-username {
+  transition: text-decoration 0.2s ease, color 0.2s ease !important;
+  text-decoration: none !important;
+  cursor: pointer !important;
+}
+
+.rating-username:hover {
+  text-decoration: underline !important;
+  text-decoration-color: #f59c1a !important;
+  text-underline-offset: 2px !important;
+  text-decoration-thickness: 1.5px !important;
+}
+
+.dark-theme .rating-username:hover {
+  text-decoration-color: var(--accent) !important;
+}
+
+/* === FIX SPÉCIFIQUE POUR L'UNDERLINE DU TEMPS === */
+/* Règles ultra-spécifiques pour empêcher l'underline sur le temps des posts */
+.card .name .post-time-ago-inline,
+.card .name:hover .post-time-ago-inline,
+.card-header .name .post-time-ago-inline,
+.card-header .name:hover .post-time-ago-inline,
+.card-orange .name .post-time-ago-inline,
+.card-orange .name:hover .post-time-ago-inline,
+.card-paid .name .post-time-ago-inline,
+.card-paid .name:hover .post-time-ago-inline {
+  text-decoration: none !important;
+  text-decoration-line: none !important;
+  text-decoration-style: none !important;
+  text-decoration-color: transparent !important;
+  text-decoration-thickness: 0 !important;
+  text-underline-offset: 0 !important;
+}
+
+/* Dark mode */
+.dark-theme .card .name .post-time-ago-inline,
+.dark-theme .card .name:hover .post-time-ago-inline,
+.dark-theme .card-header .name .post-time-ago-inline,
+.dark-theme .card-header .name:hover .post-time-ago-inline,
+.dark-theme .card-orange .name .post-time-ago-inline,
+.dark-theme .card-orange .name:hover .post-time-ago-inline,
+.dark-theme .card-paid .name .post-time-ago-inline,
+.dark-theme .card-paid .name:hover .post-time-ago-inline {
+  text-decoration: none !important;
+  text-decoration-line: none !important;
+  text-decoration-style: none !important;
+  text-decoration-color: transparent !important;
+  text-decoration-thickness: 0 !important;
+  text-underline-offset: 0 !important;
 }

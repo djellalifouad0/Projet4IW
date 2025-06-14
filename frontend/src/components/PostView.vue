@@ -25,15 +25,13 @@
       </div>
 
       <div class="post-view-main">
-        <!-- Post Card Component -->
-        <PostCard
+        <!-- Post Card Component -->        <PostCard
           :name="post.User?.username || ''"
           :address="post.location || ''"
           :avatar="post.User?.avatar || `https://ui-avatars.com/api/?name=${encodeURIComponent(post.User?.username || 'User')}&background=ECBC76&color=fff&size=64&bold=true`"
           :rate="post.pricePerHour ? post.pricePerHour + '€/h' : ''"
           :likes="post.likes || 0"
           :views="post.views || 0"
-          :online="true"
           :paid="!!post.pricePerHour"
           :description="post.description"
           :createdAt="post.createdAt || ''"
@@ -101,6 +99,7 @@
 <script>
 import PostCard from './PostCard.vue'
 import api from '../services/api'
+import socketService from '../services/socket'
 
 export default {
   name: 'PostView',
@@ -114,8 +113,10 @@ export default {
       loading: true,
       error: null
     }
-  },
-  async created() {
+  },  async created() {
+    // Initialiser la connexion WebSocket pour les statuts en ligne
+    await this.initializeSocketConnection();
+    
     const postId = this.$route.params.id
     if (postId) {
       await this.loadPost(postId)
@@ -249,7 +250,27 @@ export default {
       if (!text) return ''
       if (text.length <= maxLength) return text
       return text.substring(0, maxLength) + '...'
-    }
+    },
+
+    // === MÉTHODES POUR LA CONNEXION WEBSOCKET ===
+    async initializeSocketConnection() {
+      const token = localStorage.getItem('token');
+      if (!token) return;
+
+      try {
+        if (!socketService.isConnected()) {
+          await socketService.connect(token);
+        }
+        
+        // Déclencher la récupération des utilisateurs en ligne
+        setTimeout(() => {
+          socketService.getOnlineUsers();
+        }, 1000);
+        
+      } catch (error) {
+        console.error('Erreur lors de l\'initialisation WebSocket dans PostView:', error);
+      }
+    },
   }
 }
 </script>
