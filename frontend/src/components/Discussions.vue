@@ -90,11 +90,10 @@
           </div>
         </div><div class="chat-messages">
           <div v-for="msg in messages" :key="msg.id" :class="['chat-message', msg.fromMe ? 'me' : 'other', msg.isAppointment ? 'appointment-message' : '']">
-            <span>{{ msg.text }}</span>
-            <div v-if="msg.fromMe" class="message-status">
-              <span v-if="msg.status === 'sent'" class="status-icon">•</span>
-              <span v-else-if="msg.status === 'delivered'" class="status-icon">✓</span>
-              <span v-else-if="msg.status === 'read'" class="status-icon">✓✓</span>
+            <span>{{ msg.text }}</span>            <div v-if="msg.fromMe" class="message-status">
+              <span v-if="msg.status === 'sent'" class="status-icon sent">•</span>
+              <span v-else-if="msg.status === 'delivered'" class="status-icon delivered">✓</span>
+              <span v-else-if="msg.status === 'read'" class="status-icon read">✓✓</span>
             </div>
           </div>
           <!-- Indicateur de frappe -->
@@ -439,18 +438,29 @@ export default {
         unreadMessagesService.setActiveConversation(conv.id);
         
         // Charger les messages
-        const messagesResponse = await api.get(`/conversations/${conv.id}/messages`);        
-        
-        this.messages = messagesResponse.data.map(msg => ({
-          id: msg.id,
-          text: msg.content,
-          fromMe: msg.fromMe,
-          createdAt: msg.createdAt,
-          sender: msg.sender,
-          status: msg.fromMe ? 'delivered' : null
-        }));
-
-        // Marquer la conversation comme lue
+        const messagesResponse = await api.get(`/conversations/${conv.id}/messages`);        this.messages = messagesResponse.data.map(msg => {
+          let status = null;
+          if (msg.fromMe) {
+            // Vérifier d'abord si on a un statut sauvegardé localement
+            const savedStatus = this.getMessageStatus(msg.id);
+            if (savedStatus && savedStatus !== 'sent') {
+              status = savedStatus;
+            } else {
+              // Par défaut, les messages envoyés commencent avec le statut 'sent'
+              // Ils ne passent à 'delivered' ou 'read' que quand c'est confirmé par le serveur/WebSocket
+              status = 'sent';
+            }
+          }
+          
+          return {
+            id: msg.id,
+            text: msg.content,
+            fromMe: msg.fromMe,
+            createdAt: msg.createdAt,
+            sender: msg.sender,
+            status: status
+          };
+        });        // Marquer la conversation comme lue
         await unreadMessagesService.markConversationAsRead(conv.id);
 
         // Charger les rendez-vous de la conversation
@@ -475,8 +485,7 @@ export default {
           
           const response = await api.post(`/conversations/${this.selectedConversation.id}/messages`, {
             content: messageContent
-          });
-            // Ajouter le nouveau message à la liste localement
+          });          // Ajouter le nouveau message à la liste localement
           this.messages.push({
             id: response.data.id,
             text: response.data.content,
@@ -493,7 +502,20 @@ export default {
               content: response.data.content,
               senderName: response.data.sender.username,
               createdAt: response.data.createdAt
-            });
+            });            // Simuler le statut "delivered" après un délai court
+            setTimeout(() => {
+              const messageIndex = this.messages.findIndex(msg => msg.id === response.data.id);
+              if (messageIndex !== -1) {
+                this.messages[messageIndex].status = 'delivered';
+                this.saveMessageStatus(response.data.id, 'delivered');
+                
+                // Envoyer l'événement de livraison
+                socketService.sendMessageDelivered(this.selectedConversation.id, response.data.id);
+                
+                // NE PAS simuler automatiquement le statut "read"
+                // Il ne passera à "read" que quand l'autre utilisateur lira vraiment le message
+              }
+            }, 500);
           }
           
           // Mettre à jour le dernier message dans la liste des conversations
@@ -565,7 +587,7 @@ export default {
       socketService.offNewMessage();
       socketService.offUserTyping();
       socketService.removeAllListeners();
-    },handleNewMessage(message) {
+    },    handleNewMessage(message) {
       console.log('Nouveau message reçu:', message);
       
       // Ajouter le message à la conversation sélectionnée
@@ -577,6 +599,13 @@ export default {
           createdAt: message.createdAt,
           sender: { username: message.senderName }
         });
+        
+        // Si l'utilisateur est dans la conversation, marquer le message comme lu automatiquement
+        if (message.senderId != this.$store?.state?.user?.id) {
+          setTimeout(() => {
+            socketService.sendMessageRead(this.selectedConversation.id, message.id);
+          }, 1000);
+        }
         
         // Scroll to bottom
         this.$nextTick(() => {
@@ -596,7 +625,7 @@ export default {
         // Trier les conversations par dernier message
         this.conversations.sort((a, b) => new Date(b.lastMessageAt) - new Date(a.lastMessageAt));
       }
-    },    handleUserTyping({ userId, isTyping, conversationId }) {
+    },handleUserTyping({ userId, isTyping, conversationId }) {
       if (this.selectedConversation && this.selectedConversation.id == conversationId) {
         if (isTyping) {
           this.typingUsers.add(userId);
@@ -615,15 +644,57 @@ export default {
     },
     handleOnlineUsers(users) {
       this.onlineUsers = new Set(users);
-    },
-
-    handleUserConnected(data) {
+    },    handleUserConnected(data) {
       this.onlineUsers.add(data.userId);
+      
+      // Si l'utilisateur connecté est celui de la conversation active, mettre à jour les statuts
+      if (this.selectedConversation && this.selectedConversation.userId === data.userId) {
+        this.updateMessagesStatusForOnlineUser();
+      }
     },
 
     handleUserDisconnected(data) {
       this.onlineUsers.delete(data.userId);
-    },    isUserOnline(userId) {
+    },    // Méthode pour mettre à jour les statuts quand un utilisateur se connecte
+    updateMessagesStatusForOnlineUser() {
+      // Ne plus forcer automatiquement le statut "read"
+      // Les messages passeront à "read" seulement quand l'autre utilisateur les lira vraiment
+      console.log('Utilisateur connecté - les statuts seront mis à jour naturellement');
+    },
+      // Nouvelle méthode pour sauvegarder les statuts de messages localement
+    saveMessageStatus(messageId, status) {
+      try {
+        const key = `messageStatus_${messageId}`;
+        localStorage.setItem(key, status);
+        // Sauvegarder avec une expiration de 7 jours
+        const expiration = Date.now() + (7 * 24 * 60 * 60 * 1000);
+        localStorage.setItem(`${key}_expiry`, expiration.toString());
+      } catch (error) {
+        console.error('Erreur lors de la sauvegarde du statut de message:', error);
+      }
+    },
+    
+    // Nouvelle méthode pour récupérer le statut d'un message depuis le localStorage
+    getMessageStatus(messageId) {
+      try {
+        const key = `messageStatus_${messageId}`;
+        const expiryKey = `${key}_expiry`;
+        
+        // Vérifier l'expiration
+        const expiry = localStorage.getItem(expiryKey);
+        if (expiry && Date.now() > parseInt(expiry)) {
+          // Supprimer les données expirées
+          localStorage.removeItem(key);
+          localStorage.removeItem(expiryKey);
+          return 'sent';
+        }
+        
+        return localStorage.getItem(key) || 'sent';
+      } catch (error) {
+        console.error('Erreur lors de la récupération du statut de message:', error);
+        return 'sent';
+      }
+    },isUserOnline(userId) {
       return this.onlineUsers.has(userId);
     },
     getInputPlaceholder() {
@@ -666,12 +737,21 @@ export default {
           }
         }
       }
-    },
-    handleMessageStatus(data) {
-      const { messageId, status } = data;
-      const messageIndex = this.messages.findIndex(msg => msg.id === messageId);
-      if (messageIndex !== -1) {
-        this.messages[messageIndex].status = status;
+    },    handleMessageStatus(data) {
+      console.log('Mise à jour du statut de message:', data);
+      const { messageId, status, conversationId } = data;
+      
+      // Vérifier que c'est bien la conversation active
+      if (this.selectedConversation && this.selectedConversation.id == conversationId) {
+        const messageIndex = this.messages.findIndex(msg => msg.id === messageId);
+        if (messageIndex !== -1) {
+          this.messages[messageIndex].status = status;
+          this.saveMessageStatus(messageId, status);
+          console.log(`Message ${messageId} marqué comme ${status}`);
+          
+          // Forcer la réactivité de Vue
+          this.$forceUpdate();
+        }
       }
     },
     // Méthodes pour les rendez-vous
@@ -1335,12 +1415,32 @@ export default {
 }
 .message-status {
   font-size: 0.75rem;
-  margin-top: 2px;
+  margin-top: 4px;
   text-align: right;
+  display: flex;
+  justify-content: flex-end;
+  align-items: center;
+  gap: 2px;
 }
 
 .status-icon {
-  opacity: 0.7;
+  opacity: 0.8;
+  font-size: 0.8rem;
+  color: #666;
+  transition: all 0.2s ease;
+}
+
+/* Statuts spécifiques avec couleurs */
+.status-icon.sent {
+  color: #9ca3af;
+}
+
+.status-icon.delivered {
+  color: #3b82f6;
+}
+
+.status-icon.read {
+  color: #10b981;
 }
 /* Bouton calendrier */
 .appointment-btn {

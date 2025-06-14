@@ -227,9 +227,7 @@ exports.getMessages = async (req, res) => {
         }
       ],
       order: [['createdAt', 'ASC']]
-    });
-
-    const formattedMessages = messages.map(msg => ({
+    });    const formattedMessages = messages.map(msg => ({
       id: msg.id,
       content: msg.content,
       senderId: msg.senderId,
@@ -241,6 +239,28 @@ exports.getMessages = async (req, res) => {
         avatar: msg.sender.avatar
       }
     }));
+
+    // Envoyer les statuts "read" via WebSocket pour les messages de l'autre utilisateur
+    try {
+      const io = req.app.get('socketio');
+      if (io) {
+        // Trouver les messages de l'autre utilisateur qui viennent d'être consultés
+        const otherUserMessages = messages.filter(msg => msg.senderId !== userId);
+        
+        otherUserMessages.forEach(msg => {
+          // Envoyer le statut "read" à l'expéditeur original
+          io.to(`conversation-${conversationId}`).emit('message-status', {
+            messageId: msg.id,
+            status: 'read',
+            conversationId: conversationId
+          });
+        });
+        
+        console.log(`📖 Envoyé ${otherUserMessages.length} statuts "read" pour la conversation ${conversationId}`);
+      }
+    } catch (socketError) {
+      console.error('Erreur envoi statuts read via WebSocket:', socketError);
+    }
 
     res.json(formattedMessages);
   } catch (error) {
