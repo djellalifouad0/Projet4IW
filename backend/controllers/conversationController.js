@@ -450,11 +450,67 @@ exports.markConversationAsRead = async (req, res) => {
           readAt: null
         }
       }
-    );
-
-    res.json({ success: true });
+    );    res.json({ success: true });
   } catch (error) {
     console.error('Error marking conversation as read:', error);
     res.status(500).json({ error: 'Erreur marquage messages comme lus' });
+  }
+};
+
+/**
+ * @swagger
+ * /conversations/{id}:
+ *   delete:
+ *     summary: Supprimer une conversation
+ *     tags: [Conversations]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: integer
+ *         description: ID de la conversation
+ *     responses:
+ *       200:
+ *         description: Conversation supprimée avec succès
+ *       403:
+ *         description: Accès refusé
+ *       404:
+ *         description: Conversation non trouvée
+ */
+exports.deleteConversation = async (req, res) => {
+  try {
+    const conversationId = req.params.id;
+    const userId = req.user.id;
+
+    // Vérifier que la conversation existe et que l'utilisateur y participe
+    const conversation = await Conversation.findOne({
+      where: {
+        id: conversationId,
+        [Op.or]: [
+          { user1Id: userId },
+          { user2Id: userId }
+        ]
+      }
+    });
+
+    if (!conversation) {
+      return res.status(404).json({ error: 'Conversation non trouvée' });
+    }
+
+    // Supprimer tous les messages de la conversation
+    await Message.destroy({
+      where: { conversationId: conversationId }
+    });
+
+    // Supprimer la conversation
+    await conversation.destroy();
+
+    res.json({ success: true, message: 'Conversation supprimée avec succès' });
+  } catch (error) {
+    console.error('Error deleting conversation:', error);
+    res.status(500).json({ error: 'Erreur lors de la suppression de la conversation' });
   }
 };

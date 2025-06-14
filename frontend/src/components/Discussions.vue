@@ -1,18 +1,32 @@
-<template>  <div class="discussions-page">
-    <div class="discussions-list" :class="{ 'mobile-hidden': selectedConversation && isMobile }">
+<template>  <div class="discussions-page">    <div class="discussions-list" :class="{ 'mobile-hidden': selectedConversation && isMobile }">
       <div class="discussions-header">
-        <h2>Discussions</h2>
+        <h2>Discussions</h2>        <button @click="openSearchModal" class="search-users-btn" title="Rechercher des utilisateurs">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <circle cx="11" cy="11" r="8"/>
+            <path d="m21 21-4.35-4.35"/>
+          </svg>
+        </button>
       </div>
       <div v-if="loading" class="loading">Chargement...</div>
-      <div v-if="error" class="error">{{ error }}</div><div v-for="conv in conversations" :key="conv.id" class="discussion-item" :class="{ active: selectedConversation && selectedConversation.id === conv.id }" @click="selectConversation(conv)">
-        <div class="avatar-container">
-          <img :src="conv.avatar" class="avatar" />
-          <div v-if="isUserOnline(conv.userId)" class="online-indicator"></div>        </div>
-        <div class="info">
-          <div class="name">{{ conv.name }}</div>
-          <div class="last-message">{{ conv.lastMessage }}</div>
+      <div v-if="error" class="error">{{ error }}</div><div v-for="conv in conversations" :key="conv.id" class="discussion-item" :class="{ active: selectedConversation && selectedConversation.id === conv.id }">
+        <div class="discussion-content" @click="selectConversation(conv)">
+          <div class="avatar-container">
+            <img :src="conv.avatar" class="avatar" />
+            <div v-if="isUserOnline(conv.userId)" class="online-indicator"></div>
+          </div>
+          <div class="info">
+            <div class="name">{{ conv.name }}</div>
+            <div class="last-message">{{ conv.lastMessage }}</div>
+          </div>
         </div>
-      </div>    </div>
+        <button 
+          @click.stop="deleteConversation(conv)" 
+          class="delete-conversation-btn"
+          title="Supprimer la conversation"
+        >
+          <img src="../assets/icons/trash.svg" class="delete-icon" alt="Supprimer" />
+        </button>
+      </div></div>
     <div class="chat-window" :class="chatWindowClasses">
       <template v-if="selectedConversation">
         <div class="chat-header">
@@ -184,6 +198,96 @@
           </div>
         </form>
       </div>
+    </div>    <!-- Modal pour rechercher des utilisateurs -->
+    <div v-if="showSearchModal" :key="'search-modal-' + Date.now()" class="modal-overlay" @click="closeSearchModal">
+      <div class="search-modal" @click.stop>
+        <div class="search-modal-header">
+          <h3>Rechercher des utilisateurs</h3>
+          <button @click="closeSearchModal" class="close-btn" type="button">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <line x1="18" y1="6" x2="6" y2="18"></line>
+              <line x1="6" y1="6" x2="18" y2="18"></line>
+            </svg>
+          </button>
+        </div><div class="search-input-container">
+          <input 
+            v-model="searchQuery" 
+            @input="searchUsers"
+            placeholder="Tapez un nom d'utilisateur ou un email..." 
+            class="search-input"
+            autofocus
+          />
+        </div>
+        
+        <div v-if="searchLoading" class="search-loading">
+          Recherche en cours...
+        </div>
+        
+        <div v-if="searchError" class="search-error">
+          {{ searchError }}
+        </div>
+        
+        <div v-if="searchResults.length > 0" class="search-results">
+          <div 
+            v-for="user in searchResults" 
+            :key="user.id" 
+            class="search-result-item"
+            @click="startConversationWithUser(user)"
+          >
+            <div class="user-avatar-container">
+              <img :src="user.avatar || getDefaultAvatar(user.username)" class="user-avatar" />
+            </div>            <div class="user-info">
+              <div class="user-name">{{ user.username }}</div>
+              <div class="user-email">{{ user.email }}</div>
+            </div>
+            <button class="message-btn" type="button">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="m22 2-7 20-4-9-9-4z"/>
+                <path d="m22 2-11 11"/>
+              </svg>
+            </button>
+          </div>
+        </div>
+        
+        <div v-if="searchQuery.length >= 2 && searchResults.length === 0 && !searchLoading && !searchError" class="no-results">
+          Aucun utilisateur trouvé pour "{{ searchQuery }}"
+        </div>
+          <div v-if="searchQuery.length < 2 && searchQuery.length > 0" class="search-hint">
+          Tapez au moins 2 caractères pour rechercher
+        </div>
+      </div>
+    </div>
+
+    <!-- Modal de confirmation de suppression -->
+    <div v-if="showDeleteModal" class="modal-overlay" @click="closeDeleteModal">
+      <div class="delete-modal" @click.stop>
+        <div class="delete-modal-header">
+          <div class="delete-icon-container">
+            <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="delete-warning-icon">
+              <circle cx="12" cy="12" r="10"/>
+              <line x1="15" y1="9" x2="9" y2="15"/>
+              <line x1="9" y1="9" x2="15" y2="15"/>
+            </svg>
+          </div>
+          <h3>Supprimer la conversation</h3>
+        </div>
+        
+        <div class="delete-modal-content">
+          <p>Êtes-vous sûr de vouloir supprimer la conversation avec <strong>{{ conversationToDelete?.name }}</strong> ?</p>
+          <p class="warning-text">Cette action est irréversible et supprimera définitivement tous les messages de cette conversation.</p>
+        </div>
+        
+        <div class="delete-modal-actions">
+          <button @click="closeDeleteModal" class="cancel-delete-btn">Annuler</button>
+          <button @click="confirmDeleteConversation" class="confirm-delete-btn">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <polyline points="3,6 5,6 21,6"/>
+              <path d="M19,6v14a2,2 0 0,1 -2,2H7a2,2 0 0,1 -2,-2V6m3,0V4a2,2 0 0,1 2,-2h4a2,2 0 0,1 2,2v2"/>
+            </svg>
+            Supprimer
+          </button>
+        </div>
+      </div>
     </div>
   </div>
 </template>
@@ -215,7 +319,14 @@ export default {
         location: '',
         description: ''      },      conversationAppointments: [], // Nouveau: rendez-vous de la conversation actuelle
       showPendingAppointments: true, // Nouveau: contrôle l'affichage des rendez-vous
-      isNavbarHidden: false // Nouvel état pour tracker si la navbar est cachée
+      isNavbarHidden: false, // Nouvel état pour tracker si la navbar est cachée      showSearchModal: false, // Nouveau: état pour le modal de recherche
+      searchQuery: '', // Nouveau: requête de recherche
+      searchResults: [], // Nouveau: résultats de recherche
+      searchLoading: false, // Nouveau: état de chargement pour la recherche
+      searchError: '', // Nouveau: message d'erreur pour la recherche
+      showDeleteModal: false, // Nouveau: état pour le modal de suppression
+      conversationToDelete: null, // Nouveau: conversation à supprimer
+      isOpeningModal: false // Nouveau: flag pour éviter les ouvertures multiples
     }
   },
   computed: {
@@ -231,8 +342,7 @@ export default {
     pendingAppointments() {
       return this.conversationAppointments.filter(appointment => 
         appointment.status === 'pending'
-      );
-    },
+      );    },
     // Classes CSS pour la fenêtre de chat en mode mobile
     chatWindowClasses() {
       return {
@@ -240,6 +350,10 @@ export default {
         'mobile-hidden': !this.selectedConversation && this.isMobile,
         'navbar-hidden': this.isNavbarHidden && this.isMobile && this.selectedConversation
       };
+    },
+    // Computed pour forcer la réactivité du modal de recherche
+    shouldShowSearchModal() {
+      return this.showSearchModal;
     }
   },async created() {
     this.checkMobile();
@@ -710,8 +824,140 @@ export default {
       if (this.isMobile) {
         this.isNavbarHidden = false;
         eventBus.emit('discussion-mobile-chat-closed');
+      }    },    // Nouveau: méthode pour ouvrir le modal de recherche
+    openSearchModal() {
+      // Fermer tous les autres modals d'abord
+      this.showDeleteModal = false;
+      this.showAppointmentModal = false;
+      this.conversationToDelete = null;
+      
+      // Réinitialiser l'état de recherche
+      this.searchQuery = '';
+      this.searchResults = [];
+      this.searchLoading = false;
+      this.searchError = '';
+      this.isOpeningModal = false;
+      
+      // Force la mise à jour immédiate de l'état
+      this.showSearchModal = true;
+      
+      // Forcer le re-rendu du composant
+      this.$forceUpdate();
+          // Focus sur l'input de recherche après ouverture
+      this.$nextTick(() => {
+        setTimeout(() => {
+          const searchInput = this.$el?.querySelector('.search-input');
+          if (searchInput) {
+            searchInput.focus();
+          }
+        }, 100);
+      });
+    },// Nouveau: méthode pour fermer le modal de recherche
+    closeSearchModal() {
+      this.showSearchModal = false;
+      this.searchQuery = '';
+      this.searchResults = [];
+      this.searchLoading = false;
+      this.searchError = '';
+      this.isOpeningModal = false; // Réinitialiser le flag
+    },
+    // Nouveau: méthode pour rechercher des utilisateurs
+    async searchUsers() {
+      if (this.searchQuery.length < 2) {
+        this.searchResults = [];
+        return;
+      }
+      
+      this.searchLoading = true;
+      this.searchError = '';
+        try {
+        const response = await api.get('/users/search', {
+          params: {
+            q: this.searchQuery
+          }
+        });
+        
+        this.searchResults = response.data;
+      } catch (error) {
+        this.searchError = 'Erreur lors de la recherche d\'utilisateurs';
+        console.error('Error searching users:', error);
+      } finally {
+        this.searchLoading = false;
       }
     },
+    // Nouveau: méthode pour démarrer une conversation avec un utilisateur depuis les résultats de recherche
+    async startConversationWithUser(user) {
+      // Fermer le modal de recherche
+      this.closeSearchModal();
+        // Vérifier si la conversation existe déjà
+      const existingConv = this.conversations.find(conv => 
+        conv.userId === user.id
+      );
+      
+      if (existingConv) {
+        // Si la conversation existe, la sélectionner
+        this.selectConversation(existingConv);
+      } else {
+        // Sinon, créer une nouvelle conversation
+        try {
+          const response = await api.post('/conversations', {
+            profileToken: user.profileToken
+          });
+          
+          // Ajouter la nouvelle conversation à la liste
+          this.conversations.push({
+            id: response.data.id,
+            name: user.username,
+            avatar: user.avatar || this.getDefaultAvatar(user.username),
+            profileToken: user.profileToken,
+            userId: user.id,
+            lastMessage: '',
+            lastMessageAt: null
+          });
+          
+          // Sélectionner la nouvelle conversation
+          this.selectConversation(this.conversations[this.conversations.length - 1]);        } catch (error) {
+          this.error = 'Erreur lors de la création de la conversation';
+          console.error('Error creating conversation:', error);
+        }
+      }
+    },    // Nouvelle méthode pour supprimer une conversation
+    deleteConversation(conversation) {
+      this.conversationToDelete = conversation;
+      this.showDeleteModal = true;
+    },
+    
+    // Méthode pour fermer le modal de suppression
+    closeDeleteModal() {
+      this.showDeleteModal = false;
+      this.conversationToDelete = null;
+    },
+    
+    // Méthode pour confirmer la suppression
+    async confirmDeleteConversation() {
+      if (!this.conversationToDelete) return;
+
+      try {
+        await api.delete(`/conversations/${this.conversationToDelete.id}`);
+        
+        // Retirer la conversation de la liste
+        const index = this.conversations.findIndex(conv => conv.id === this.conversationToDelete.id);
+        if (index !== -1) {
+          this.conversations.splice(index, 1);
+        }
+        
+        // Si c'était la conversation sélectionnée, la désélectionner
+        if (this.selectedConversation && this.selectedConversation.id === this.conversationToDelete.id) {
+          this.selectedConversation = null;
+        }
+          // Fermer le modal
+        this.closeDeleteModal();
+        
+      } catch (error) {
+        this.error = 'Erreur lors de la suppression de la conversation';
+        console.error('Error deleting conversation:', error);
+      }
+    }
   }
 }
 </script>
@@ -747,6 +993,9 @@ export default {
   padding: 0 22px 16px 22px;
   border-bottom: 1px solid #f0d08a;
   margin-bottom: 8px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
 }
 
 .discussions-header h2 {
@@ -755,6 +1004,40 @@ export default {
   font-size: 1.3rem;
   font-weight: 600;
 }
+
+/* Bouton de recherche d'utilisateurs */
+.search-users-btn {
+  background: #ECBC76;
+  color: #28303F;
+  border: none;
+  border-radius: 50%;
+  width: 36px;
+  height: 36px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  position: relative;
+  z-index: 10;
+  flex-shrink: 0;
+}
+
+.search-users-btn:hover {
+  background: #e4a94f;
+  transform: scale(1.05);
+}
+
+.search-users-btn:active {
+  transform: scale(0.95);
+}
+
+.search-users-btn:disabled {
+  background: #ccc;
+  cursor: not-allowed;
+  transform: none;
+}
+
 .loading {
   text-align: center;
   color: #888;
@@ -773,16 +1056,65 @@ export default {
   align-items: center;
   gap: 14px;
   padding: 12px 22px;
-  cursor: pointer;
   border-radius: 10px;
   transition: background 0.15s;
+  position: relative;
 }
+
+.discussion-content {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  flex: 1;
+  cursor: pointer;
+}
+
 .discussion-item:hover {
   background: #ffe7c2;
 }
+
 .discussion-item.active {
   background: #ffe7c2;
   box-shadow: 0 2px 8px #ecbc76aa;
+}
+
+/* Bouton de suppression de conversation */
+.delete-conversation-btn {
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 8px;
+  border-radius: 50%;
+  transition: all 0.2s ease;
+  opacity: 0;
+  visibility: hidden;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  flex-shrink: 0;
+}
+
+.discussion-item:hover .delete-conversation-btn {
+  opacity: 1;
+  visibility: visible;
+}
+
+.delete-conversation-btn:hover {
+  background: rgba(244, 67, 54, 0.1);
+  transform: scale(1.1);
+}
+
+.delete-icon {
+  width: 16px;
+  height: 16px;
+  filter: brightness(0) saturate(100%) invert(23%) sepia(95%) saturate(1832%) hue-rotate(347deg) brightness(95%) contrast(95%);
+  transition: filter 0.2s ease;
+}
+
+.delete-conversation-btn:hover .delete-icon {
+  filter: brightness(0) saturate(100%) invert(17%) sepia(84%) saturate(2851%) hue-rotate(347deg) brightness(98%) contrast(102%);
 }
 .avatar-container {
   position: relative;
@@ -1089,172 +1421,311 @@ export default {
   z-index: 1000;
 }
 
-.appointment-modal {
+/* Modal de recherche d'utilisateurs */
+.search-modal {
   background: white;
   border-radius: 16px;
-  padding: 24px;
+  padding: 0;
   width: 90%;
   max-width: 500px;
-  max-height: 90vh;
-  overflow-y: auto;
+  max-height: 80vh;
+  overflow: hidden;
   box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
 }
 
-.appointment-modal h3 {
-  margin: 0 0 20px 0;
+.search-modal-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 20px 24px;
+  border-bottom: 1px solid #eee;
+}
+
+.search-modal-header h3 {
+  margin: 0;
   color: #28303F;
   font-size: 1.4rem;
 }
 
-.form-group {
-  margin-bottom: 16px;
+.close-btn {
+  background: none;
+  border: none;
+  color: #666;
+  cursor: pointer;
+  padding: 8px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: background 0.2s ease;
 }
 
-.form-group label {
-  display: block;
-  margin-bottom: 6px;
-  font-weight: 600;
-  color: #28303F;
+.close-btn:hover {
+  background: #f5f5f5;
 }
 
-.form-group input,
-.form-group textarea {
+.search-input-container {
+  padding: 20px 24px;
+}
+
+.search-input {
   width: 100%;
-  padding: 10px 12px;
+  padding: 12px 16px;
   border: 1.5px solid #ecbc76;
-  border-radius: 8px;
+  border-radius: 10px;
   font-size: 1rem;
   box-sizing: border-box;
 }
 
-.form-group input:focus,
-.form-group textarea:focus {
+.search-input:focus {
   outline: none;
   border-color: #d4a562;
 }
 
-.form-group textarea {
-  resize: vertical;
-  min-height: 80px;
+.search-loading,
+.search-error,
+.no-results,
+.search-hint {
+  padding: 16px 24px;
+  text-align: center;
+  color: #666;
+  font-style: italic;
 }
 
-.modal-actions {
+.search-error {
+  color: #d00;
+  background: #fee;
+  font-style: normal;
+}
+
+.search-results {
+  max-height: 300px;
+  overflow-y: auto;
+}
+
+.search-result-item {
   display: flex;
+  align-items: center;
   gap: 12px;
-  justify-content: flex-end;
-  margin-top: 24px;
-}
-
-.cancel-btn {
-  background: #f5f5f5;
-  color: #28303F;
-  border: none;
-  border-radius: 8px;
-  padding: 10px 20px;
-  font-size: 1rem;
-  font-weight: 600;
+  padding: 12px 24px;
   cursor: pointer;
-  transition: background 0.15s;
+  transition: background 0.2s ease;
+  border-bottom: 1px solid #f5f5f5;
 }
 
-.cancel-btn:hover {
-  background: #e0e0e0;
+.search-result-item:hover {
+  background: #f9f9f9;
 }
 
-.submit-btn {
+.search-result-item:last-child {
+  border-bottom: none;
+}
+
+.user-avatar-container {
+  flex-shrink: 0;
+}
+
+.user-avatar {
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  border: 2px solid #ecbc76;
+}
+
+.user-info {
+  flex: 1;
+}
+
+.user-name {
+  font-weight: 600;
+  color: #28303F;
+  font-size: 1rem;
+}
+
+.user-email {
+  font-size: 0.9rem;
+  color: #666;
+  margin-top: 2px;
+}
+
+.message-btn {
   background: #4A90E2;
   color: white;
   border: none;
-  border-radius: 8px;
-  padding: 10px 20px;
-  font-size: 1rem;
-  font-weight: 600;
+  border-radius: 50%;
+  width: 32px;
+  height: 32px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
   cursor: pointer;
-  transition: background 0.15s;
+  transition: background 0.2s ease;
+  flex-shrink: 0;
 }
 
-.submit-btn:hover:not(:disabled) {
+.message-btn:hover {
   background: #357ABD;
 }
 
-.submit-btn:disabled {
-  background: #ccc;
-  cursor: not-allowed;
+/* Modal de confirmation de suppression */
+.delete-modal {
+  background: white;
+  border-radius: 16px;
+  padding: 0;
+  width: 90%;
+  max-width: 450px;
+  overflow: hidden;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
+  animation: slideDown 0.3s ease;
 }
 
-/* Message de rendez-vous */
-.chat-message.appointment-message {
-  background: linear-gradient(135deg, #4A90E2, #357ABD) !important;
-  color: white !important;
-  border-left: 4px solid #2E5984;
+.delete-modal-header {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 24px 24px 16px 24px;
+  text-align: center;
+}
+
+.delete-icon-container {
+  background: rgba(244, 67, 54, 0.1);
+  border-radius: 50%;
+  width: 72px;
+  height: 72px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 16px;
+}
+
+.delete-warning-icon {
+  color: #f44336;
+}
+
+.delete-modal-header h3 {
+  margin: 0;
+  color: #28303F;
+  font-size: 1.4rem;
+  font-weight: 600;
+}
+
+.delete-modal-content {
+  padding: 0 24px 24px 24px;
+  text-align: center;
+}
+
+.delete-modal-content p {
+  margin: 0 0 12px 0;
+  color: #555;
+  font-size: 1rem;
+  line-height: 1.5;
+}
+
+.warning-text {
+  color: #888 !important;
+  font-size: 0.9rem !important;
+  font-style: italic;
+}
+
+.delete-modal-actions {
+  display: flex;
+  gap: 12px;
+  padding: 20px 24px 24px 24px;
+  border-top: 1px solid #eee;
+}
+
+.cancel-delete-btn {
+  flex: 1;
+  background: #f5f5f5;
+  color: #666;
+  border: none;
+  border-radius: 8px;
+  padding: 12px 20px;
+  font-size: 1rem;
   font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s ease;
 }
 
-.chat-message.appointment-message.me {
-  background: linear-gradient(135deg, #4A90E2, #357ABD) !important;
+.cancel-delete-btn:hover {
+  background: #e0e0e0;
+  color: #555;
 }
 
-/* SOLUTION POSITION ABSOLUTE : Les rendez-vous flottent et ne prennent jamais de place */
+.confirm-delete-btn {
+  flex: 1;
+  background: #f44336;
+  color: white;
+  border: none;
+  border-radius: 8px;
+  padding: 12px 20px;
+  font-size: 1rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+}
+
+.confirm-delete-btn:hover {
+  background: #d32f2f;
+  transform: translateY(-1px);
+  box-shadow: 0 2px 8px rgba(244, 67, 54, 0.3);
+}
+
+.confirm-delete-btn svg {
+  width: 16px;
+  height: 16px;
+}
+
+/* Styles pour les rendez-vous en attente */
 .pending-appointments {
   position: absolute;
-  top: 93px; /* Juste en dessous du header */
+  top: 81px; /* Juste sous le header du chat */
   left: 0;
   right: 0;
-  z-index: 50;
-  background: #fff9e6;
+  background: #fff8e1;
   border-bottom: 1px solid #f0d08a;
+  z-index: 10;
   transition: all 0.3s ease;
-  max-height: 300px;
-  overflow: hidden;
+  border-radius: 12px;
+  margin: 0 18px;
+  box-shadow: 0 2px 8px rgba(236, 188, 118, 0.15);
 }
 
 .pending-appointments.collapsed {
-  max-height: 50px; /* Garde juste le header visible pour pouvoir cliquer */
-}
-
-.pending-appointments.collapsed .pending-appointments-content {
-  display: none; /* Cache seulement le contenu, pas le header */
-}
-
-/* Quand il n'y a pas de rendez-vous, on cache complètement */
-.pending-appointments:empty {
-  display: none !important;
-}
-
-/* Ajuster le padding des messages selon l'état des rendez-vous */
-.chat-window:not(:has(.pending-appointments)) .chat-messages {
-  padding-top: 18px; /* Padding normal quand pas de rendez-vous */
-}
-
-.chat-window:has(.pending-appointments.collapsed) .chat-messages {
-  padding-top: 68px; /* Header plié = 50px + 18px de marge */
-}
-
-.chat-window:has(.pending-appointments:not(.collapsed)) .chat-messages {
-  padding-top: 100px; /* Header ouvert avec contenu */
+  /* Animation lors de la fermeture */
+  max-height: 60px;
 }
 
 .pending-appointments-header {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding: 16px 24px;
+  padding: 16px 20px;
   cursor: pointer;
-  user-select: none;
-  transition: background-color 0.2s ease;
+  transition: background 0.2s ease;
 }
 
 .pending-appointments-header:hover {
-  background: #f5f0d6;
+  background: rgba(236, 188, 118, 0.1);
 }
 
 .pending-appointments-title {
-  font-weight: 600;
-  color: #b8860b;
-  font-size: 0.95rem;
   display: flex;
   align-items: center;
-  gap: 8px;
+  gap: 10px;
+  font-weight: 600;
+  color: #28303F;
+  font-size: 1rem;
+}
+
+.pending-icon {
+  width: 20px;
+  height: 20px;
+  filter: brightness(0) saturate(100%) invert(18%) sepia(16%) saturate(881%) hue-rotate(193deg) brightness(95%) contrast(88%);
 }
 
 .toggle-appointments-btn {
@@ -1263,21 +1734,18 @@ export default {
   cursor: pointer;
   padding: 4px;
   border-radius: 4px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  transition: background-color 0.2s ease;
+  transition: background 0.2s ease;
 }
 
 .toggle-appointments-btn:hover {
-  background: rgba(184, 134, 11, 0.1);
+  background: rgba(236, 188, 118, 0.2);
 }
 
 .toggle-arrow {
-  font-size: 14px;
-  color: #b8860b;
+  color: #666;
+  font-size: 12px;
   transition: transform 0.3s ease;
-  user-select: none;
+  display: inline-block;
 }
 
 .toggle-arrow.collapsed {
@@ -1285,22 +1753,17 @@ export default {
 }
 
 .pending-appointments-content {
-  padding: 0 24px 16px 24px;
-  max-height: 300px;
-  overflow-y: auto;
+  padding: 0 20px 16px 20px;
   animation: slideDown 0.3s ease;
 }
 
 .pending-appointment-card {
   background: white;
-  border: 1px solid #e6cc80;
-  border-radius: 8px;
-  padding: 12px;
-  margin-bottom: 8px;
-  display: flex;
-  justify-content: space-between;
-  align-items: flex-start;
-  gap: 12px;
+  border-radius: 10px;
+  padding: 16px;
+  margin-bottom: 12px;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.08);
+  border: 1px solid #f0d08a;
 }
 
 .pending-appointment-card:last-child {
@@ -1308,114 +1771,106 @@ export default {
 }
 
 .appointment-info {
-  flex: 1;
+  margin-bottom: 12px;
 }
 
 .appointment-title {
   font-weight: 600;
   color: #28303F;
-  margin-bottom: 4px;
-  font-size: 1rem;
+  font-size: 1.1rem;
+  margin-bottom: 8px;
 }
 
 .appointment-date {
-  color: #b8860b;
+  color: #ECBC76;
   font-weight: 500;
-  font-size: 0.9rem;
-  margin-bottom: 2px;
+  font-size: 0.95rem;
+  margin-bottom: 6px;
 }
 
 .appointment-location {
-  color: #666;
-  font-size: 0.85rem;
-  margin-bottom: 2px;
-}
-
-.appointment-description {
-  color: #666;
-  font-size: 0.85rem;
-  font-style: italic;
-  margin-bottom: 4px;
-}
-
-.appointment-requester {
-  color: #888;
-  font-size: 0.8rem;
-}
-
-.appointment-actions {
   display: flex;
+  align-items: center;
   gap: 6px;
-  flex-shrink: 0;
-}
-
-.accept-btn {
-  background: #4A90E2;
-  color: white;
-  border: none;
-  border-radius: 6px;
-  padding: 6px 12px;
-  font-size: 0.85rem;
-  font-weight: 600;
-  cursor: pointer;
-  transition: background 0.2s;
-}
-
-.accept-btn:hover {
-  background: #357ABD;
-}
-
-.decline-btn {
-  background: #f44336;
-  color: white;
-  border: none;
-  border-radius: 6px;
-  padding: 6px 12px;
-  font-size: 0.85rem;
-  font-weight: 600;
-  cursor: pointer;
-  transition: background 0.2s;
-}
-
-.decline-btn:hover {
-  background: #da190b;
-}
-
-.appointment-status-waiting {
-  color: #888;
-  font-size: 0.85rem;
-  font-style: italic;
-  align-self: center;
-  flex-shrink: 0;
-}
-
-/* Icon styles for discussions */
-.pending-icon {
-  width: 16px;
-  height: 16px;
-  filter: brightness(0) saturate(100%) invert(69%) sepia(74%) saturate(424%) hue-rotate(35deg) brightness(87%) contrast(91%);
+  color: #666;
+  font-size: 0.9rem;
+  margin-bottom: 6px;
 }
 
 .location-icon {
   width: 14px;
   height: 14px;
-  margin-right: 4px;
-  filter: brightness(0) saturate(100%) invert(47%) sepia(18%) saturate(1094%) hue-rotate(195deg) brightness(95%) contrast(87%);
+  filter: brightness(0) saturate(100%) invert(45%) sepia(0%) saturate(0%) hue-rotate(195deg) brightness(94%) contrast(89%);
 }
 
-.appointment-icon {
-  width: 18px;
-  height: 18px;
-  filter: brightness(0) saturate(100%) invert(18%) sepia(15%) saturate(1239%) hue-rotate(195deg) brightness(96%) contrast(91%);
-  /* #28303F color filter */
+.appointment-description {
+  color: #555;
+  font-size: 0.9rem;
+  line-height: 1.4;
+  margin-bottom: 8px;
+}
+
+.appointment-requester {
+  color: #666;
+  font-size: 0.85rem;
+}
+
+.appointment-actions {
+  display: flex;
+  gap: 12px;
+  margin-top: 12px;
+}
+
+.accept-btn, .decline-btn {
+  flex: 1;
+  padding: 8px 16px;
+  border: none;
+  border-radius: 8px;
+  font-size: 0.9rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+}
+
+.accept-btn {
+  background: #4CAF50;
+  color: white;
+}
+
+.accept-btn:hover {
+  background: #45a049;
+  transform: translateY(-1px);
+}
+
+.decline-btn {
+  background: #f44336;
+  color: white;
+}
+
+.decline-btn:hover {
+  background: #da190b;
+  transform: translateY(-1px);
 }
 
 .btn-action-icon {
-  width: 14px;
-  height: 14px;
-  margin-right: 6px;
-  vertical-align: middle;
-  filter: brightness(0) saturate(100%) invert(100%) sepia(0%) saturate(0%) hue-rotate(0deg) brightness(100%) contrast(100%);
+  width: 16px;
+  height: 16px;
+  filter: brightness(0) saturate(100%) invert(100%) sepia(0%) saturate(7500%) hue-rotate(109deg) brightness(104%) contrast(104%);
+}
+
+.appointment-status-waiting {
+  text-align: center;
+  color: #666;
+  font-style: italic;
+  font-size: 0.9rem;
+  margin-top: 12px;
+  padding: 8px;
+  background: #f5f5f5;
+  border-radius: 6px;
 }
 
 /* Responsive Design */
@@ -1633,12 +2088,64 @@ export default {
     gap: 8px;
     margin-top: 12px;
   }
-  
-  .accept-btn, .decline-btn {
+    .accept-btn, .decline-btn {
     width: 100%;
     justify-content: center;
     padding: 10px 16px;
     font-size: 14px;
+  }
+  
+  /* Styles mobile pour le bouton de suppression */
+  .delete-conversation-btn {
+    opacity: 1;
+    visibility: visible;
+    width: 28px;
+    height: 28px;
+    padding: 6px;
+  }  
+  .delete-icon {
+    width: 14px;
+    height: 14px;
+  }
+  
+  /* Modal de suppression responsive */
+  .delete-modal {
+    width: 95%;
+    max-width: 380px;
+  }
+  
+  .delete-modal-header {
+    padding: 20px 20px 12px 20px;
+  }
+  
+  .delete-icon-container {
+    width: 60px;
+    height: 60px;
+    margin-bottom: 12px;
+  }
+  
+  .delete-modal-header h3 {
+    font-size: 1.2rem;
+  }
+  
+  .delete-modal-content {
+    padding: 0 20px 20px 20px;
+  }
+  
+  .delete-modal-content p {
+    font-size: 0.95rem;
+  }
+  
+  .delete-modal-actions {
+    padding: 16px 20px 20px 20px;
+    flex-direction: column;
+  }
+  
+  .cancel-delete-btn,
+  .confirm-delete-btn {
+    width: 100%;
+    padding: 14px 20px;
+    font-size: 0.95rem;
   }
 }
 

@@ -127,3 +127,49 @@ exports.getUserByProfileToken = async (req, res) => {
     res.status(500).json({ error: 'Erreur serveur' });
   }
 };
+
+// ✅ Rechercher des utilisateurs par email ou username
+exports.searchUsers = async (req, res) => {
+  try {
+    const { q } = req.query;
+    const currentUserId = req.user.id;
+    
+    if (!q || q.trim().length < 2) {
+      return res.status(400).json({ error: 'Le terme de recherche doit contenir au moins 2 caractères' });
+    }
+
+    const users = await User.findAll({
+      where: {
+        [Sequelize.Op.and]: [
+          {
+            [Sequelize.Op.or]: [
+              Sequelize.where(
+                Sequelize.fn('LOWER', Sequelize.col('email')), 
+                'LIKE', 
+                `%${q.trim().toLowerCase()}%`
+              ),
+              Sequelize.where(
+                Sequelize.fn('LOWER', Sequelize.col('username')), 
+                'LIKE', 
+                `%${q.trim().toLowerCase()}%`
+              )
+            ]
+          },
+          {
+            id: {
+              [Sequelize.Op.ne]: currentUserId // Exclure l'utilisateur connecté
+            },
+            isActive: true // Seulement les utilisateurs actifs
+          }
+        ]
+      },
+      attributes: ['id', 'username', 'email', 'avatar', 'profileToken'],
+      limit: 10
+    });
+
+    res.json(users);
+  } catch (error) {
+    console.error('Erreur recherche utilisateurs:', error);
+    res.status(500).json({ error: 'Erreur lors de la recherche d\'utilisateurs' });
+  }
+};
