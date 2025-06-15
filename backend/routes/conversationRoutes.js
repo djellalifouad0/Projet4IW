@@ -7,7 +7,8 @@ const {
   getMessages,
   sendMessage,
   getUnreadMessagesCount,
-  markConversationAsRead
+  markConversationAsRead,
+  deleteConversation
 } = require('../controllers/conversationController');
 
 // Routes protégées par authentification
@@ -17,5 +18,6 @@ router.post('/', authenticate, createConversation);
 router.get('/:id/messages', authenticate, getMessages);
 router.post('/:id/messages', authenticate, sendMessage);
 router.patch('/:id/mark-read', authenticate, markConversationAsRead);
+router.delete('/:id', authenticate, deleteConversation);
 
 module.exports = router;

@@ -86,8 +86,7 @@ router.patch('/users/:id/toggle', authenticate, authorizeAdmin, userController.t
  *       403:
  *         description: Non autorisé
  */
-router.delete('/users/:id', authenticate, authorizeAdmin, userController.deleteUser);
-
+router.delete('/users/:id', authenticate, authorizeAdmin, userController.deleteUser)
 // Ajout route pour récupérer l'utilisateur connecté
 router.get('/users/me', authenticate, (req, res) => {
   // req.user contient { id, role } grâce au middleware authenticate
@@ -148,5 +147,48 @@ router.put('/profile', authenticate, userController.updateUserProfile);
  *         description: Utilisateur non trouvé
  */
 router.get('/users/profile/:profileToken', userController.getUserByProfileToken);
+
+/**
+ * @swagger
+ * /api/users/search:
+ *   get:
+ *     summary: Rechercher des utilisateurs par email ou nom d'utilisateur
+ *     tags: [Users]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: query
+ *         name: q
+ *         required: true
+ *         schema:
+ *           type: string
+ *           minLength: 2
+ *         description: Terme de recherche (email ou nom d'utilisateur, minimum 2 caractères)
+ *     responses:
+ *       200:
+ *         description: Liste des utilisateurs trouvés
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: array
+ *               items:
+ *                 type: object
+ *                 properties:
+ *                   id:
+ *                     type: integer
+ *                   username:
+ *                     type: string
+ *                   email:
+ *                     type: string
+ *                   avatar:
+ *                     type: string
+ *                   profileToken:
+ *                     type: string
+ *       400:
+ *         description: Terme de recherche trop court
+ *       401:
+ *         description: Non authentifié
+ */
+router.get('/users/search', authenticate, userController.searchUsers);
 
 module.exports = router;
