@@ -13,10 +13,9 @@
           <div class="avatar-container">
             <img :src="conv.avatar" class="avatar" />
             <div v-if="isUserOnline(conv.userId)" class="online-indicator"></div>
-          </div>
-          <div class="info">
+          </div>          <div class="info">
             <div class="name">{{ conv.name }}</div>
-            <div class="last-message">{{ conv.lastMessage }}</div>
+            <div class="last-message">{{ truncateMessage(conv.lastMessage, 20) }}</div>
             <div v-if="conv.lastMessageAt" class="time-ago">{{ formatTimeAgo(conv.lastMessageAt) }}</div>
           </div>
         </div>
@@ -89,12 +88,23 @@
             </div>
           </div>
           </div>
-        </div><div class="chat-messages">
-          <div v-for="msg in messages" :key="msg.id" :class="['chat-message', msg.fromMe ? 'me' : 'other', msg.isAppointment ? 'appointment-message' : '']">
-            <span>{{ msg.text }}</span>            <div v-if="msg.fromMe" class="message-status">
-              <span v-if="msg.status === 'sent'" class="status-icon sent">•</span>
-              <span v-else-if="msg.status === 'delivered'" class="status-icon delivered">✓</span>
-              <span v-else-if="msg.status === 'read'" class="status-icon read">✓✓</span>
+        </div>        <div class="chat-messages">
+          <div v-for="(msg, index) in messages" :key="msg.id" :class="['chat-message', msg.fromMe ? 'me' : 'other', msg.isAppointment ? 'appointment-message' : '']">
+            <div class="message-content">
+              <span class="message-text">{{ msg.text }}</span>
+              <div v-if="shouldShowMessageTime(msg, index)" class="message-info">
+                <span class="message-time">{{ formatMessageTime(msg.createdAt) }}</span>
+                <div v-if="msg.fromMe" class="message-status">
+                  <span v-if="msg.status === 'sent'" class="status-icon sent">•</span>
+                  <span v-else-if="msg.status === 'delivered'" class="status-icon delivered">✓</span>
+                  <span v-else-if="msg.status === 'read'" class="status-icon read">✓✓</span>
+                </div>
+              </div>
+              <div v-else-if="msg.fromMe" class="message-status-only">
+                <span v-if="msg.status === 'sent'" class="status-icon sent">•</span>
+                <span v-else-if="msg.status === 'delivered'" class="status-icon delivered">✓</span>
+                <span v-else-if="msg.status === 'read'" class="status-icon read">✓✓</span>
+              </div>
             </div>
           </div>
           <!-- Indicateur de frappe -->
@@ -430,7 +440,52 @@ export default {
         });
       }
     },
+
+    formatMessageTime(dateString) {
+      if (!dateString) return '';
+      
+      const messageDate = new Date(dateString);
+      const now = new Date();
+      const diffInDays = Math.floor((now - messageDate) / (1000 * 60 * 60 * 24));
+      
+      // Si c'est aujourd'hui, afficher seulement l'heure
+      if (diffInDays === 0) {
+        return messageDate.toLocaleTimeString('fr-FR', {
+          hour: '2-digit',
+          minute: '2-digit'
+        });
+      }
+      // Si c'est hier
+      else if (diffInDays === 1) {
+        return `Hier ${messageDate.toLocaleTimeString('fr-FR', {
+          hour: '2-digit',
+          minute: '2-digit'
+        })}`;
+      }
+      // Si c'est dans la semaine (moins de 7 jours)
+      else if (diffInDays < 7) {
+        return messageDate.toLocaleDateString('fr-FR', {
+          weekday: 'short',
+          hour: '2-digit',
+          minute: '2-digit'
+        });
+      }
+      // Si c'est plus ancien
+      else {
+        return messageDate.toLocaleDateString('fr-FR', {
+          day: '2-digit',
+          month: '2-digit',
+          hour: '2-digit',
+          minute: '2-digit'
+        });
+      }
+    },
     
+    truncateMessage(message, maxLength = 50) {
+      if (!message) return '';
+      if (message.length <= maxLength) return message;
+      return message.substring(0, maxLength).trim() + '...';
+    },
     // Méthode pour trier les conversations par message le plus récent
     sortConversations() {
       this.conversations.sort((a, b) => {
@@ -1076,7 +1131,23 @@ export default {
         this.error = 'Erreur lors de la suppression de la conversation';
         console.error('Error deleting conversation:', error);
       }
-    }
+    },
+    shouldShowMessageTime(currentMessage, index) {
+      if (index === 0) return true; // Toujours afficher l'heure pour le premier message
+      
+      const previousMessage = this.messages[index - 1];
+      if (!previousMessage) return true;
+      
+      // Afficher l'heure si l'expéditeur est différent
+      if (currentMessage.fromMe !== previousMessage.fromMe) return true;
+      
+      // Afficher l'heure si plus de 5 minutes se sont écoulées
+      const currentTime = new Date(currentMessage.createdAt);
+      const previousTime = new Date(previousMessage.createdAt);
+      const diffInMinutes = (currentTime - previousTime) / (1000 * 60);
+      
+      return diffInMinutes > 5;
+    },
   }
 }
 </script>
@@ -1257,6 +1328,7 @@ export default {
 }
 .info {
   flex: 1;
+  min-width: 0;
 }
 .name {
   font-weight: 600;
@@ -1365,6 +1437,33 @@ export default {
   align-self: flex-end;
 }
 
+.message-content {
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+}
+
+.message-text {
+  margin-bottom: 4px;
+}
+
+.message-info {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-top: 4px;
+}
+
+.message-time {
+  font-size: 0.75rem;
+  color: #666;
+  opacity: 0.8;
+}
+
+.chat-message.me .message-time {
+  color: rgba(40, 48, 63, 0.7);
+}
+
 /* Indicateur de frappe */
 .typing-indicator {
   display: flex;
@@ -1461,12 +1560,20 @@ export default {
 }
 .message-status {
   font-size: 0.75rem;
-  margin-top: 4px;
-  text-align: right;
+  margin-left: 8px;
   display: flex;
   justify-content: flex-end;
   align-items: center;
   gap: 2px;
+}
+
+.message-status-only {
+  display: flex;
+  justify-content: flex-end;
+  align-items: center;
+  gap: 2px;
+  font-size: 0.75rem;
+  margin-top: 2px;
 }
 
 .status-icon {
@@ -1713,74 +1820,71 @@ export default {
   background: #357ABD;
 }
 
-/* Modal de confirmation de suppression */
-.delete-modal {
+/* Modal de rendez-vous */
+.appointment-modal {
   background: white;
   border-radius: 16px;
-  padding: 0;
+  padding: 24px;
   width: 90%;
-  max-width: 450px;
-  overflow: hidden;
+  max-width: 500px;
+  max-height: 90vh;
+  overflow-y: auto;
   box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
   animation: slideDown 0.3s ease;
 }
 
-.delete-modal-header {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  padding: 24px 24px 16px 24px;
-  text-align: center;
-}
-
-.delete-icon-container {
-  background: rgba(244, 67, 54, 0.1);
-  border-radius: 50%;
-  width: 72px;
-  height: 72px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  margin-bottom: 16px;
-}
-
-.delete-warning-icon {
-  color: #f44336;
-}
-
-.delete-modal-header h3 {
-  margin: 0;
+.appointment-modal h3 {
+  margin: 0 0 24px 0;
   color: #28303F;
   font-size: 1.4rem;
   font-weight: 600;
-}
-
-.delete-modal-content {
-  padding: 0 24px 24px 24px;
   text-align: center;
 }
 
-.delete-modal-content p {
-  margin: 0 0 12px 0;
-  color: #555;
+.appointment-modal .form-group {
+  margin-bottom: 20px;
+}
+
+.appointment-modal .form-group label {
+  display: block;
+  margin-bottom: 8px;
+  color: #28303F;
+  font-weight: 500;
+  font-size: 0.95rem;
+}
+
+.appointment-modal .form-group input,
+.appointment-modal .form-group textarea {
+  width: 100%;
+  padding: 12px 16px;
+  border: 2px solid #e0e0e0;
+  border-radius: 8px;
   font-size: 1rem;
-  line-height: 1.5;
+  transition: border-color 0.3s ease;
+  font-family: inherit;
+  box-sizing: border-box;
 }
 
-.warning-text {
-  color: #888 !important;
-  font-size: 0.9rem !important;
-  font-style: italic;
+.appointment-modal .form-group input:focus,
+.appointment-modal .form-group textarea:focus {
+  outline: none;
+  border-color: #ECBC76;
 }
 
-.delete-modal-actions {
+.appointment-modal .form-group textarea {
+  resize: vertical;
+  min-height: 80px;
+}
+
+.appointment-modal .modal-actions {
   display: flex;
   gap: 12px;
-  padding: 20px 24px 24px 24px;
+  margin-top: 24px;
+  padding-top: 20px;
   border-top: 1px solid #eee;
 }
 
-.cancel-delete-btn {
+.appointment-modal .cancel-btn {
   flex: 1;
   background: #f5f5f5;
   color: #666;
@@ -1793,37 +1897,36 @@ export default {
   transition: all 0.2s ease;
 }
 
-.cancel-delete-btn:hover {
+.appointment-modal .cancel-btn:hover {
   background: #e0e0e0;
   color: #555;
 }
 
-.confirm-delete-btn {
+.appointment-modal .submit-btn {
   flex: 1;
-  background: #f44336;
-  color: white;
+  background: #ECBC76;
+  color: #28303F;
   border: none;
   border-radius: 8px;
   padding: 12px 20px;
   font-size: 1rem;
-  font-weight: 500;
+  font-weight: 600;
   cursor: pointer;
   transition: all 0.2s ease;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 8px;
 }
 
-.confirm-delete-btn:hover {
-  background: #d32f2f;
+.appointment-modal .submit-btn:hover:not(:disabled) {
+  background: #e6b056;
   transform: translateY(-1px);
-  box-shadow: 0 2px 8px rgba(244, 67, 54, 0.3);
+  box-shadow: 0 2px 8px rgba(236, 188, 118, 0.3);
 }
 
-.confirm-delete-btn svg {
-  width: 16px;
-  height: 16px;
+.appointment-modal .submit-btn:disabled {
+  background: #ccc;
+  color: #888;
+  cursor: not-allowed;
+  transform: none;
+  box-shadow: none;
 }
 
 /* Styles pour les rendez-vous en attente */
@@ -1998,635 +2101,23 @@ export default {
 }
 
 .decline-btn:hover {
-  background: #da190b;
+  background: #d32f2f;
   transform: translateY(-1px);
 }
 
 .btn-action-icon {
-  width: 16px;
-  height: 16px;
-  filter: brightness(0) saturate(100%) invert(100%) sepia(0%) saturate(7500%) hue-rotate(109deg) brightness(104%) contrast(104%);
+  width: 14px;
+  height: 14px;
+  filter: brightness(0) saturate(100%) invert(100%);
 }
 
 .appointment-status-waiting {
-  text-align: center;
   color: #666;
   font-style: italic;
-  font-size: 0.9rem;
-  margin-top: 12px;
+  text-align: center;
   padding: 8px;
-  background: #f5f5f5;
+  background: #f9f9f9;
   border-radius: 6px;
-}
-
-/* Responsive Design */
-@keyframes slideDown {
-  from {
-    opacity: 0;
-    transform: translateY(-10px);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
-}
-
-@media (max-width: 1350px) {
-  .discussions-page {
-    max-width: 95%;
-    padding: 15px;
-    gap: 20px;
-    height: calc(100vh - 100px);
-  }
-}
-
-@media (max-width: 1200px) {
-  .discussions-page {
-    max-width: 95%;
-    padding: 15px;
-    gap: 20px;
-    height: calc(100vh - 100px);
-  }
-  
-  .discussions-list {
-    width: 280px;
-  }
-  
-  .appointment-modal {
-    width: 85%;
-    max-width: 450px;
-  }
-}
-
-@media (max-width: 902px) {
-  .discussions-page {
-    flex-direction: column;
-    gap: 0;
-    padding: 10px;
-    height: calc(100vh - 80px); /* Account for bottom navbar */
-    max-width: 100%;
-  }
-    .discussions-list {
-    width: 100%;
-    height: calc(100vh - 96px); /* Prend toute la hauteur disponible sur mobile */
-    min-height: calc(100vh - 96px);
-    border-radius: 12px;
-    margin-bottom: 0;
-    transition: transform 0.3s ease;
-  }
-  
-  .discussions-list.mobile-hidden {
-    transform: translateX(-100%);
-    position: absolute;
-    z-index: -1;
-    opacity: 0;
-  }  .chat-window {
-    width: 100%;
-    height: 80vh;
-    min-height: 350px;
-    border-radius: 0 0 12px 12px;
-    border-top: 1px solid #ddd;
-    transition: transform 0.3s ease;
-  }.chat-window.mobile-visible {
-    width: 100vw; /* Force full viewport width */
-    height: calc(100vh - 80px);
-    border-radius: 0; /* Remove border radius for full coverage */
-    border-top: none;
-    display: flex;
-    flex-direction: column;
-    position: fixed; /* Fix position to cover entire screen */
-    top: 0;
-    left: 0;
-    z-index: 100;
-    margin: 0;
-    padding: 0;
-  }
-    /* When navbar is hidden in mobile chat mode */
-  .chat-window.mobile-visible.navbar-hidden {
-    height: 100vh;
-    width: 100vw;
-    position: fixed;
-    top: 0;
-    left: 0;
-    border-radius: 0;
-  }
-    .chat-window.mobile-visible .chat-messages {
-    flex: 1;
-    overflow-y: auto;
-    margin-bottom: 0;
-    padding-bottom: 20px; /* Reduced padding for tight spacing */
-    height: calc(100vh - 160px); /* viewport - navbar(80px) - input field space(80px) */
-    max-height: calc(100vh - 160px);
-    min-height: 200px;
-  }
-  /* When navbar is hidden, messages take full height minus input */  .chat-window.mobile-visible.navbar-hidden .chat-messages {    height: 80vh !important;
-    max-height: 80vh !important;
-    padding-bottom: 10px;
-  }
-    .chat-window.mobile-visible .chat-input {
-    position: fixed;
-    bottom: 80px; /* Position just above the mobile navbar */
-    left: 0;
-    right: 0;
-    background: white;
-    border-top: 1px solid #eee;
-    z-index: 101;
-    flex-shrink: 0;
-    margin: 0;
-    padding: 14px 18px;
-  }
-  
-  /* When navbar is hidden, position input at very bottom */
-  .chat-window.mobile-visible.navbar-hidden .chat-input {
-    bottom: 0; /* At the very bottom when navbar is hidden */
-    padding: 12px 16px; /* Slightly reduced padding */
-  }
-    .back-button {
-    display: flex !important;
-  }
-  
-  .mobile-hidden {
-    display: none !important;
-  }
-  
-  .mobile-visible {
-    display: block !important;
-  }
-  
-  .chat-header {
-    padding: 14px 18px;
-    border-bottom: 1px solid #eee;
-  }
-    .chat-messages {
-    padding: 14px 18px;
-    padding-top: 80px; /* Espace ajusté pour mobile avec rendez-vous */
-    gap: 8px;
-  }
-    /* Ajuster le padding pour mobile selon l'état des rendez-vous */
-  .chat-window:not(:has(.pending-appointments)) .chat-messages {
-    padding-top: 14px; /* Padding normal mobile quand pas de rendez-vous */
-  }
-  
-  .chat-window:has(.pending-appointments.collapsed) .chat-messages {
-    padding-top: 64px; /* Header mobile plié = 50px + 14px de marge */
-  }
-  
-  .chat-window:has(.pending-appointments:not(.collapsed)) .chat-messages {
-    padding-top: 80px; /* Header mobile ouvert avec contenu */
-  }
-  
-  .chat-input {
-    padding: 14px 18px;
-    gap: 12px;
-  }
-  
-  .chat-input input {
-    font-size: 16px; /* Prevents zoom on iOS */
-    padding: 12px 14px;
-  }
-  
-  .chat-input button {
-    padding: 12px 18px;
-    white-space: nowrap;
-  }
-  
-  .appointment-btn {
-    width: 44px !important;
-    height: 44px !important;
-    min-width: 44px;
-  }
-  
-  .appointment-icon {
-    width: 20px;
-    height: 20px;
-  }
-    .chat-message {
-    max-width: 85%;
-    padding: 12px 16px;
-    font-size: 15px;
-    line-height: 1.4;
-  }
-  
-  .pending-appointments {
-    top: 69px; /* Position ajustée pour le header mobile plus petit */
-    border-radius: 8px;
-  }
-  
-  .pending-appointment-card {
-    margin: 8px 12px;
-  }
-  
-  .pending-appointments-header {
-    padding: 14px 16px;
-  }
-  
-  .pending-appointments-content {
-    padding: 0 16px 14px 16px;
-  }
-  
-  .pending-appointment-card {
-    padding: 14px;
-    margin-bottom: 12px;
-  }
-  
-  .appointment-actions {
-    flex-direction: column;
-    gap: 8px;
-    margin-top: 12px;
-  }
-    .accept-btn, .decline-btn {
-    width: 100%;
-    justify-content: center;
-    padding: 10px 16px;
-    font-size: 14px;
-  }
-  
-  /* Styles mobile pour le bouton de suppression */
-  .delete-conversation-btn {
-    opacity: 1;
-    visibility: visible;
-    width: 28px;
-    height: 28px;
-    padding: 6px;
-  }  
-  .delete-icon {
-    width: 14px;
-    height: 14px;
-  }
-  
-  /* Modal de suppression responsive */
-  .delete-modal {
-    width: 95%;
-    max-width: 380px;
-  }
-  
-  .delete-modal-header {
-    padding: 20px 20px 12px 20px;
-  }
-  
-  .delete-icon-container {
-    width: 60px;
-    height: 60px;
-    margin-bottom: 12px;
-  }
-  
-  .delete-modal-header h3 {
-    font-size: 1.2rem;
-  }
-  
-  .delete-modal-content {
-    padding: 0 20px 20px 20px;
-  }
-  
-  .delete-modal-content p {
-    font-size: 0.95rem;
-  }
-  
-  .delete-modal-actions {
-    padding: 16px 20px 20px 20px;
-    flex-direction: column;
-  }
-  
-  .cancel-delete-btn,
-  .confirm-delete-btn {
-    width: 100%;
-    padding: 14px 20px;
-    font-size: 0.95rem;
-  }
-}
-
-@media (max-width: 600px) {
-  .discussions-page {
-    padding: 8px;
-    gap: 0;
-    height: calc(100vh - 74px); /* Account for mobile bottom navbar */
-  }
-    .discussions-list {
-    height: calc(100vh - 90px); /* Prend toute la hauteur disponible */
-    min-height: calc(100vh - 90px);
-    padding: 12px 0;
-    border-radius: 12px;
-  }
-  
-  .chat-window {
-    height: 65vh;
-    min-height: 300px;
-    border-radius: 0 0 8px 8px;
-  }
-  
-  .discussion-item {
-    padding: 12px 16px;
-    margin: 0 8px;
-    border-radius: 8px;
-  }
-  
-  .discussion-item .avatar {
-    width: 45px;
-    height: 45px;
-  }
-  
-  .discussion-item .info .name {
-    font-size: 15px;
-    font-weight: 600;
-  }
-    .discussion-item .info .last-message {
-    font-size: 13px;
-    line-height: 1.3;
-  }
-  
-  .discussion-item .info .time-ago {
-    font-size: 12px;
-    margin-top: 1px;
-  }
-  
-  .chat-header {
-    padding: 12px 16px;
-  }
-  
-  .chat-header .avatar {
-    width: 40px;
-    height: 40px;
-  }
-  
-  .chat-header .name {
-    font-size: 16px;
-    font-weight: 600;
-  }
-  
-  .chat-header .status {
-    font-size: 13px;
-  }
-  
-  .chat-messages {
-    padding: 12px 16px;
-    gap: 6px;
-  }
-  .chat-input {
-    padding: 12px 16px;
-    gap: 10px;
-  }
-  .chat-window.mobile-visible .chat-input {
-    position: fixed;
-    bottom: 85px; /* Positioned just above bottom navbar for 600px screens */
-    left: 0;
-    right: 0;
-    background: white;
-    border-top: 1px solid #eee;
-    z-index: 101; /* Higher than chat window */
-    margin: 0;
-    padding: 12px 16px;
-  }
-  
-  /* When navbar is hidden at 600px breakpoint */
-  .chat-window.mobile-visible.navbar-hidden .chat-input {
-    bottom: 0; /* At the very bottom when navbar is hidden */
-    padding: 10px 14px;
-  }
-  
-  .chat-window.mobile-visible.navbar-hidden {
-    height: 100vh;
-  }
-    .chat-window.mobile-visible.navbar-hidden .chat-messages {
-    height: calc(100vh - 80px); /* Full viewport minus input field (estimate 80px total) */
-    max-height: calc(100vh - 80px);
-    padding-bottom: 15px; /* Tight spacing */
-  }
-  
-  .chat-input input {
-    font-size: 16px; /* Prevents zoom on iOS */
-    padding: 12px 14px;
-    border-radius: 8px;
-  }
-  
-  .chat-input button {
-    padding: 12px 16px;
-    border-radius: 8px;
-    font-size: 14px;
-  }
-  
-  .appointment-btn {
-    width: 42px !important;
-    height: 42px !important;
-    min-width: 42px;
-  }
-  
-  .appointment-modal {
-    width: 95%;
-    max-width: none;
-    margin: 10px;
-    padding: 20px;
-    border-radius: 12px;
-    max-height: 85vh;
-  }
-  
-  .appointment-modal h3 {
-    font-size: 1.2rem;
-    margin-bottom: 16px;
-  }
-  
-  .form-group {
-    margin-bottom: 16px;
-  }
-  
-  .form-group label {
-    font-size: 14px;
-    margin-bottom: 6px;
-  }
-  
-  .form-group input,
-  .form-group textarea {
-    font-size: 16px; /* Prevents zoom on iOS */
-    padding: 12px;
-    border-radius: 8px;
-  }
-  
-  .modal-actions {
-    flex-direction: column;
-    gap: 10px;
-  }
-  
-  .modal-actions button {
-    width: 100%;
-    padding: 12px;
-    font-size: 16px;
-  }
-  
-  .pending-appointments {
-    /* margin: 6px 8px; */
-    border-radius: 6px;
-  }
-  
-  .pending-appointments-header {
-    padding: 12px 14px;
-  }
-  
-  .pending-appointments-title {
-    font-size: 0.85rem;
-  }
-  
-  .pending-appointments-content {
-    padding: 0 14px 12px 14px;
-  }
-  
-  .pending-appointment-card {
-    padding: 12px;
-    margin-bottom: 10px;
-    border-radius: 6px;
-  }
-  
-  .appointment-title {
-    font-size: 14px;
-    font-weight: 600;
-  }
-  
-  .appointment-date,
-  .appointment-location,
-  .appointment-description,
-  .appointment-requester {
-    font-size: 13px;
-    line-height: 1.3;
-  }
-  
-  .typing-indicator {
-    font-size: 13px;
-    padding: 6px 10px;
-  }
-  
-  .online-indicator {
-    width: 12px;
-    height: 12px;
-    bottom: 2px;
-    right: 2px;
-  }
-}
-
-@media (max-width: 480px) {  .discussions-page {
-    padding: 5px;
-    height: 80vh;
-  }
-    .discussions-list {
-    height: calc(100vh - 80px); /* Prend toute la hauteur disponible */
-    min-height: calc(100vh - 80px);
-    padding: 8px 0;
-  }
-  
-  .chat-window {
-    height: 68vh;
-    min-height: 280px;
-  }  .chat-window.mobile-visible {    width: 100vw;
-    height: 80vh;
-    display: flex;
-    flex-direction: column;
-    position: fixed;
-    top: 0;
-    left: 0;
-    z-index: 100;
-    border-radius: 0;
-    margin: 0;
-    padding: 0;
-  }
-  .chat-window.mobile-visible .chat-messages {
-    flex: 1;
-    overflow-y: auto;
-    height: calc(100vh - 160px); /* viewport - navbar(90px) - input field space(70px) */
-    max-height: calc(100vh - 160px);
-    min-height: 180px;
-    padding-bottom: 15px; /* Tight spacing */
-  }.chat-window.mobile-visible .chat-input {
-    position: fixed;
-    bottom: 90px; /* Positioned just above bottom navbar for 480px screens */
-    left: 0;
-    right: 0;
-    background: white;
-    border-top: 1px solid #eee;
-    z-index: 101;
-    flex-shrink: 0;
-    margin: 0;
-    padding: 10px 12px;
-  }
-    /* When navbar is hidden at 480px breakpoint */
-  .chat-window.mobile-visible.navbar-hidden .chat-input {
-    bottom: 0; /* At the very bottom when navbar is hidden */
-    padding: 8px 10px;
-  }
-  
-  .chat-window.mobile-visible.navbar-hidden {
-    height: 100vh;
-    width: 100vw;
-    position: fixed;
-    top: 0;
-    left: 0;
-    border-radius: 0;
-  }  .chat-window.mobile-visible.navbar-hidden .chat-messages {    height: 80vh;
-    max-height: 80vh;
-    padding-bottom: 10px; /* Very tight spacing */
-  }
-  
-  .discussion-item {
-    padding: 10px 12px;
-    margin: 0 6px;
-  }
-  
-  .discussion-item .avatar {
-    width: 42px;
-    height: 42px;
-  }
-  
-  .chat-header {
-    padding: 10px 12px;
-  }
-  
-  .chat-messages {
-    padding: 10px 12px;
-  }
-    .chat-input {
-    padding: 10px 12px;
-    gap: 8px;
-  }
-  
-  .chat-input input {
-    padding: 10px 12px;
-    font-size: 16px;
-  }
-  
-  .chat-input button {
-    padding: 10px 14px;
-    font-size: 13px;
-  }
-  
-  .appointment-btn {
-    width: 40px !important;
-    height: 40px !important;
-    min-width: 40px;
-  }
-  
-  .appointment-icon {
-    width: 18px;
-    height: 18px;
-  }
-  
-  .chat-message {
-    max-width: 90%;
-    padding: 10px 14px;
-    font-size: 14px;
-  }
-  
-  .appointment-modal {
-    margin: 5px;
-    padding: 16px;
-    max-height: 90vh;
-  }
-  
-  /* .pending-appointments {
-    margin: 4px 6px;
-  } */
-  
-  .pending-appointments-header {
-    padding: 10px 12px;
-  }
-  
-  .pending-appointments-content {
-    padding: 0 12px 10px 12px;
-  }
+  margin-top: 8px;
 }
 </style>
