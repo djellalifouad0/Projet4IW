@@ -1,25 +1,62 @@
 <template>
   <div class="search-bar">
-    <div class="search-input-wrapper">
+    <form @submit.prevent="handleSearch" class="search-input-wrapper">
       <img src="@/assets/icons/search.svg" alt="search" class="search-icon" />
       <input
         type="text"
         :placeholder="placeholder"
-        :value="modelValue"
-        @input="$emit('update:modelValue', $event.target.value)"
+        v-model="searchQuery"
+        @input="$emit('update:modelValue', searchQuery)"
       />
-    </div>
+      <button type="submit" class="search-submit-btn" :disabled="!searchQuery.trim()">
+        Rechercher
+      </button>
+    </form>
   </div>
 </template>
 
 <script>
+import { useRouter } from 'vue-router'
+
 export default {
   name: 'SearchBar',
   props: {
     modelValue: String,
     placeholder: {
       type: String,
-      default: 'Rechercher des skills'
+      default: 'Rechercher des services, compétences...'
+    }
+  },
+  emits: ['update:modelValue'],
+  setup(props, { emit }) {
+    const router = useRouter()
+
+    return {
+      router
+    }
+  },
+  data() {
+    return {
+      searchQuery: this.modelValue || ''
+    }
+  },
+  watch: {
+    modelValue(newValue) {
+      this.searchQuery = newValue || ''
+    }
+  },
+  methods: {
+    handleSearch() {
+      if (!this.searchQuery.trim()) return
+      
+      // Rediriger vers la home avec le paramètre de recherche
+      this.$router.push({
+        path: '/',
+        query: { search: this.searchQuery.trim() }
+      })
+      
+      // Émettre l'événement pour les composants parents
+      this.$emit('search', this.searchQuery.trim())
     }
   }
 }
@@ -35,6 +72,8 @@ export default {
   position: relative;
   width: 700px;
   max-width: 100%;
+  display: flex;
+  align-items: center;
 }
 .search-icon {
   position: absolute;
@@ -44,18 +83,75 @@ export default {
   width: 22px;
   height: 22px;
   pointer-events: none;
+  z-index: 2;
 }
 .search-input-wrapper input {
-  width: 100%;
-  padding: 18px 32px 18px 54px;
+  flex: 1;
+  padding: 18px 120px 18px 54px;
   border-radius: 18px;
   border: none;
   background: #fff;
   font-size: 1.18rem;
   box-shadow: 0 2px 16px #0001;
-  color: #d48a2f;
+  color: #28303F;
   font-weight: 500;
 }
+.search-input-wrapper input::placeholder {
+  color: #999;
+  font-weight: 400;
+}
+.search-submit-btn {
+  position: absolute;
+  right: 8px;
+  top: 50%;
+  transform: translateY(-50%);
+  background: #ECBC76;
+  color: #28303F;
+  border: none;
+  border-radius: 12px;
+  padding: 10px 16px;
+  font-size: 0.9rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  z-index: 2;
+}
+.search-submit-btn:hover:not(:disabled) {
+  background: #e6b056;
+  transform: translateY(-50%) translateY(-1px);
+}
+.search-submit-btn:disabled {
+  background: #ccc;
+  color: #888;
+  cursor: not-allowed;
+}
+
+/* Styles pour le mode nuit */
+.dark-theme .search-input-wrapper input {
+  background: #2d3748 !important;
+  color: #e2e8f0 !important;
+  box-shadow: 0 2px 16px rgba(0, 0, 0, 0.3) !important;
+}
+
+.dark-theme .search-input-wrapper input::placeholder {
+  color: #a0aec0 !important;
+}
+
+.dark-theme .search-submit-btn {
+  background: #ECBC76 !important;
+  color: #1a202c !important;
+}
+
+.dark-theme .search-submit-btn:hover:not(:disabled) {
+  background: #e6b056 !important;
+  box-shadow: 0 2px 8px rgba(236, 188, 118, 0.4) !important;
+}
+
+.dark-theme .search-submit-btn:disabled {
+  background: #4a5568 !important;
+  color: #a0aec0 !important;
+}
+
 @media (max-width: 900px) {
   .search-input-wrapper {
     width: 100%;
@@ -65,6 +161,10 @@ export default {
   }
   .search-icon {
     left: 30px;
+  }
+  .search-submit-btn {
+    padding: 8px 12px;
+    font-size: 0.85rem;
   }
 }
 @media (max-width: 700px) {
@@ -83,12 +183,17 @@ export default {
   }
   .search-input-wrapper input {
     font-size: 1rem;
-    padding: 14px 14px 14px 44px;
+    padding: 14px 100px 14px 44px;
     border-radius: 13px;
   }
   .search-icon {
     width: 18px;
     height: 18px;
+  }
+  .search-submit-btn {
+    padding: 6px 10px;
+    font-size: 0.8rem;
+    border-radius: 8px;
   }
 }
 </style>

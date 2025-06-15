@@ -15,7 +15,23 @@
       <button class="publish-btn" @click="showForm = true">+ Publier</button>
     </div>
 
-    <div v-if="likeError" class="error-message" style="margin-bottom: 10px;">{{ likeError }}</div>    <div class="cards">      <PostCard
+    <div v-if="likeError" class="error-message" style="margin-bottom: 10px;">{{ likeError }}</div>
+
+    <!-- Indicateur de recherche -->
+    <div v-if="searchQuery" class="search-indicator">
+      <div class="search-info">
+        <span class="search-text">Résultats pour : "<strong>{{ searchQuery }}</strong>"</span>
+        <span class="search-count">({{ posts.length }} résultat{{ posts.length !== 1 ? 's' : '' }})</span>
+      </div>
+      <button @click="clearSearch" class="clear-search-btn" title="Effacer la recherche">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <line x1="18" y1="6" x2="6" y2="18"></line>
+          <line x1="6" y1="6" x2="18" y2="18"></line>
+        </svg>
+      </button>
+    </div>
+
+    <div class="cards">      <PostCard
         v-for="post in posts"
         :key="post.id"
         :name="post.User?.username || ''"
@@ -87,10 +103,10 @@ import socketService from '../services/socket'
 
 export default {
   name: 'Home',
-  components: { PostCard },
-  data() {
+  components: { PostCard },  data() {
     return {
       posts: [],
+      allPosts: [], // Tous les posts pour la recherche
       showForm: false,
       form: {
         description: '',
@@ -104,11 +120,14 @@ export default {
       citySearchTimeout: null,
       showFilterMenu: false,
       sortBy: 'recent',
-      userPosition: null
-    }
-  },  async mounted() {
+      userPosition: null,
+      searchQuery: '' // Terme de recherche actuel
+    }  },async mounted() {
     // Initialiser la connexion WebSocket pour les statuts en ligne
     await this.initializeSocketConnection();
+    
+    // Vérifier si il y a un paramètre de recherche dans l'URL
+    this.searchQuery = this.$route.query.search || '';
     
     navigator.geolocation.getCurrentPosition((pos) => {
       this.userPosition = {
@@ -119,9 +138,20 @@ export default {
     }, () => {
       this.fetchPosts();
     });
-    
+
     // Ajout du listener pour fermer le menu de filtres
     document.addEventListener('click', this.handleClickOutside);
+  },
+
+  watch: {
+    '$route.query.search': {
+      handler(newSearchQuery) {
+        this.searchQuery = newSearchQuery || '';
+        this.applySearch();
+        this.sortPosts();
+      },
+      immediate: false
+    }
   },
   
   beforeDestroy() {
@@ -135,8 +165,7 @@ export default {
       this.sortBy = type;
       this.showFilterMenu = false;
       this.sortPosts();
-    },
-    async fetchPosts() {
+    },    async fetchPosts() {
       try {
         const res = await api.get('/skills');
         // Pour chaque post, on va chercher le nombre de commentaires (y compris réponses)
@@ -151,11 +180,37 @@ export default {
             return { ...post, commentsCount: 0 };
           }
         }));
-        this.posts = postsWithComments;
+        
+        // Stocker tous les posts
+        this.allPosts = postsWithComments;
+        
+        // Appliquer la recherche si nécessaire
+        this.applySearch();
+        
         await this.sortPosts();
       } catch (e) {
         this.publishError = "Erreur lors du chargement des posts.";
       }
+    },
+    applySearch() {
+      if (!this.searchQuery.trim()) {
+        // Si pas de recherche, afficher tous les posts
+        this.posts = [...this.allPosts];
+        return;
+      }
+
+      const query = this.searchQuery.toLowerCase().trim();
+      
+      // Filtrer les posts selon la recherche
+      this.posts = this.allPosts.filter(post => {
+        const description = (post.description || '').toLowerCase();
+        const location = (post.location || '').toLowerCase();
+        const username = (post.User?.username || '').toLowerCase();
+        
+        return description.includes(query) || 
+               location.includes(query) || 
+               username.includes(query);
+      });
     },
     async sortPosts() {
       if (this.sortBy === 'recent') {
@@ -322,6 +377,10 @@ export default {
       } catch (error) {
         console.error('Erreur lors de l\'initialisation WebSocket dans Home:', error);
       }
+    },
+    clearSearch() {
+      // Supprimer le paramètre de recherche de l'URL
+      this.$router.push({ path: '/', query: {} });
     },
   }
 }
@@ -667,6 +726,82 @@ export default {
 :global(body) {
   overflow-x: hidden;
 }
+
+/* Indicateur de recherche */
+.search-indicator {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  background: linear-gradient(135deg, #fff8e1 0%, #f5f5f5 100%);
+  border: 2px solid #ECBC76;
+  border-radius: 12px;
+  padding: 16px 20px;
+  margin: 20px 0;
+  font-size: 1rem;
+  box-shadow: 0 3px 12px rgba(236, 188, 118, 0.2);
+  position: relative;
+  overflow: hidden;
+}
+
+.search-indicator::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 3px;
+  background: linear-gradient(90deg, #ECBC76, #d48a2f, #ECBC76);
+  animation: shimmer 2s ease-in-out infinite;
+}
+
+@keyframes shimmer {
+  0% { transform: translateX(-100%); }
+  100% { transform: translateX(100%); }
+}
+
+.search-info {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.search-text {
+  color: #28303F;
+  font-weight: 500;
+}
+
+.search-text strong {
+  color: #d48a2f;
+  font-weight: 700;
+}
+
+.search-count {
+  color: #6B7280;
+  background: rgba(107, 114, 128, 0.1);
+  padding: 2px 8px;
+  border-radius: 12px;
+  font-weight: 500;
+}
+
+.clear-search-btn {
+  background: rgba(255, 255, 255, 0.9);
+  border: 1px solid #ECBC76;
+  color: #d48a2f;
+  cursor: pointer;
+  padding: 8px;
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.3s ease;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.clear-search-btn:hover {
+  background: #ECBC76;
+  color: #28303F;
+  transform: translateY(-1px);  box-shadow: 0 4px 8px rgba(236, 188, 118, 0.3);
+}
 .filter-dropdown-wrapper {
   position: relative;
   display: inline-block;
@@ -736,5 +871,43 @@ export default {
   margin-right: 8px;
   vertical-align: middle;
   filter: brightness(0) saturate(100%) invert(56%) sepia(88%) saturate(2574%) hue-rotate(24deg) brightness(100%) contrast(91%);
+}
+</style>
+
+<style>
+/* Styles globaux pour le mode nuit de l'indicateur de recherche */
+.dark-theme .search-indicator {
+  background: linear-gradient(135deg, #2d3748 0%, #1a202c 100%) !important;
+  border-color: #ECBC76 !important;
+  box-shadow: 0 3px 12px rgba(236, 188, 118, 0.3) !important;
+}
+
+.dark-theme .search-indicator::before {
+  background: linear-gradient(90deg, #ECBC76, #d48a2f, #ECBC76) !important;
+}
+
+.dark-theme .search-text {
+  color: #e2e8f0 !important;
+}
+
+.dark-theme .search-text strong {
+  color: #ECBC76 !important;
+  background: rgba(236, 188, 118, 0.2) !important;
+}
+
+.dark-theme .search-count {
+  color: #cbd5e0 !important;
+  background: rgba(203, 213, 224, 0.1) !important;
+}
+
+.dark-theme .clear-search-btn {
+  background: rgba(45, 55, 72, 0.9) !important;
+  border-color: #ECBC76 !important;
+  color: #ECBC76 !important;
+}
+
+.dark-theme .clear-search-btn:hover {
+  background: #ECBC76 !important;
+  color: #1a202c !important;
 }
 </style>

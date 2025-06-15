@@ -2,7 +2,7 @@
   <div class="main-layout">
     <Navbar v-if="!isAuthPage && !isCartePage && !isDiscussionMobile" />
     <main class="main-content">
-      <SearchBar v-if="!isAuthPage && !isCartePage && !isDiscussionMobile" v-model="search" />
+      <SearchBar v-if="!isAuthPage && !isCartePage && !isDiscussionMobile" v-model="search" @search="handleSearch" />
       <ErrorBoundary>
         <router-view />
       </ErrorBoundary>
@@ -46,9 +46,7 @@ export default {
     
     eventBus.on('discussion-mobile-chat-closed', () => {
       isDiscussionMobile.value = false
-    })
-
-    // Debug: surveiller les changements de route
+    })    // Debug: surveiller les changements de route
     watchEffect(() => {
       console.log('Route actuelle:', route.path)
       // Reset l'état mobile si on quitte les discussions
@@ -57,11 +55,18 @@ export default {
       }
     })
 
+    const handleSearch = (searchQuery) => {
+      // Cette méthode sera appelée depuis SearchBar
+      // La redirection se fait déjà dans SearchBar, donc pas besoin d'action ici
+      console.log('Recherche lancée:', searchQuery)
+    }
+
     return { 
       isAuthPage, 
       isCartePage, 
       isDiscussionMobile,
-      search
+      search,
+      handleSearch
     }
   }
 }
