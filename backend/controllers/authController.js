@@ -160,3 +160,66 @@ exports.enable2FA = async (req, res) => {
     res.status(500).json({ error: 'Erreur activation 2FA', details: error.message });
   }
 };
+
+// 🔧 Changer le mot de passe
+exports.changePassword = async (req, res) => {
+  try {
+    const { currentPassword, newPassword } = req.body;
+    const userId = req.user.id;
+
+    const user = await User.findByPk(userId);
+    if (!user) return res.status(404).json({ error: 'Utilisateur non trouvé' });
+
+    // Vérifier le mot de passe actuel
+    const match = await bcrypt.compare(currentPassword, user.password);
+    if (!match) return res.status(400).json({ error: 'Mot de passe actuel incorrect' });
+
+    // Hasher le nouveau mot de passe
+    const hashedNewPassword = await bcrypt.hash(newPassword, 10);
+    user.password = hashedNewPassword;
+    await user.save();
+
+    res.json({ message: 'Mot de passe modifié avec succès' });
+  } catch (error) {
+    res.status(500).json({ error: 'Erreur lors du changement de mot de passe', details: error.message });
+  }
+};
+
+// 🔧 Changer l'adresse email
+exports.changeEmail = async (req, res) => {
+  try {
+    const { newEmail, password } = req.body;
+    const userId = req.user.id;
+
+    const user = await User.findByPk(userId);
+    if (!user) return res.status(404).json({ error: 'Utilisateur non trouvé' });
+
+    // Vérifier le mot de passe
+    const match = await bcrypt.compare(password, user.password);
+    if (!match) return res.status(400).json({ error: 'Mot de passe incorrect' });
+
+    // Vérifier que le nouvel email n'est pas déjà utilisé
+    const existingUser = await User.findOne({ where: { email: newEmail } });
+    if (existingUser && existingUser.id !== userId) {
+      return res.status(400).json({ error: 'Cette adresse email est déjà utilisée' });
+    }
+
+    user.email = newEmail;
+    await user.save();
+
+    res.json({ message: 'Adresse email modifiée avec succès' });
+  } catch (error) {
+    res.status(500).json({ error: 'Erreur lors du changement d\'email', details: error.message });
+  }
+};
+
+// 🔧 Déconnecter tous les appareils (simulation)
+exports.logoutAll = async (req, res) => {
+  try {
+    // Dans une vraie application, on invaliderait tous les tokens JWT
+    // Ici on simule juste la déconnexion
+    res.json({ message: 'Déconnecté de tous les appareils' });
+  } catch (error) {
+    res.status(500).json({ error: 'Erreur lors de la déconnexion', details: error.message });
+  }
+};

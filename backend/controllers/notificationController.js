@@ -249,6 +249,105 @@ function groupNotificationsByDate(notifications) {
 }
 
 /**
+ * @swagger
+ * /notifications/settings:
+ *   get:
+ *     summary: Récupère les paramètres de notifications de l'utilisateur
+ *     tags: [Notifications]
+ *     security:
+ *       - bearerAuth: []
+ *     responses:
+ *       200:
+ *         description: Paramètres de notifications
+ */
+exports.getNotificationSettings = async (req, res) => {
+  try {
+    const user = await User.findByPk(req.user.id);
+    if (!user) return res.status(404).json({ error: 'Utilisateur non trouvé' });
+
+    // Paramètres par défaut si pas encore configurés
+    const defaultSettings = {
+      messages: true,
+      likes: true,
+      comments: true,
+      appointments: true,
+      ratings: true,
+      updates: true,
+      profileUpdates: true
+    };
+
+    // Si l'utilisateur a des paramètres personnalisés, les utiliser
+    const settings = user.notificationSettings ? JSON.parse(user.notificationSettings) : defaultSettings;
+
+    res.json(settings);
+  } catch (error) {
+    console.error('Erreur récupération paramètres notifications:', error);
+    res.status(500).json({ error: 'Erreur récupération paramètres notifications' });
+  }
+};
+
+/**
+ * @swagger
+ * /notifications/settings:
+ *   put:
+ *     summary: Met à jour les paramètres de notifications de l'utilisateur
+ *     tags: [Notifications]
+ *     security:
+ *       - bearerAuth: []
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               messages:
+ *                 type: boolean
+ *               likes:
+ *                 type: boolean
+ *               comments:
+ *                 type: boolean
+ *               appointments:
+ *                 type: boolean
+ *               ratings:
+ *                 type: boolean
+ *               updates:
+ *                 type: boolean
+ *     responses:
+ *       200:
+ *         description: Paramètres mis à jour
+ */
+exports.updateNotificationSettings = async (req, res) => {
+  try {
+    const { messages, likes, comments, appointments, ratings, updates, profileUpdates } = req.body;
+    const user = await User.findByPk(req.user.id);
+    
+    if (!user) return res.status(404).json({ error: 'Utilisateur non trouvé' });
+
+    const settings = {
+      messages: messages !== undefined ? messages : true,
+      likes: likes !== undefined ? likes : true,
+      comments: comments !== undefined ? comments : true,
+      appointments: appointments !== undefined ? appointments : true,
+      ratings: ratings !== undefined ? ratings : true,
+      updates: updates !== undefined ? updates : true,
+      profileUpdates: profileUpdates !== undefined ? profileUpdates : true
+    };
+
+    user.notificationSettings = JSON.stringify(settings);
+    await user.save();
+
+    res.json({ 
+      message: 'Paramètres de notifications mis à jour',
+      settings 
+    });
+  } catch (error) {
+    console.error('Erreur mise à jour paramètres notifications:', error);
+    res.status(500).json({ error: 'Erreur mise à jour paramètres notifications' });
+  }
+};
+
+/**
  * Types de notifications prédéfinis
  */
 exports.NOTIFICATION_TYPES = {

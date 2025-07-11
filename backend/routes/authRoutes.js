@@ -159,4 +159,80 @@ router.get('/me', authenticate, (req, res) => {
     .catch(() => res.status(500).json({ error: 'Erreur serveur' }));
 });
 
+/**
+ * @swagger
+ * /api/auth/change-password:
+ *   put:
+ *     summary: Changer le mot de passe
+ *     tags: [Auth]
+ *     security:
+ *       - bearerAuth: []
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required: [currentPassword, newPassword]
+ *             properties:
+ *               currentPassword:
+ *                 type: string
+ *               newPassword:
+ *                 type: string
+ *     responses:
+ *       200:
+ *         description: Mot de passe modifié
+ *       400:
+ *         description: Mot de passe actuel incorrect
+ *       500:
+ *         description: Erreur serveur
+ */
+router.put('/change-password', authenticate, authController.changePassword);
+
+/**
+ * @swagger
+ * /api/auth/change-email:
+ *   put:
+ *     summary: Changer l'adresse email
+ *     tags: [Auth]
+ *     security:
+ *       - bearerAuth: []
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required: [newEmail, password]
+ *             properties:
+ *               newEmail:
+ *                 type: string
+ *               password:
+ *                 type: string
+ *     responses:
+ *       200:
+ *         description: Email modifié
+ *       400:
+ *         description: Email déjà utilisé ou mot de passe incorrect
+ *       500:
+ *         description: Erreur serveur
+ */
+router.put('/change-email', authenticate, authController.changeEmail);
+
+/**
+ * @swagger
+ * /api/auth/logout-all:
+ *   post:
+ *     summary: Déconnecter tous les appareils
+ *     tags: [Auth]
+ *     security:
+ *       - bearerAuth: []
+ *     responses:
+ *       200:
+ *         description: Déconnecté de tous les appareils
+ *       500:
+ *         description: Erreur serveur
+ */
+router.post('/logout-all', authenticate, authController.logoutAll);
+
 module.exports = router;

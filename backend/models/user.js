@@ -94,6 +94,11 @@ const User = sequelize.define('User', {
     type: DataTypes.STRING,
     allowNull: false,
     unique: true
+  },
+  notificationSettings: {
+    type: DataTypes.TEXT,
+    allowNull: true,
+    comment: 'JSON string containing user notification preferences'
   }
 }, {
   hooks: {
