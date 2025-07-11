@@ -16,7 +16,7 @@
           </div>
           <div class="info">
             <div class="name">{{ conv.name }}</div>
-            <div class="last-message">{{ conv.lastMessage }}</div>
+            <div class="last-message">{{ truncateMessage(conv.lastMessage) }}</div>
             <div v-if="conv.lastMessageAt" class="time-ago">{{ formatTimeAgo(conv.lastMessageAt) }}</div>
           </div>
         </div>
@@ -1076,7 +1076,12 @@ export default {
         this.error = 'Erreur lors de la suppression de la conversation';
         console.error('Error deleting conversation:', error);
       }
-    }
+    },
+    truncateMessage(message) {
+      const maxLength = 25;
+      if (!message) return '';
+      return message.length > maxLength ? message.slice(0, maxLength) + '…' : message;
+    },
   }
 }
 </script>
