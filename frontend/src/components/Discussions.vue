@@ -1718,6 +1718,114 @@ export default {
   background: #357ABD;
 }
 
+/* Modal de rendez-vous */
+.appointment-modal {
+  background: #fff8e1;
+  border-radius: 16px;
+  box-shadow: 0 4px 24px rgba(236, 188, 118, 0.18), 0 1.5px 6px #ecbc7622;
+  border: 1.5px solid #f0d08a;
+  padding: 32px 28px 24px 28px;
+  margin: 0 auto;
+  width: 100%;
+  max-width: 480px;
+  max-height: 80vh;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+}
+
+.appointment-modal h3 {
+  color: #e4a94f;
+  font-size: 1.35rem;
+  font-weight: 700;
+  margin-bottom: 22px;
+  text-align: center;
+}
+
+.appointment-modal .form-group {
+  margin-bottom: 18px;
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+}
+
+.appointment-modal label {
+  font-size: 1rem;
+  color: #28303F;
+  font-weight: 500;
+  margin-bottom: 7px;
+}
+
+.appointment-modal input,
+.appointment-modal textarea {
+  padding: 12px 14px;
+  border-radius: 10px;
+  border: 1.5px solid #ecbc76;
+  font-size: 1rem;
+  background: #fff;
+  color: #28303F;
+  transition: border-color 0.2s;
+  box-sizing: border-box;
+}
+
+.appointment-modal input:focus,
+.appointment-modal textarea:focus {
+  outline: none;
+  border-color: #e4a94f;
+}
+
+.appointment-modal textarea {
+  min-height: 70px;
+  resize: vertical;
+}
+
+.appointment-modal .modal-actions {
+  display: flex;
+  gap: 12px;
+  margin-top: 10px;
+}
+
+.appointment-modal .cancel-btn {
+  flex: 1;
+  background: #f5f5f5;
+  color: #666;
+  border: none;
+  border-radius: 8px;
+  padding: 12px 0;
+  font-size: 1rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+
+.appointment-modal .cancel-btn:hover {
+  background: #e0e0e0;
+}
+
+.appointment-modal .submit-btn {
+  flex: 1;
+  background: #ecbc76;
+  color: #28303F;
+  border: none;
+  border-radius: 8px;
+  padding: 12px 0;
+  font-size: 1rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+
+.appointment-modal .submit-btn:disabled {
+  background: #ccc;
+  color: #888;
+  cursor: not-allowed;
+}
+
+.appointment-modal .submit-btn:not(:disabled):hover {
+  background: #e4a94f;
+}
+
 /* Modal de confirmation de suppression */
 .delete-modal {
   background: white;
@@ -2060,6 +2168,16 @@ export default {
   .appointment-modal {
     width: 85%;
     max-width: 450px;
+    padding: 28px 24px 20px 24px;
+  }
+  
+  .appointment-modal h3 {
+    font-size: 1.25rem;
+    margin-bottom: 18px;
+  }
+  
+  .appointment-modal .form-group {
+    margin-bottom: 16px;
   }
 }
 
@@ -2298,6 +2416,50 @@ export default {
     padding: 14px 20px;
     font-size: 0.95rem;
   }
+  
+  /* Modal de rendez-vous responsive */
+  .appointment-modal {
+    width: 95%;
+    max-width: 420px;
+    padding: 24px 20px 18px 20px;
+    margin: 0 auto;
+    max-height: 85vh;
+    overflow-y: auto;
+  }
+  
+  .appointment-modal h3 {
+    font-size: 1.2rem;
+    margin-bottom: 16px;
+  }
+  
+  .appointment-modal .form-group {
+    margin-bottom: 14px;
+  }
+  
+  .appointment-modal label {
+    font-size: 0.95rem;
+    margin-bottom: 6px;
+  }
+  
+  .appointment-modal input,
+  .appointment-modal textarea {
+    font-size: 16px; /* Prevents zoom on iOS */
+    padding: 12px;
+    border-radius: 8px;
+  }
+  
+  .appointment-modal .modal-actions {
+    flex-direction: column;
+    gap: 10px;
+    margin-top: 12px;
+  }
+  
+  .appointment-modal .cancel-btn,
+  .appointment-modal .submit-btn {
+    width: 100%;
+    padding: 12px;
+    font-size: 0.95rem;
+  }
 }
 
 @media (max-width: 600px) {
@@ -2421,7 +2583,8 @@ export default {
     margin: 10px;
     padding: 20px;
     border-radius: 12px;
-    max-height: 85vh;
+    max-height: 90vh;
+    overflow-y: auto;
   }
   
   .appointment-modal h3 {
@@ -2429,28 +2592,28 @@ export default {
     margin-bottom: 16px;
   }
   
-  .form-group {
+  .appointment-modal .form-group {
     margin-bottom: 16px;
   }
   
-  .form-group label {
+  .appointment-modal label {
     font-size: 14px;
     margin-bottom: 6px;
   }
   
-  .form-group input,
-  .form-group textarea {
+  .appointment-modal input,
+  .appointment-modal textarea {
     font-size: 16px; /* Prevents zoom on iOS */
     padding: 12px;
     border-radius: 8px;
   }
   
-  .modal-actions {
+  .appointment-modal .modal-actions {
     flex-direction: column;
     gap: 10px;
   }
   
-  .modal-actions button {
+  .appointment-modal .modal-actions button {
     width: 100%;
     padding: 12px;
     font-size: 16px;
@@ -2632,6 +2795,47 @@ export default {
   
   .pending-appointments-content {
     padding: 0 12px 10px 12px;
+  }
+  
+  /* Modal de rendez-vous très petit écran */
+  .appointment-modal {
+    width: 98%;
+    margin: 5px;
+    padding: 16px;
+    border-radius: 10px;
+    max-height: 95vh;
+    overflow-y: auto;
+  }
+  
+  .appointment-modal h3 {
+    font-size: 1.1rem;
+    margin-bottom: 14px;
+  }
+  
+  .appointment-modal .form-group {
+    margin-bottom: 14px;
+  }
+  
+  .appointment-modal label {
+    font-size: 13px;
+    margin-bottom: 5px;
+  }
+  
+  .appointment-modal input,
+  .appointment-modal textarea {
+    font-size: 16px;
+    padding: 10px;
+    border-radius: 6px;
+  }
+  
+  .appointment-modal .modal-actions {
+    gap: 8px;
+    margin-top: 10px;
+  }
+  
+  .appointment-modal .modal-actions button {
+    padding: 10px;
+    font-size: 15px;
   }
 }
 </style>
