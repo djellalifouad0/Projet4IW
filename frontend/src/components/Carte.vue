@@ -294,11 +294,11 @@ export default {
   position: fixed;
   top: 0;
   left: 0;
-  z-index: 0;
+  z-index: 100;
   background: #fefcf6;
   box-shadow: 0 2px 16px #0001;
-  padding-top: 20px;
-  padding-bottom: 20px;
+  padding-top: 12px;
+  padding-bottom: 12px;
 }
 .carte-header-inner {
   width: 1200px;
@@ -326,7 +326,7 @@ export default {
 }
 .carte-search {
   flex: 1;
-  max-width: 500px;
+  max-width: 700px;
 }
 .carte-page {
   width: 100vw;
@@ -335,15 +335,15 @@ export default {
   display: flex;
   flex-direction: column;
   align-items: center;
-  padding-top: 120px;
+  padding-top: 130px;
 }
 .carte-content {
   display: flex;
   flex-direction: row;
   width: 100vw;
-  height: calc(100vh - 120px);
+  height: calc(100vh - 130px);
   position: fixed;
-  top: 120px;
+  top: 130px;
   left: 0;
 }
 .carte-list {
@@ -442,6 +442,27 @@ export default {
 
 /* Tablettes en portrait et petits écrans (768px - 1023px) */
 @media (max-width: 1023px) {
+  * {
+    box-sizing: border-box;
+  }
+  
+  html, body {
+    overflow-x: hidden !important;
+    max-width: 100vw !important;
+  }
+  
+  .carte-page {
+    overflow-x: hidden !important;
+    width: 100vw !important;
+    max-width: 100vw !important;
+  }
+  
+  .carte-header-fixed {
+    width: 100vw !important;
+    max-width: 100vw !important;
+    overflow-x: hidden !important;
+  }
+  
   .mobile-toggle-btn-header {
     display: flex;
   }
@@ -486,14 +507,36 @@ export default {
 
 /* Smartphones en paysage et petites tablettes (576px - 767px) */
 @media (max-width: 767px) {
+  * {
+    box-sizing: border-box;
+  }
+  
+  html, body {
+    overflow-x: hidden !important;
+    max-width: 100vw !important;
+  }
+  
+  .carte-page {
+    overflow-x: hidden !important;
+    width: 100vw !important;
+    max-width: 100vw !important;
+  }
+  
+  .carte-header-fixed {
+    width: 100vw !important;
+    max-width: 100vw !important;
+    overflow-x: hidden !important;
+  }
+  
   .mobile-toggle-btn-header {
-    width: 36px;
-    height: 36px;
+    width: 32px;
+    height: 32px;
     margin-left: 10px;
+    flex-shrink: 0;
   }
   
   .mobile-toggle-btn-header .toggle-icon {
-    font-size: 14px;
+    font-size: 12px;
   }
   
   .carte-header-fixed {
@@ -502,8 +545,11 @@ export default {
   }
   
   .carte-header-inner {
-    gap: 15px;
+    gap: 10px;
     padding: 0 15px;
+    max-width: 100vw !important;
+    overflow-x: hidden !important;
+    box-sizing: border-box !important;
   }
   
   .carte-logo {
@@ -513,10 +559,47 @@ export default {
   
   .carte-brand {
     font-size: 1.1rem;
+    flex-shrink: 0;
   }
   
   .carte-search {
-    max-width: none;
+    max-width: none !important;
+    flex: 1 !important;
+    min-width: 0 !important;
+    width: auto !important;
+  }
+  
+  .carte-search >>> .search-bar {
+    height: 50px !important;
+    padding: 12px 15px !important;
+    border-radius: 12px !important;
+    background: rgba(255, 255, 255, 0.95) !important;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.1) !important;
+  }
+  
+  .carte-search >>> .search-icon {
+    display: none !important;
+  }
+  
+  .carte-search >>> .search-submit-btn {
+    display: none !important;
+  }
+  
+  .carte-search >>> .search-input-wrapper {
+    padding: 0 !important;
+    width: 100% !important;
+    display: flex !important;
+    align-items: center !important;
+  }
+  
+  .carte-search >>> .search-input-wrapper input {
+    height: 42px !important;
+    padding: 12px 18px !important;
+    font-size: 1rem !important;
+    width: 100% !important;
+    box-sizing: border-box !important;
+    border-radius: 10px !important;
+    border: 2px solid #ECBC76 !important;
   }
     .carte-list {
     top: 110px;
@@ -539,16 +622,42 @@ export default {
 
 /* Smartphones en portrait (jusqu'à 575px) */
 @media (max-width: 575px) {
+  * {
+    box-sizing: border-box;
+  }
+  
+  html, body {
+    overflow-x: hidden !important;
+    max-width: 100vw !important;
+  }
+  
+  .carte-page {
+    overflow-x: hidden !important;
+    width: 100vw !important;
+    max-width: 100vw !important;
+  }
+  
+  .carte-header-fixed {
+    width: 100vw !important;
+    max-width: 100vw !important;
+    overflow-x: hidden !important;
+  }
+  
   .carte-header-inner {
     flex-direction: row;
-    gap: 15px;
+    gap: 8px;
     align-items: center;
     justify-content: space-between;
+    max-width: 100vw !important;
+    overflow-x: hidden !important;
+    box-sizing: border-box !important;
+    padding: 0 12px !important;
   }
   
   .carte-logo-bar {
     justify-content: flex-start;
     position: static;
+    flex-shrink: 0;
   }
   
   .mobile-toggle-btn-header {
@@ -566,10 +675,44 @@ export default {
   }
   
   .carte-search {
-    width: 100%;
-    margin-top: 10px;
+    width: 100% !important;
+    margin-top: 12px;
     order: 3;
-    flex-basis: 100%;
+    flex-basis: 100% !important;
+    min-width: 0 !important;
+  }
+  
+  .carte-search >>> .search-bar {
+    height: 48px !important;
+    padding: 14px 18px !important;
+    border-radius: 14px !important;
+    background: rgba(255, 255, 255, 0.98) !important;
+    box-shadow: 0 3px 12px rgba(0,0,0,0.15) !important;
+  }
+  
+  .carte-search >>> .search-icon {
+    display: none !important;
+  }
+  
+  .carte-search >>> .search-submit-btn {
+    display: none !important;
+  }
+  
+  .carte-search >>> .search-input-wrapper {
+    padding: 0 !important;
+    width: 100% !important;
+    display: flex !important;
+    align-items: center !important;
+  }
+  
+  .carte-search >>> .search-input-wrapper input {
+    height: 40px !important;
+    padding: 14px 20px !important;
+    font-size: 0.95rem !important;
+    width: 100% !important;
+    box-sizing: border-box !important;
+    border-radius: 12px !important;
+    border: 2px solid #ECBC76 !important;
   }
   
   .carte-header-inner {
@@ -596,10 +739,32 @@ export default {
 
 /* Très petits écrans (jusqu'à 400px) */
 @media (max-width: 400px) {
+  * {
+    box-sizing: border-box;
+  }
+  
+  html, body {
+    overflow-x: hidden !important;
+    max-width: 100vw !important;
+  }
+  
+  .carte-page {
+    overflow-x: hidden !important;
+    width: 100vw !important;
+    max-width: 100vw !important;
+  }
+  
+  .carte-header-fixed {
+    width: 100vw !important;
+    max-width: 100vw !important;
+    overflow-x: hidden !important;
+  }
+  
   .mobile-toggle-btn-header {
     width: 28px;
     height: 28px;
     border-radius: 4px;
+    flex-shrink: 0;
   }
   
   .mobile-toggle-btn-header .toggle-icon {
@@ -612,7 +777,10 @@ export default {
   }
   
   .carte-header-inner {
-    padding: 0 10px;
+    padding: 0 8px !important;
+    max-width: 100vw !important;
+    overflow-x: hidden !important;
+    box-sizing: border-box !important;
   }
   
   .carte-logo {
@@ -622,6 +790,41 @@ export default {
   
   .carte-brand {
     font-size: 1rem;
+    flex-shrink: 0;
+  }
+  
+  .carte-search >>> .search-bar {
+    height: 44px !important;
+    margin-top: 10px;
+    padding: 12px 16px !important;
+    border-radius: 12px !important;
+    background: rgba(255, 255, 255, 0.98) !important;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.12) !important;
+  }
+  
+  .carte-search >>> .search-icon {
+    display: none !important;
+  }
+  
+  .carte-search >>> .search-submit-btn {
+    display: none !important;
+  }
+  
+  .carte-search >>> .search-input-wrapper {
+    padding: 0 !important;
+    width: 100% !important;
+    display: flex !important;
+    align-items: center !important;
+  }
+  
+  .carte-search >>> .search-input-wrapper input {
+    height: 36px !important;
+    padding: 12px 16px !important;
+    font-size: 0.9rem !important;
+    width: 100% !important;
+    box-sizing: border-box !important;
+    border-radius: 10px !important;
+    border: 2px solid #ECBC76 !important;
   }
     .carte-list {
     top: 140px;
