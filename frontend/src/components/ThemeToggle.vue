@@ -15,6 +15,8 @@
     <svg v-else class="theme-icon" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
       <path d="M21 12.79A9 9 0 1111.21 3 7 7 0 0021 12.79z" stroke="currentColor" stroke-width="2" fill="currentColor"/>
     </svg>
+    
+    <span class="theme-text">Changer thème</span>
   </button>
 </template>
 
@@ -64,11 +66,12 @@ export default {
   background: none;
   border: none;
   cursor: pointer;
-  padding: 8px;
+  padding: 8px 12px;
   border-radius: 8px;
   display: flex;
   align-items: center;
   justify-content: center;
+  gap: 8px;
   transition: all 0.2s ease;
   color: #28303F;
   min-width: 44px;
@@ -85,6 +88,13 @@ export default {
   width: 20px;
   height: 20px;
   transition: transform 0.3s ease;
+  flex-shrink: 0;
+}
+
+.theme-text {
+  font-size: 1.08rem;
+  font-weight: 500;
+  white-space: nowrap;
 }
 
 .theme-toggle-btn:hover .theme-icon {
@@ -122,12 +132,27 @@ export default {
   .theme-toggle-btn {
     min-width: 40px;
     min-height: 40px;
-    padding: 6px;
+    padding: 6px 10px;
   }
   
   .theme-icon {
     width: 18px;
     height: 18px;
+  }
+  
+  .theme-text {
+    font-size: 1.08rem;
+  }
+}
+
+@media (max-width: 768px) {
+  .theme-text {
+    display: none;
+  }
+  
+  .theme-toggle-btn {
+    padding: 6px;
+    gap: 0;
   }
 }
 </style>
