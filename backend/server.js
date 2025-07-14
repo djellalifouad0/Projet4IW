@@ -141,6 +141,10 @@ io.on('connection', (socket) => {
   })
 })
 app.set('socketio', io)
+const { sequelize, connectWithRetry } = require('./config/db');
+
+await connectWithRetry();
+
 server.listen(PORT, () => {
   console.log(`🚀 Serveur démarré sur http://localhost:${PORT}`)
   console.log(`📘 Swagger dispo sur http://localhost:${PORT}/api-docs`)
