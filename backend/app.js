@@ -38,8 +38,8 @@ app.get('*', (req, res) => {
   res.sendFile(path.join(__dirname, 'frontend-build', 'index.html'))
 })
 
-sequelize.sync({ alter: true }).then(() => {
-  console.log('✅ Base de données synchronisée');
+sequelize.sync().then(() => {
+  console.log('Base de données synchronisée');
 })
 
 module.exports = app;

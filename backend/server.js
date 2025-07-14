@@ -160,7 +160,7 @@ server.listen(PORT, () => {
   console.log(`🚀 Serveur démarré sur http://localhost:${PORT}`)
   console.log(`📘 Swagger dispo sur http://localhost:${PORT}/api-docs`)
   console.log(`🔌 WebSocket activé`)
-    // 🔗 Enregistre l'adapter Sequelize
+ e
     AdminJS.registerAdapter(AdminJSSequelize)
 
     console.log('✅ AdminJS Sequelize adapter enregistré')
@@ -194,7 +194,6 @@ server.listen(PORT, () => {
             sequelize.query(`SELECT COUNT(*) AS count FROM User WHERE role = 'admin';`, { type: sequelize.QueryTypes.SELECT }).then(r => r[0].count),
             sequelize.query(`SELECT COUNT(*) AS count FROM User WHERE isActive = true;`, { type: sequelize.QueryTypes.SELECT }).then(r => r[0].count),
             sequelize.query(`SELECT COUNT(*) AS count FROM User WHERE isActive = false;`, { type: sequelize.QueryTypes.SELECT }).then(r => r[0].count),
-
             sequelize.query(`SELECT COUNT(*) AS count FROM Appointment WHERE status = 'pending';`, { type: sequelize.QueryTypes.SELECT }).then(r => r[0].count),
             sequelize.query(`SELECT COUNT(*) AS count FROM Appointment WHERE status = 'accepted';`, { type: sequelize.QueryTypes.SELECT }).then(r => r[0].count),
             sequelize.query(`SELECT COUNT(*) AS count FROM Appointment WHERE status = 'declined';`, { type: sequelize.QueryTypes.SELECT }).then(r => r[0].count),
@@ -205,7 +204,6 @@ server.listen(PORT, () => {
 
             sequelize.query(`SELECT COUNT(*) AS count FROM Notification;`, { type: sequelize.QueryTypes.SELECT }).then(r => r[0].count),
             sequelize.query(`SELECT COUNT(*) AS count FROM Notification WHERE \`read\` = false;`, { type: sequelize.QueryTypes.SELECT }).then(r => r[0].count),
-
             sequelize.query(`SELECT COUNT(*) AS count FROM Rating;`, { type: sequelize.QueryTypes.SELECT }).then(r => r[0].count),
             sequelize.query(`SELECT AVG(rating) AS avg FROM Rating;`, { type: sequelize.QueryTypes.SELECT }).then(r => parseFloat(r[0].avg || 0).toFixed(2)),
 
