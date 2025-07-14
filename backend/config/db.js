@@ -1,15 +1,18 @@
 const { Sequelize } = require('sequelize')
+require('dotenv').config()
 
-// Connexion MySQL
-const sequelize = new Sequelize('skills5', 'root', 'root', {
-  host: 'localhost', 
-  dialect: 'mysql',
-  logging: true,    
+const sequelize = new Sequelize(
+  process.env.DB_NAME,
+  process.env.DB_USER,
+  process.env.DB_PASSWORD,
+  {
+    host: process.env.DB_HOST,
+    dialect: process.env.DB_DIALECT || 'mysql',
+    logging: process.env.DB_LOGGING === 'true',
     define: {
-    freezeTableName: true,
-  },
- 
-})
+      freezeTableName: true,
+    },
+  }
+)
 
-module.exports = sequelize;
-
+module.exports = sequelize

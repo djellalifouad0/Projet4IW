@@ -237,6 +237,7 @@ server.listen(PORT, () => {
 
     const router = AdminJSExpress.buildRouter(adminJs)
     app.use(adminJs.options.rootPath, router)
+    
 
     console.log(`✅ AdminJS disponible sur http://localhost:${PORT}${adminJs.options.rootPath}`)
   })()

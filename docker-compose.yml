@@ -1,33 +1,35 @@
-version: '3.8'
-
 services:
-
-  backend:
-    container_name: express-backend
+  app:
     build:
-      context: ./backend
+      context: .
+    container_name: express-app
     ports:
       - "5000:5000"
-    volumes:
-      - ./backend:/app
-      - sqlite-data:/app/database
     environment:
       - PORT=5000
       - JWT_SECRET=supersecretkey
+      - DB_NAME=skills5
+      - DB_USER=root
+      - DB_PASSWORD=root
+      - DB_HOST=mysql
+      - DB_DIALECT=mysql
     depends_on:
-      - frontend
-
-  frontend:
-    container_name: react-frontend
-    build:
-      context: ./frontend
-    ports:
-      - "3000:3000"
+      - mysql
     volumes:
-      - ./frontend:/app
+      - sqlite-data:/app/database
+
+  mysql:
+    image: mysql:8
+    container_name: mysql
+    restart: always
     environment:
-      - VITE_API_URL=http://localhost:5000/api
-    command: npm run dev
+      MYSQL_DATABASE: skills5
+      MYSQL_ROOT_PASSWORD: root
+    ports:
+      - "3306:3306"
+    volumes:
+      - mysql-data:/var/lib/mysql
 
 volumes:
   sqlite-data:
+  mysql-data:

@@ -1,5 +1,6 @@
 const express = require('express');
 const cors = require('cors');
+const path = require('path')
 const sequelize = require('./config/db');
 const authRoutes = require('./routes/authRoutes');
 const userRoutes = require('./routes/userRoutes');
@@ -32,6 +33,10 @@ app.use('/api/ratings', ratingRoutes);
 // ➕ Swagger (dispo sur /api-docs)
 setupSwagger(app);
 
+app.use(express.static(path.join(__dirname, 'frontend-build')))
+app.get('*', (req, res) => {
+  res.sendFile(path.join(__dirname, 'frontend-build', 'index.html'))
+})
 
 sequelize.sync({ alter: true }).then(() => {
   console.log('✅ Base de données synchronisée');

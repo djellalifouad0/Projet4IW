@@ -1,0 +1,9 @@
+# Ignorer node_modules hôte
+backend/node_modules
+frontend/node_modules
+
+# Optionnel
+npm-debug.log
+.DS_Store
+dist
+build

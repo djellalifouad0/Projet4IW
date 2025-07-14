@@ -42,3 +42,7 @@
 2025-07-14 16:50:47 [ERROR]: Unhandled Rejection: NoDatabaseAdapterError: There are no adapters supporting one of the database you provided
 2025-07-14 16:50:57 [ERROR]: Unhandled Rejection: NoDatabaseAdapterError: There are no adapters supporting one of the database you provided
 2025-07-14 16:51:59 [ERROR]: Unhandled Rejection: NoDatabaseAdapterError: There are no adapters supporting one of the database you provided
+2025-07-14 20:06:40 [ERROR]: Unhandled Rejection: ReferenceError: express is not defined
+2025-07-14 20:06:45 [ERROR]: Unhandled Rejection: SequelizeDatabaseError: Too many keys specified; max 64 keys allowed
+2025-07-14 20:06:49 [ERROR]: Unhandled Rejection: SequelizeDatabaseError: Too many keys specified; max 64 keys allowed
+2025-07-14 20:09:58 [ERROR]: Unhandled Rejection: SequelizeDatabaseError: Too many keys specified; max 64 keys allowed
