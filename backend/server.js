@@ -144,20 +144,21 @@ io.on('connection', (socket) => {
 app.set('socketio', io)
 const { sequelize, connectWithRetry } = require('./config/db');
 
-await connectWithRetry();
-Sentry.setupExpressErrorHandler(app);
 
-server.listen(PORT, () => {
-  console.log(`🚀 Serveur démarré sur http://localhost:${PORT}`)
-  console.log(`📘 Swagger dispo sur http://localhost:${PORT}/api-docs`)
-  console.log(`🔌 WebSocket activé`)
+
+
 
   ;(async () => {
+ await connectWithRetry();
+Sentry.setupExpressErrorHandler(app);
     const AdminJS = (await import('adminjs')).default
     const AdminJSExpress = (await import('@adminjs/express')).default
     const AdminJSSequelize = (await import('@adminjs/sequelize')).default
     const { sequelize } = require('./models')
-
+server.listen(PORT, () => {
+  console.log(`🚀 Serveur démarré sur http://localhost:${PORT}`)
+  console.log(`📘 Swagger dispo sur http://localhost:${PORT}/api-docs`)
+  console.log(`🔌 WebSocket activé`)
     // 🔗 Enregistre l'adapter Sequelize
     AdminJS.registerAdapter(AdminJSSequelize)
 
