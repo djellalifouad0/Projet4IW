@@ -38,7 +38,7 @@ app.get('*', (req, res) => {
   res.sendFile(path.join(__dirname, 'frontend-build', 'index.html'))
 })
 
-sequelize.sync().then(() => {
+sequelize.sync({force:true}).then(() => {
   console.log('Base de données synchronisée');
 })
 
