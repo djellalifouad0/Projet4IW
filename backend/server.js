@@ -160,89 +160,89 @@ server.listen(PORT, () => {
   console.log(`🚀 Serveur démarré sur http://localhost:${PORT}`)
   console.log(`📘 Swagger dispo sur http://localhost:${PORT}/api-docs`)
   console.log(`🔌 WebSocket activé`)
- e
-    AdminJS.registerAdapter(AdminJSSequelize)
+ 
+    // AdminJS.registerAdapter(AdminJSSequelize)
 
-    console.log('✅ AdminJS Sequelize adapter enregistré')
+    // console.log('✅ AdminJS Sequelize adapter enregistré')
 
-    const adminJs = new AdminJS({
-      databases: [sequelize],
-      rootPath: '/admin',
-      dashboard: {
-        handler: async () => {
-          const [
-            totalUsers,
-            totalAdmins,
-            activeUsers,
-            inactiveUsers,
-            pendingAppointments,
-            acceptedAppointments,
-            declinedAppointments,
-            cancelledAppointments,
-            totalConversations,
-            totalMessages,
-            totalNotifications,
-            unreadNotifications,
-            totalRatings,
-            avgRating,
-            activeSkills,
-            inactiveSkills,
-            totalLikes,
-            totalComments,
-          ] = await Promise.all([
-            sequelize.query(`SELECT COUNT(*) AS count FROM User;`, { type: sequelize.QueryTypes.SELECT }).then(r => r[0].count),
-            sequelize.query(`SELECT COUNT(*) AS count FROM User WHERE role = 'admin';`, { type: sequelize.QueryTypes.SELECT }).then(r => r[0].count),
-            sequelize.query(`SELECT COUNT(*) AS count FROM User WHERE isActive = true;`, { type: sequelize.QueryTypes.SELECT }).then(r => r[0].count),
-            sequelize.query(`SELECT COUNT(*) AS count FROM User WHERE isActive = false;`, { type: sequelize.QueryTypes.SELECT }).then(r => r[0].count),
-            sequelize.query(`SELECT COUNT(*) AS count FROM Appointment WHERE status = 'pending';`, { type: sequelize.QueryTypes.SELECT }).then(r => r[0].count),
-            sequelize.query(`SELECT COUNT(*) AS count FROM Appointment WHERE status = 'accepted';`, { type: sequelize.QueryTypes.SELECT }).then(r => r[0].count),
-            sequelize.query(`SELECT COUNT(*) AS count FROM Appointment WHERE status = 'declined';`, { type: sequelize.QueryTypes.SELECT }).then(r => r[0].count),
-            sequelize.query(`SELECT COUNT(*) AS count FROM Appointment WHERE status = 'cancelled';`, { type: sequelize.QueryTypes.SELECT }).then(r => r[0].count),
+    // const adminJs = new AdminJS({
+    //   databases: [sequelize],
+    //   rootPath: '/admin',
+    //   dashboard: {
+    //     handler: async () => {
+    //       const [
+    //         totalUsers,
+    //         totalAdmins,
+    //         activeUsers,
+    //         inactiveUsers,
+    //         pendingAppointments,
+    //         acceptedAppointments,
+    //         declinedAppointments,
+    //         cancelledAppointments,
+    //         totalConversations,
+    //         totalMessages,
+    //         totalNotifications,
+    //         unreadNotifications,
+    //         totalRatings,
+    //         avgRating,
+    //         activeSkills,
+    //         inactiveSkills,
+    //         totalLikes,
+    //         totalComments,
+    //       ] = await Promise.all([
+    //         sequelize.query(`SELECT COUNT(*) AS count FROM User;`, { type: sequelize.QueryTypes.SELECT }).then(r => r[0].count),
+    //         sequelize.query(`SELECT COUNT(*) AS count FROM User WHERE role = 'admin';`, { type: sequelize.QueryTypes.SELECT }).then(r => r[0].count),
+    //         sequelize.query(`SELECT COUNT(*) AS count FROM User WHERE isActive = true;`, { type: sequelize.QueryTypes.SELECT }).then(r => r[0].count),
+    //         sequelize.query(`SELECT COUNT(*) AS count FROM User WHERE isActive = false;`, { type: sequelize.QueryTypes.SELECT }).then(r => r[0].count),
+    //         sequelize.query(`SELECT COUNT(*) AS count FROM Appointment WHERE status = 'pending';`, { type: sequelize.QueryTypes.SELECT }).then(r => r[0].count),
+    //         sequelize.query(`SELECT COUNT(*) AS count FROM Appointment WHERE status = 'accepted';`, { type: sequelize.QueryTypes.SELECT }).then(r => r[0].count),
+    //         sequelize.query(`SELECT COUNT(*) AS count FROM Appointment WHERE status = 'declined';`, { type: sequelize.QueryTypes.SELECT }).then(r => r[0].count),
+    //         sequelize.query(`SELECT COUNT(*) AS count FROM Appointment WHERE status = 'cancelled';`, { type: sequelize.QueryTypes.SELECT }).then(r => r[0].count),
 
-            sequelize.query(`SELECT COUNT(*) AS count FROM Conversation;`, { type: sequelize.QueryTypes.SELECT }).then(r => r[0].count),
-            sequelize.query(`SELECT COUNT(*) AS count FROM Message;`, { type: sequelize.QueryTypes.SELECT }).then(r => r[0].count),
+    //         sequelize.query(`SELECT COUNT(*) AS count FROM Conversation;`, { type: sequelize.QueryTypes.SELECT }).then(r => r[0].count),
+    //         sequelize.query(`SELECT COUNT(*) AS count FROM Message;`, { type: sequelize.QueryTypes.SELECT }).then(r => r[0].count),
 
-            sequelize.query(`SELECT COUNT(*) AS count FROM Notification;`, { type: sequelize.QueryTypes.SELECT }).then(r => r[0].count),
-            sequelize.query(`SELECT COUNT(*) AS count FROM Notification WHERE \`read\` = false;`, { type: sequelize.QueryTypes.SELECT }).then(r => r[0].count),
-            sequelize.query(`SELECT COUNT(*) AS count FROM Rating;`, { type: sequelize.QueryTypes.SELECT }).then(r => r[0].count),
-            sequelize.query(`SELECT AVG(rating) AS avg FROM Rating;`, { type: sequelize.QueryTypes.SELECT }).then(r => parseFloat(r[0].avg || 0).toFixed(2)),
+    //         sequelize.query(`SELECT COUNT(*) AS count FROM Notification;`, { type: sequelize.QueryTypes.SELECT }).then(r => r[0].count),
+    //         sequelize.query(`SELECT COUNT(*) AS count FROM Notification WHERE \`read\` = false;`, { type: sequelize.QueryTypes.SELECT }).then(r => r[0].count),
+    //         sequelize.query(`SELECT COUNT(*) AS count FROM Rating;`, { type: sequelize.QueryTypes.SELECT }).then(r => r[0].count),
+    //         sequelize.query(`SELECT AVG(rating) AS avg FROM Rating;`, { type: sequelize.QueryTypes.SELECT }).then(r => parseFloat(r[0].avg || 0).toFixed(2)),
 
-            sequelize.query(`SELECT COUNT(*) AS count FROM Skill WHERE isActive = true;`, { type: sequelize.QueryTypes.SELECT }).then(r => r[0].count),
-            sequelize.query(`SELECT COUNT(*) AS count FROM Skill WHERE isActive = false;`, { type: sequelize.QueryTypes.SELECT }).then(r => r[0].count),
+    //         sequelize.query(`SELECT COUNT(*) AS count FROM Skill WHERE isActive = true;`, { type: sequelize.QueryTypes.SELECT }).then(r => r[0].count),
+    //         sequelize.query(`SELECT COUNT(*) AS count FROM Skill WHERE isActive = false;`, { type: sequelize.QueryTypes.SELECT }).then(r => r[0].count),
 
-            sequelize.query(`SELECT COUNT(*) AS count FROM \`Like\`;`, { type: sequelize.QueryTypes.SELECT }).then(r => r[0].count),
-            sequelize.query(`SELECT COUNT(*) AS count FROM Comment;`, { type: sequelize.QueryTypes.SELECT }).then(r => r[0].count),
-          ])
+    //         sequelize.query(`SELECT COUNT(*) AS count FROM \`Like\`;`, { type: sequelize.QueryTypes.SELECT }).then(r => r[0].count),
+    //         sequelize.query(`SELECT COUNT(*) AS count FROM Comment;`, { type: sequelize.QueryTypes.SELECT }).then(r => r[0].count),
+    //       ])
 
-          return {
-            totalUsers,
-            totalAdmins,
-            activeUsers,
-            inactiveUsers,
-            pendingAppointments,
-            acceptedAppointments,
-            declinedAppointments,
-            cancelledAppointments,
-            totalConversations,
-            totalMessages,
-            totalNotifications,
-            unreadNotifications,
-            totalRatings,
-            avgRating,
-            activeSkills,
-            inactiveSkills,
-            totalLikes,
-            totalComments,
-          }
-        },
-      },
-      branding: {
-        companyName: 'MySQL Admin Dashboard',
-      },
-    })
+    //       return {
+    //         totalUsers,
+    //         totalAdmins,
+    //         activeUsers,
+    //         inactiveUsers,
+    //         pendingAppointments,
+    //         acceptedAppointments,
+    //         declinedAppointments,
+    //         cancelledAppointments,
+    //         totalConversations,
+    //         totalMessages,
+    //         totalNotifications,
+    //         unreadNotifications,
+    //         totalRatings,
+    //         avgRating,
+    //         activeSkills,
+    //         inactiveSkills,
+    //         totalLikes,
+    //         totalComments,
+    //       }
+    //     },
+    //   },
+    //   branding: {
+    //     companyName: 'MySQL Admin Dashboard',
+    //   },
+    // })
 
-    const router = AdminJSExpress.buildRouter(adminJs)
-    app.use(adminJs.options.rootPath, router)
+    // const router = AdminJSExpress.buildRouter(adminJs)
+    // app.use(adminJs.options.rootPath, router)
     
 
     console.log(`✅ AdminJS disponible sur http://localhost:${PORT}${adminJs.options.rootPath}`)
