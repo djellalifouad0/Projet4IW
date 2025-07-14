@@ -32,10 +32,6 @@ jobs:
       - name:  Backend logs
         run: docker-compose logs app
 
-      - name:  Stop containers
-        if: always()
-        run: docker-compose down -v
-
       - name:  Deploy to VPS
         if: github.ref == 'refs/heads/main'
         uses: appleboy/ssh-action@v1
