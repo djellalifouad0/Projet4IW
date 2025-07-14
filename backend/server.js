@@ -3,7 +3,8 @@ const http = require('http')
 const socketIo = require('socket.io')
 const jwt = require('jsonwebtoken')
 const logger = require('./utils/logger');
-
+require("./instrument.js");
+const Sentry = require("@sentry/node");
 // Gestion globale des exceptions
 process.on('uncaughtException', (err) => {
   logger.error(`Uncaught Exception: ${err}`);
@@ -144,6 +145,7 @@ app.set('socketio', io)
 const { sequelize, connectWithRetry } = require('./config/db');
 
 await connectWithRetry();
+Sentry.setupExpressErrorHandler(app);
 
 server.listen(PORT, () => {
   console.log(`🚀 Serveur démarré sur http://localhost:${PORT}`)
