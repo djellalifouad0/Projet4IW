@@ -142,10 +142,27 @@ io.on('connection', (socket) => {
   })
 })
 app.set('socketio', io)
-const { sequelize, connectWithRetry } = require('./config/db');
+const sequelize  = require('./config/db');
 
 
-
+async function connectWithRetry(retries = 10, delay = 5000) {
+  for (let i = 1; i <= retries; i++) {
+    try {
+      await sequelize.authenticate();
+      console.log('Database connection established');
+      return sequelize;
+    } catch (err) {
+      console.error(`Attempt ${i}/${retries} failed: ${err.message}`);
+      if (i < retries) {
+        console.log(`Waiting ${delay / 1000}s before retrying...`);
+        await new Promise(res => setTimeout(res, delay));
+      } else {
+        console.error('🔥 All attempts to connect to the database failed. Exiting.');
+        process.exit(1);
+      }
+    }
+  }
+}
 
 
   ;(async () => {
@@ -155,6 +172,7 @@ Sentry.setupExpressErrorHandler(app);
     const AdminJSExpress = (await import('@adminjs/express')).default
     const AdminJSSequelize = (await import('@adminjs/sequelize')).default
     const { sequelize } = require('./models')
+    
 server.listen(PORT, () => {
   console.log(`🚀 Serveur démarré sur http://localhost:${PORT}`)
   console.log(`📘 Swagger dispo sur http://localhost:${PORT}/api-docs`)
