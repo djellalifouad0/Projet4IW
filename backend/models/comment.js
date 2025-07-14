@@ -23,11 +23,14 @@ const Comment = sequelize.define('Comment', {
     type: DataTypes.INTEGER,
     allowNull: true,
     references: {
-      model: 'Comments',
+      model: 'Comment',
       key: 'id'
     },
     onDelete: 'CASCADE'
   }
+,
+}, {
+  freezeTableName: true
 });
 
 module.exports = Comment;

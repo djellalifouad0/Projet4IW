@@ -1,0 +1,44 @@
+2025-07-14 16:28:59 [ERROR]: Unhandled Rejection: NoDatabaseAdapterError: There are no adapters supporting one of the database you provided
+2025-07-14 16:29:50 [ERROR]: Unhandled Rejection: NoDatabaseAdapterError: There are no adapters supporting one of the database you provided
+2025-07-14 16:30:10 [ERROR]: Unhandled Rejection: NoDatabaseAdapterError: There are no adapters supporting one of the database you provided
+2025-07-14 16:31:09 [ERROR]: Unhandled Rejection: SequelizeDatabaseError: Failed to open the referenced table 'User'
+2025-07-14 16:31:09 [ERROR]: Unhandled Rejection: NoDatabaseAdapterError: There are no adapters supporting one of the database you provided
+2025-07-14 16:33:03 [ERROR]: Unhandled Rejection: NoDatabaseAdapterError: There are no adapters supporting one of the database you provided
+2025-07-14 16:33:03 [ERROR]: Unhandled Rejection: SequelizeDatabaseError: Failed to open the referenced table 'User'
+2025-07-14 16:33:31 [ERROR]: Unhandled Rejection: NoDatabaseAdapterError: There are no adapters supporting one of the database you provided
+2025-07-14 16:33:31 [ERROR]: Unhandled Rejection: SequelizeDatabaseError: Failed to open the referenced table 'User'
+2025-07-14 16:33:34 [ERROR]: Unhandled Rejection: NoDatabaseAdapterError: There are no adapters supporting one of the database you provided
+2025-07-14 16:33:34 [ERROR]: Unhandled Rejection: SequelizeDatabaseError: Failed to open the referenced table 'User'
+2025-07-14 16:33:41 [ERROR]: Unhandled Rejection: NoDatabaseAdapterError: There are no adapters supporting one of the database you provided
+2025-07-14 16:33:41 [ERROR]: Unhandled Rejection: SequelizeDatabaseError: Failed to open the referenced table 'User'
+2025-07-14 16:34:21 [ERROR]: Unhandled Rejection: SequelizeDatabaseError: Failed to open the referenced table 'User'
+2025-07-14 16:34:21 [ERROR]: Unhandled Rejection: NoDatabaseAdapterError: There are no adapters supporting one of the database you provided
+2025-07-14 16:36:29 [ERROR]: Unhandled Rejection: NoDatabaseAdapterError: There are no adapters supporting one of the database you provided
+2025-07-14 16:36:29 [ERROR]: Unhandled Rejection: SequelizeDatabaseError: Failed to open the referenced table 'User'
+2025-07-14 16:38:32 [ERROR]: Unhandled Rejection: SequelizeDatabaseError: Failed to open the referenced table 'User'
+2025-07-14 16:38:32 [ERROR]: Unhandled Rejection: NoDatabaseAdapterError: There are no adapters supporting one of the database you provided
+2025-07-14 16:40:13 [ERROR]: Unhandled Rejection: SequelizeDatabaseError: Failed to open the referenced table 'User'
+2025-07-14 16:40:27 [ERROR]: Unhandled Rejection: NoDatabaseAdapterError: There are no adapters supporting one of the database you provided
+2025-07-14 16:41:02 [ERROR]: Unhandled Rejection: NoDatabaseAdapterError: There are no adapters supporting one of the database you provided
+2025-07-14 16:41:02 [ERROR]: Unhandled Rejection: SequelizeDatabaseError: Failed to open the referenced table 'Conversations'
+2025-07-14 16:41:33 [ERROR]: Unhandled Rejection: NoDatabaseAdapterError: There are no adapters supporting one of the database you provided
+2025-07-14 16:41:34 [ERROR]: Unhandled Rejection: SequelizeDatabaseError: Failed to open the referenced table 'Conversations'
+2025-07-14 16:44:52 [ERROR]: Unhandled Rejection: NoDatabaseAdapterError: There are no adapters supporting one of the database you provided
+2025-07-14 16:46:12 [ERROR]: Unhandled Rejection: NoDatabaseAdapterError: There are no adapters supporting one of the database you provided
+2025-07-14 16:46:19 [ERROR]: Unhandled Rejection: NoDatabaseAdapterError: There are no adapters supporting one of the database you provided
+2025-07-14 16:46:27 [ERROR]: Unhandled Rejection: NoDatabaseAdapterError: There are no adapters supporting one of the database you provided
+2025-07-14 16:46:38 [ERROR]: Unhandled Rejection: NoDatabaseAdapterError: There are no adapters supporting one of the database you provided
+2025-07-14 16:46:50 [ERROR]: Unhandled Rejection: NoDatabaseAdapterError: There are no adapters supporting one of the database you provided
+2025-07-14 16:47:08 [ERROR]: Unhandled Rejection: NoDatabaseAdapterError: There are no adapters supporting one of the database you provided
+2025-07-14 16:47:28 [ERROR]: Unhandled Rejection: NoDatabaseAdapterError: There are no adapters supporting one of the database you provided
+2025-07-14 16:47:38 [ERROR]: Unhandled Rejection: NoDatabaseAdapterError: There are no adapters supporting one of the database you provided
+2025-07-14 16:47:42 [ERROR]: Unhandled Rejection: NoDatabaseAdapterError: There are no adapters supporting one of the database you provided
+2025-07-14 16:47:52 [ERROR]: Unhandled Rejection: NoDatabaseAdapterError: There are no adapters supporting one of the database you provided
+2025-07-14 16:47:57 [ERROR]: Unhandled Rejection: NoDatabaseAdapterError: There are no adapters supporting one of the database you provided
+2025-07-14 16:48:21 [ERROR]: Unhandled Rejection: NoDatabaseAdapterError: There are no adapters supporting one of the database you provided
+2025-07-14 16:48:26 [ERROR]: Unhandled Rejection: NoDatabaseAdapterError: There are no adapters supporting one of the database you provided
+2025-07-14 16:48:35 [ERROR]: Unhandled Rejection: NoDatabaseAdapterError: There are no adapters supporting one of the database you provided
+2025-07-14 16:49:45 [ERROR]: Unhandled Rejection: NoDatabaseAdapterError: There are no adapters supporting one of the database you provided
+2025-07-14 16:50:47 [ERROR]: Unhandled Rejection: NoDatabaseAdapterError: There are no adapters supporting one of the database you provided
+2025-07-14 16:50:57 [ERROR]: Unhandled Rejection: NoDatabaseAdapterError: There are no adapters supporting one of the database you provided
+2025-07-14 16:51:59 [ERROR]: Unhandled Rejection: NoDatabaseAdapterError: There are no adapters supporting one of the database you provided

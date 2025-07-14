@@ -60,7 +60,7 @@ const Rating = sequelize.define('Rating', {
     type: DataTypes.INTEGER,
     allowNull: false,
     references: {
-      model: 'Users',
+      model: 'User',
       key: 'id'
     }
   },
@@ -68,7 +68,7 @@ const Rating = sequelize.define('Rating', {
     type: DataTypes.INTEGER,
     allowNull: false,
     references: {
-      model: 'Users',
+      model: 'User',
       key: 'id'
     }
   }
@@ -86,6 +86,9 @@ const Rating = sequelize.define('Rating', {
       }
     }
   }
+,
+}, {
+  freezeTableName: true
 });
 
 module.exports = Rating;

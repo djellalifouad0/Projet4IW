@@ -107,6 +107,13 @@ const User = sequelize.define('User', {
         throw new Error('profileToken cannot be updated');
       }
     }  }
+,
+},
+
+
+{
+   tableName: 'User',
+  freezeTableName: true
 });
 
 module.exports = User;

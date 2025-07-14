@@ -35,9 +35,18 @@ const Notification = sequelize.define('Notification', {
     type: DataTypes.INTEGER,
     allowNull: false
   }
+,
+}, {
+  freezeTableName: true
 });
 
-User.hasMany(Notification, { foreignKey: 'userId' });
-Notification.belongsTo(User, { foreignKey: 'userId' });
+User.hasMany(Notification, { foreignKey: 'userId' ,
+}, {
+  freezeTableName: true
+});
+Notification.belongsTo(User, { foreignKey: 'userId' ,
+}, {
+  freezeTableName: true
+});
 
 module.exports = Notification;

@@ -1,180 +1,244 @@
-const app = require('./app');
-const http = require('http');
-const socketIo = require('socket.io');
-const jwt = require('jsonwebtoken');
+const app = require('./app')
+const http = require('http')
+const socketIo = require('socket.io')
+const jwt = require('jsonwebtoken')
+const logger = require('./utils/logger');
 
+// Gestion globale des exceptions
+process.on('uncaughtException', (err) => {
+  logger.error(`Uncaught Exception: ${err}`);
+  process.exit(1); // tu peux laisser tourner si tu veux
+});
+
+// Gestion globale des promesses rejetées
+process.on('unhandledRejection', (reason, promise) => {
+  logger.error(`Unhandled Rejection: ${reason}`);
+  // process.exit(1); // optionnel
+});
 // 🔐 PORT depuis variable d'environnement ou défaut 5000
-const PORT = process.env.PORT || 5000;
+const PORT = process.env.PORT || 5000
 
 // Créer le serveur HTTP
-const server = http.createServer(app);
+const server = http.createServer(app)
 
 // Configurer Socket.IO avec CORS
 const io = socketIo(server, {
   cors: {
-    origin: ["http://localhost:3000", "http://localhost:5173", "http://localhost:8080"], // URLs du frontend + serveur de test
+    origin: ["http://localhost:3000", "http://localhost:5173", "http://localhost:8080"],
     methods: ["GET", "POST"]
   }
-});
+})
 
-// Middleware d'authentification pour Socket.IO
 io.use((socket, next) => {
-  const token = socket.handshake.auth.token;
+  const token = socket.handshake.auth.token
   if (!token) {
-    return next(new Error('Token manquant'));
+    return next(new Error('Token manquant'))
   }
   try {
-    const decoded = jwt.verify(token, 'votre_clé_secrète'); // Utiliser la même clé que authController
-    socket.userId = decoded.userId;
-    socket.profileToken = decoded.profileToken;
-    next();
-  } catch (error) {
-    next(new Error('Token invalide'));
+    const decoded = jwt.verify(token, 'votre_clé_secrète')
+    socket.userId = decoded.userId
+    socket.profileToken = decoded.profileToken
+    next()
+  } catch {
+    next(new Error('Token invalide'))
   }
-});
+})
 
-// Gestion des connexions WebSocket
-const connectedUsers = new Map();
-const userConversations = new Map();
+const connectedUsers = new Map()
+const userConversations = new Map()
 
 io.on('connection', (socket) => {
-  console.log(`🔌 Utilisateur connecté: ${socket.userId}`);
-  
-  // Ajouter l'utilisateur à la liste des connectés
-  connectedUsers.set(socket.userId, socket.id);
-    // Rejoindre une conversation
+  console.log(`🔌 Utilisateur connecté: ${socket.userId}`)
+
+  connectedUsers.set(socket.userId, socket.id)
+
   socket.on('join-conversation', (conversationId) => {
-    socket.join(`conversation-${conversationId}`);
-    
+    socket.join(`conversation-${conversationId}`)
     if (!userConversations.has(socket.userId)) {
-      userConversations.set(socket.userId, new Set());
+      userConversations.set(socket.userId, new Set())
     }
-    userConversations.get(socket.userId).add(conversationId);
-    
-    console.log(`👥 Utilisateur ${socket.userId} a rejoint la conversation ${conversationId}`);
-  });
-    // Quitter une conversation
+    userConversations.get(socket.userId).add(conversationId)
+  })
+
   socket.on('leave-conversation', (conversationId) => {
-    socket.leave(`conversation-${conversationId}`);
-    
+    socket.leave(`conversation-${conversationId}`)
     if (userConversations.has(socket.userId)) {
-      userConversations.get(socket.userId).delete(conversationId);
+      userConversations.get(socket.userId).delete(conversationId)
     }
-    
-    console.log(`👋 Utilisateur ${socket.userId} a quitté la conversation ${conversationId}`);
-  });
-  // Envoyer un message (pour notifications en temps réel seulement)
+  })
+
   socket.on('send-message', (data) => {
-    const { conversationId, message } = data;
-    
-    // Diffuser le message à tous les participants de la conversation (SAUF l'expéditeur)
+    const { conversationId, message } = data
     socket.to(`conversation-${conversationId}`).emit('new-message', {
       id: message.id,
       content: message.content,
       senderId: socket.userId,
       senderName: message.senderName,
       createdAt: message.createdAt,
-      conversationId: conversationId,
-      fromMe: false // Pour les autres participants
-    });
-    
-    console.log(`💬 Message WebSocket diffusé dans la conversation ${conversationId} par ${socket.userId}`);
-  });
+      conversationId,
+      fromMe: false
+    })
+  })
 
-  // Gestion des statuts de connexion
   socket.on('get-online-users', () => {
-    const onlineUsers = Array.from(connectedUsers.keys());
-    socket.emit('online-users', onlineUsers);
-  });
+    socket.emit('online-users', Array.from(connectedUsers.keys()))
+  })
 
-  // Notification de connexion aux autres utilisateurs
   socket.broadcast.emit('user-connected', {
     userId: socket.userId,
     profileToken: socket.profileToken
-  });
-    // Indicateur de frappe
-  socket.on('typing', (data) => {
-    const { conversationId, isTyping } = data;
+  })
+
+  socket.on('typing', ({ conversationId, isTyping }) => {
     socket.to(`conversation-${conversationId}`).emit('user-typing', {
       userId: socket.userId,
       conversationId,
       isTyping
-    });
-    console.log(`⌨️  Utilisateur ${socket.userId} ${isTyping ? 'tape' : 'arrête de taper'} dans la conversation ${conversationId}`);
-  });
+    })
+  })
 
-  // ====== GESTION DES NOTIFICATIONS EN TEMPS RÉEL ======
-  
-  // Demande de vérification des notifications
   socket.on('check-notifications', async () => {
     try {
-      console.log(`🔔 Vérification des notifications pour l'utilisateur ${socket.userId}`);
-      
-      // Importer le service de notifications si pas déjà fait
-      const notificationService = require('./services/notificationService');
-      
-      // Récupérer le nombre de notifications non lues pour cet utilisateur
-      const unreadCount = await notificationService.getUnreadNotificationCount(socket.userId);
-      
-      // Envoyer le nombre à cet utilisateur spécifiquement
-      socket.emit('notification-count-update', unreadCount);
-      
-      console.log(`📊 Nombre de notifications non lues pour ${socket.userId}: ${unreadCount}`);
-    } catch (error) {
-      console.error('❌ Erreur lors de la vérification des notifications:', error);
-      socket.emit('notification-count-update', 0); // Fallback
+      const notificationService = require('./services/notificationService')
+      const unreadCount = await notificationService.getUnreadNotificationCount(socket.userId)
+      socket.emit('notification-count-update', unreadCount)
+    } catch {
+      socket.emit('notification-count-update', 0)
     }
-  });
+  })
 
-  // Demande explicite du nombre de notifications non lues
   socket.on('get-notification-count', async () => {
     try {
-      const notificationService = require('./services/notificationService');
-      const unreadCount = await notificationService.getUnreadNotificationCount(socket.userId);
-      socket.emit('notification-count-update', unreadCount);
-    } catch (error) {
-      console.error('❌ Erreur lors de la récupération du nombre de notifications:', error);
-      socket.emit('notification-count-update', 0);
+      const notificationService = require('./services/notificationService')
+      const unreadCount = await notificationService.getUnreadNotificationCount(socket.userId)
+      socket.emit('notification-count-update', unreadCount)
+    } catch {
+      socket.emit('notification-count-update', 0)
     }
-  });
+  })
 
-  // Gestion des messages en temps réel avec notifications
-  socket.on('message-delivered', (data) => {
-    const { conversationId, messageId } = data;
+  socket.on('message-delivered', ({ conversationId, messageId }) => {
     socket.to(`conversation-${conversationId}`).emit('message-status', {
       messageId,
       status: 'delivered',
       conversationId
-    });
-  });
-
-  socket.on('message-read', (data) => {
-    const { conversationId, messageId } = data;
+    })
+  })
+  socket.on('message-read', ({ conversationId, messageId }) => {
     socket.to(`conversation-${conversationId}`).emit('message-status', {
       messageId,
       status: 'read',
       conversationId
-    });
-  });
-
-  // Déconnexion
+    })
+  })
   socket.on('disconnect', () => {
-    console.log(`🔌 Utilisateur déconnecté: ${socket.userId}`);
-    connectedUsers.delete(socket.userId);
-    userConversations.delete(socket.userId);
-    
-    // Notifier les autres utilisateurs de la déconnexion
+    console.log(`🔌 Utilisateur déconnecté: ${socket.userId}`)
+    connectedUsers.delete(socket.userId)
+    userConversations.delete(socket.userId)
     socket.broadcast.emit('user-disconnected', {
       userId: socket.userId
-    });
-  });
-});
-
-// Exporter io pour l'utiliser dans les contrôleurs
-app.set('socketio', io);
-
+    })
+  })
+})
+app.set('socketio', io)
 server.listen(PORT, () => {
-  console.log(`🚀 Serveur démarré sur http://localhost:${PORT}`);
-  console.log(`📘 Swagger dispo sur http://localhost:${PORT}/api-docs`);
-  console.log(`🔌 WebSocket activé`);
-});
+  console.log(`🚀 Serveur démarré sur http://localhost:${PORT}`)
+  console.log(`📘 Swagger dispo sur http://localhost:${PORT}/api-docs`)
+  console.log(`🔌 WebSocket activé`)
+
+  ;(async () => {
+    const AdminJS = (await import('adminjs')).default
+    const AdminJSExpress = (await import('@adminjs/express')).default
+    const AdminJSSequelize = (await import('@adminjs/sequelize')).default
+    const { sequelize } = require('./models')
+
+    // 🔗 Enregistre l'adapter Sequelize
+    AdminJS.registerAdapter(AdminJSSequelize)
+
+    console.log('✅ AdminJS Sequelize adapter enregistré')
+
+    const adminJs = new AdminJS({
+      databases: [sequelize],
+      rootPath: '/admin',
+      dashboard: {
+        handler: async () => {
+          const [
+            totalUsers,
+            totalAdmins,
+            activeUsers,
+            inactiveUsers,
+            pendingAppointments,
+            acceptedAppointments,
+            declinedAppointments,
+            cancelledAppointments,
+            totalConversations,
+            totalMessages,
+            totalNotifications,
+            unreadNotifications,
+            totalRatings,
+            avgRating,
+            activeSkills,
+            inactiveSkills,
+            totalLikes,
+            totalComments,
+          ] = await Promise.all([
+            sequelize.query(`SELECT COUNT(*) AS count FROM User;`, { type: sequelize.QueryTypes.SELECT }).then(r => r[0].count),
+            sequelize.query(`SELECT COUNT(*) AS count FROM User WHERE role = 'admin';`, { type: sequelize.QueryTypes.SELECT }).then(r => r[0].count),
+            sequelize.query(`SELECT COUNT(*) AS count FROM User WHERE isActive = true;`, { type: sequelize.QueryTypes.SELECT }).then(r => r[0].count),
+            sequelize.query(`SELECT COUNT(*) AS count FROM User WHERE isActive = false;`, { type: sequelize.QueryTypes.SELECT }).then(r => r[0].count),
+
+            sequelize.query(`SELECT COUNT(*) AS count FROM Appointment WHERE status = 'pending';`, { type: sequelize.QueryTypes.SELECT }).then(r => r[0].count),
+            sequelize.query(`SELECT COUNT(*) AS count FROM Appointment WHERE status = 'accepted';`, { type: sequelize.QueryTypes.SELECT }).then(r => r[0].count),
+            sequelize.query(`SELECT COUNT(*) AS count FROM Appointment WHERE status = 'declined';`, { type: sequelize.QueryTypes.SELECT }).then(r => r[0].count),
+            sequelize.query(`SELECT COUNT(*) AS count FROM Appointment WHERE status = 'cancelled';`, { type: sequelize.QueryTypes.SELECT }).then(r => r[0].count),
+
+            sequelize.query(`SELECT COUNT(*) AS count FROM Conversation;`, { type: sequelize.QueryTypes.SELECT }).then(r => r[0].count),
+            sequelize.query(`SELECT COUNT(*) AS count FROM Message;`, { type: sequelize.QueryTypes.SELECT }).then(r => r[0].count),
+
+            sequelize.query(`SELECT COUNT(*) AS count FROM Notification;`, { type: sequelize.QueryTypes.SELECT }).then(r => r[0].count),
+            sequelize.query(`SELECT COUNT(*) AS count FROM Notification WHERE \`read\` = false;`, { type: sequelize.QueryTypes.SELECT }).then(r => r[0].count),
+
+            sequelize.query(`SELECT COUNT(*) AS count FROM Rating;`, { type: sequelize.QueryTypes.SELECT }).then(r => r[0].count),
+            sequelize.query(`SELECT AVG(rating) AS avg FROM Rating;`, { type: sequelize.QueryTypes.SELECT }).then(r => parseFloat(r[0].avg || 0).toFixed(2)),
+
+            sequelize.query(`SELECT COUNT(*) AS count FROM Skill WHERE isActive = true;`, { type: sequelize.QueryTypes.SELECT }).then(r => r[0].count),
+            sequelize.query(`SELECT COUNT(*) AS count FROM Skill WHERE isActive = false;`, { type: sequelize.QueryTypes.SELECT }).then(r => r[0].count),
+
+            sequelize.query(`SELECT COUNT(*) AS count FROM \`Like\`;`, { type: sequelize.QueryTypes.SELECT }).then(r => r[0].count),
+            sequelize.query(`SELECT COUNT(*) AS count FROM Comment;`, { type: sequelize.QueryTypes.SELECT }).then(r => r[0].count),
+          ])
+
+          return {
+            totalUsers,
+            totalAdmins,
+            activeUsers,
+            inactiveUsers,
+            pendingAppointments,
+            acceptedAppointments,
+            declinedAppointments,
+            cancelledAppointments,
+            totalConversations,
+            totalMessages,
+            totalNotifications,
+            unreadNotifications,
+            totalRatings,
+            avgRating,
+            activeSkills,
+            inactiveSkills,
+            totalLikes,
+            totalComments,
+          }
+        },
+      },
+      branding: {
+        companyName: 'MySQL Admin Dashboard',
+      },
+    })
+
+    const router = AdminJSExpress.buildRouter(adminJs)
+    app.use(adminJs.options.rootPath, router)
+
+    console.log(`✅ AdminJS disponible sur http://localhost:${PORT}${adminJs.options.rootPath}`)
+  })()
+})
+

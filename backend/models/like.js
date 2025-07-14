@@ -12,12 +12,27 @@ const Like = sequelize.define('Like', {
     type: DataTypes.INTEGER,
     allowNull: false
   }
+,
+}, {
+  freezeTableName: true
 });
 
 // Associations définies ici pour éviter les boucles d'import !
-Skill.hasMany(Like, { foreignKey: 'skillId', onDelete: 'CASCADE' });
-Like.belongsTo(Skill, { foreignKey: 'skillId' });
-User.hasMany(Like, { foreignKey: 'userId' });
-Like.belongsTo(User, { foreignKey: 'userId' });
+Skill.hasMany(Like, { foreignKey: 'skillId', onDelete: 'CASCADE' ,
+}, {
+  freezeTableName: true
+});
+Like.belongsTo(Skill, { foreignKey: 'skillId' ,
+}, {
+  freezeTableName: true
+});
+User.hasMany(Like, { foreignKey: 'userId' ,
+}, {
+  freezeTableName: true
+});
+Like.belongsTo(User, { foreignKey: 'userId' ,
+}, {
+  freezeTableName: true
+});
 
 module.exports = Like;

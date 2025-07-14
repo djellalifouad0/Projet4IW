@@ -11,7 +11,7 @@ const Conversation = sequelize.define('Conversation', {
     type: DataTypes.INTEGER,
     allowNull: false,
     references: {
-      model: 'Users',
+      model: 'User',
       key: 'id'
     },
     onDelete: 'CASCADE'
@@ -20,7 +20,7 @@ const Conversation = sequelize.define('Conversation', {
     type: DataTypes.INTEGER,
     allowNull: false,
     references: {
-      model: 'Users',
+      model: 'User',
       key: 'id'
     },
     onDelete: 'CASCADE'
@@ -34,7 +34,7 @@ const Conversation = sequelize.define('Conversation', {
     allowNull: true
   }
 }, {
-  tableName: 'Conversations'
+  freezeTableName: true
 });
 
 module.exports = Conversation;

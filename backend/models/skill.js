@@ -28,13 +28,16 @@ const Skill = sequelize.define('Skill', {
     type: DataTypes.INTEGER,
     allowNull: false,
     references: {
-      model: 'Users',
+      model: 'User',
       key: 'id'
     },
     onDelete: 'CASCADE'
   }
 }, {
-  tableName: 'Skills'
+  tableName: 'Skill'
+,
+}, {
+  freezeTableName: true
 });
 
 module.exports = Skill;

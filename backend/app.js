@@ -32,10 +32,9 @@ app.use('/api/ratings', ratingRoutes);
 // ➕ Swagger (dispo sur /api-docs)
 setupSwagger(app);
 
-// ➕ Test de connexion DB avec synchronisation normale (préserve les données)
+
 sequelize.sync({ alter: true }).then(() => {
-  console.log('🗄️  Base de données synchronisée (données préservées)');
-}).catch((error) => {
-  console.error('❌ Erreur lors de la synchronisation DB:', error.message);
-});
+  console.log('✅ Base de données synchronisée');
+})
+
 module.exports = app;
