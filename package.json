@@ -1,5 +1,8 @@
 {
   "dependencies": {
+    "@admin-bro/express": "^3.1.0",
+    "@admin-bro/sequelize": "^1.2.1",
+    "admin-bro": "^4.0.1",
     "jwt-decode": "^4.0.0",
     "socket.io-client": "^4.8.1",
     "sqlite3": "^5.1.7"
