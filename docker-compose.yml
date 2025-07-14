@@ -20,7 +20,14 @@ services:
         condition: service_healthy
     volumes:
       - sqlite-data:/app/database
-    command: sh -c "sleep 20 && npm start"
+    command: >
+      sh -c "
+        until mysqladmin ping -hmysql --silent; do
+          echo 'Attente MySQL…';
+          sleep 2;
+        done;
+        npm start
+      "
 
   mysql:
     image: mysql:8
