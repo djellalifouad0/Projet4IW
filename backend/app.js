@@ -33,7 +33,7 @@ app.use('/api/likes', likeRoutes);
 app.use('/api/conversations', conversationRoutes);
 app.use('/api/appointments', appointmentRoutes);
 app.use('/api/ratings', ratingRoutes);
-app.use('/api/dashboard', dashboardRoutes);
+// app.use('/api/dashboard', dashboardRoutes);
 // ➕ Swagger (dispo sur /api-docs)
 setupSwagger(app);
 
