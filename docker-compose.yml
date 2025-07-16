@@ -22,10 +22,6 @@ services:
       - sqlite-data:/app/database
     command: >
       sh -c "
-        until mysqladmin ping -hmysql --silent; do
-          echo 'Attente MySQL…';
-          sleep 2;
-        done;
         npm start
       "
 
@@ -37,7 +33,7 @@ services:
       MYSQL_DATABASE: skills5
       MYSQL_ROOT_PASSWORD: root
     ports:
-      - "3306:3306"
+      - "3307:3306"
     volumes:
       - mysql-data:/var/lib/mysql
     healthcheck:
