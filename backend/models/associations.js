@@ -35,20 +35,22 @@ function setupAssociations() {
     constraints: false
   });
 
-  Message.belongsTo(Conversation, {
+Message.belongsTo(Conversation, {
+    as: 'conversation',
     foreignKey: {
       name: 'conversationId',
       unique: false
     },
     constraints: false
-  });
+});
 
-  Conversation.hasMany(Message, {
+Conversation.hasMany(Message, {
+    as: 'messages',
     foreignKey: {
       name: 'conversationId',
       unique: false
     }
-  });
+});
 
   User.hasMany(Message, {
     as: 'sentMessages',

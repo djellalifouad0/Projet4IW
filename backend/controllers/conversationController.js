@@ -392,15 +392,16 @@ exports.sendMessage = async (req, res) => {
  *       200:
  *         description: Nombre de messages non lus
  */
+
 exports.getUnreadMessagesCount = async (req, res) => {
   try {
     const userId = req.user.id;
-    
-    // Compter les messages non lus où l'utilisateur n'est PAS l'expéditeur
+
     const unreadCount = await Message.count({
       include: [
         {
           model: Conversation,
+          as: 'conversation',  // <= 🔷 AJOUT du `as`
           where: {
             [Op.or]: [
               { user1Id: userId },
@@ -410,8 +411,8 @@ exports.getUnreadMessagesCount = async (req, res) => {
         }
       ],
       where: {
-        senderId: { [Op.ne]: userId }, // Messages pas envoyés par l'utilisateur
-        readAt: null // Messages non lus
+        senderId: { [Op.ne]: userId },
+        readAt: null
       }
     });
 

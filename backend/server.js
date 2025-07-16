@@ -131,15 +131,16 @@ io.on('connection', (socket) => {
 });
 
 app.set('socketio', io);
-
+const { setupAssociations } = require('./models/associations.js');
 
 (async () => {
   try {
     await sequelize.authenticate();
 
     logger.info('✅ Connexion à la base de données OK');
+    setupAssociations();
 
-    await sequelize.sync({ force: true, logging: console.log });
+    await sequelize.sync({ alter: true, logging: console.log });
 
 
     server.listen(PORT, () => {
