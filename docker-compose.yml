@@ -22,10 +22,6 @@ services:
       - sqlite-data:/app/database
     command: >
       sh -c "
-        until mysqladmin ping -hmysql --silent; do
-          echo 'Attente MySQL…';
-          sleep 2;
-        done;
         npm start
       "
 
