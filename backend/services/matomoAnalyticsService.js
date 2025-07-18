@@ -1,4 +1,4 @@
-// Service pour analyser et traiter les données KPI de Matomo
+﻿
 class MatomoAnalyticsService {
   constructor() {
     this.matomoUrl = process.env.MATOMO_URL || 'http://matomo:80';
@@ -6,7 +6,6 @@ class MatomoAnalyticsService {
     this.token = process.env.MATOMO_TOKEN || '';
   }
 
-  // Méthode générique pour faire des requêtes à l'API Matomo
   async makeRequest(params) {
     const url = new URL(`${this.matomoUrl}/index.php`);
     url.searchParams.append('module', 'API');
@@ -27,7 +26,6 @@ class MatomoAnalyticsService {
     }
   }
 
-  // KPI 1: Post Publish Clicks
   async getPostPublishClicks(period = 'day', date = 'today') {
     return this.makeRequest({
       method: 'Events.getCategory',
@@ -37,7 +35,6 @@ class MatomoAnalyticsService {
     });
   }
 
-  // KPI 2: Post Likes
   async getPostLikes(period = 'day', date = 'today') {
     return this.makeRequest({
       method: 'Events.getAction',
@@ -47,7 +44,6 @@ class MatomoAnalyticsService {
     });
   }
 
-  // KPI 3: Post Comments
   async getPostComments(period = 'day', date = 'today') {
     return this.makeRequest({
       method: 'Events.getAction',
@@ -57,7 +53,6 @@ class MatomoAnalyticsService {
     });
   }
 
-  // KPI 4: Post Views
   async getPostViews(period = 'day', date = 'today') {
     return this.makeRequest({
       method: 'Events.getAction',
@@ -67,7 +62,6 @@ class MatomoAnalyticsService {
     });
   }
 
-  // KPI 5: Profile Views
   async getProfileViews(period = 'day', date = 'today') {
     return this.makeRequest({
       method: 'Events.getCategory',
@@ -77,7 +71,6 @@ class MatomoAnalyticsService {
     });
   }
 
-  // KPI 6: Search Executed
   async getSearchExecuted(period = 'day', date = 'today') {
     return this.makeRequest({
       method: 'Events.getCategory',
@@ -87,7 +80,6 @@ class MatomoAnalyticsService {
     });
   }
 
-  // KPI 7: Filter Clicks
   async getFilterClicks(period = 'day', date = 'today') {
     return this.makeRequest({
       method: 'Events.getCategory',
@@ -97,7 +89,6 @@ class MatomoAnalyticsService {
     });
   }
 
-  // KPI 8: Clear Search Clicks
   async getClearSearchClicks(period = 'day', date = 'today') {
     return this.makeRequest({
       method: 'Events.getAction',
@@ -107,7 +98,6 @@ class MatomoAnalyticsService {
     });
   }
 
-  // KPI 9: Map Clicks
   async getMapClicks(period = 'day', date = 'today') {
     return this.makeRequest({
       method: 'Events.getCategory',
@@ -117,7 +107,6 @@ class MatomoAnalyticsService {
     });
   }
 
-  // KPI 10: Homepage Time Spent
   async getHomepageTimeSpent(period = 'day', date = 'today') {
     return this.makeRequest({
       method: 'Events.getCategory',
@@ -127,7 +116,6 @@ class MatomoAnalyticsService {
     });
   }
 
-  // KPI 11: Conversations Started
   async getConversationsStarted(period = 'day', date = 'today') {
     return this.makeRequest({
       method: 'Events.getCategory',
@@ -137,7 +125,6 @@ class MatomoAnalyticsService {
     });
   }
 
-  // KPI 12: Messages Sent
   async getMessagesSent(period = 'day', date = 'today') {
     return this.makeRequest({
       method: 'Events.getCategory',
@@ -147,7 +134,6 @@ class MatomoAnalyticsService {
     });
   }
 
-  // KPI 22: Daily Active Users
   async getDailyActiveUsers(date = 'today') {
     return this.makeRequest({
       method: 'VisitsSummary.getUniqueVisitors',
@@ -156,7 +142,6 @@ class MatomoAnalyticsService {
     });
   }
 
-  // KPI 23: Weekly Active Users
   async getWeeklyActiveUsers(date = 'today') {
     return this.makeRequest({
       method: 'VisitsSummary.getUniqueVisitors',
@@ -165,7 +150,6 @@ class MatomoAnalyticsService {
     });
   }
 
-  // KPI 24: Monthly Active Users
   async getMonthlyActiveUsers(date = 'today') {
     return this.makeRequest({
       method: 'VisitsSummary.getUniqueVisitors',
@@ -174,7 +158,6 @@ class MatomoAnalyticsService {
     });
   }
 
-  // Obtenir un résumé de tous les KPI
   async getAllKPIs(period = 'day', date = 'today') {
     try {
       const [
@@ -234,7 +217,6 @@ class MatomoAnalyticsService {
     }
   }
 
-  // Méthodes utilitaires pour extraire les données
   extractEventCount(data) {
     if (!data || !Array.isArray(data)) return 0;
     return data.reduce((total, item) => total + (item.nb_events || 0), 0);
@@ -245,7 +227,6 @@ class MatomoAnalyticsService {
     return data.reduce((total, item) => total + (item.sum_event_value || 0), 0);
   }
 
-  // Obtenir les données pour un tableau de bord
   async getDashboardData(period = 'day', date = 'today') {
     const kpis = await this.getAllKPIs(period, date);
     
@@ -288,3 +269,4 @@ class MatomoAnalyticsService {
 }
 
 module.exports = MatomoAnalyticsService;
+

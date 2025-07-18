@@ -1,10 +1,9 @@
-import { createRouter, createWebHistory } from 'vue-router'
+﻿import { createRouter, createWebHistory } from 'vue-router'
 import MainLayout from '../layouts/MainLayout.vue'
 import Home from '../components/Home.vue'
 import LoginForm from '../components/LoginForm.vue'
 import RegisterForm from '../components/RegisterForm.vue'
 
-// Lazy loading généralisé pour toutes les routes sauf Home, Login et Register
 const routes = [
   {
     path: '/',
@@ -32,3 +31,4 @@ const router = createRouter({
 })
 
 export default router
+

@@ -1,4 +1,4 @@
-<template>
+﻿<template>
   <div class="main-layout">
     <Navbar v-if="!isAuthPage && !isCartePage && !isDiscussionMobile" />
     <main class="main-content">
@@ -29,8 +29,7 @@ export default {
     const route = useRoute()
     const search = ref('')
     const isDiscussionMobile = ref(false)
-    
-    // Computed properties pour détecter les pages spéciales
+
     const isAuthPage = computed(() => {
       return route.path === '/login' || route.path === '/register'
     })
@@ -39,7 +38,6 @@ export default {
       return route.path === '/carte'
     })
 
-    // Écouter les événements de chat mobile
     eventBus.on('discussion-mobile-chat-opened', () => {
       isDiscussionMobile.value = true
     })
@@ -49,15 +47,15 @@ export default {
     })    // Debug: surveiller les changements de route
     watchEffect(() => {
       console.log('Route actuelle:', route.path)
-      // Reset l'état mobile si on quitte les discussions
+
       if (route.path !== '/discussions') {
         isDiscussionMobile.value = false
       }
     })
 
     const handleSearch = (searchQuery) => {
-      // Cette méthode sera appelée depuis SearchBar
-      // La redirection se fait déjà dans SearchBar, donc pas besoin d'action ici
+
+
       console.log('Recherche lancée:', searchQuery)
     }
 
@@ -96,3 +94,4 @@ export default {
   box-sizing: border-box;
 }
 </style>
+

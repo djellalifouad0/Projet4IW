@@ -1,4 +1,4 @@
-<template>
+﻿<template>
   <ErrorBoundary>
     <router-view />
     <ToastContainer />
@@ -35,3 +35,4 @@ export default {
   padding: 0;
 }
 </style>
+

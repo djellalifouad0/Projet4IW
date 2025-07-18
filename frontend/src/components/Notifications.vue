@@ -1,4 +1,4 @@
-<template>
+﻿<template>
   <div class="notifications-content">
     <div class="notifications-header">
       <h1 class="notifications-title">Notifications</h1>
@@ -15,7 +15,7 @@
     <div v-if="loading && currentPage === 1" class="loading">Chargement...</div>
     <div v-else-if="!hasNotifications" class="empty">Aucune notification pour le moment.</div>
     
-    <!-- Notifications groupées par date -->
+    
     <div v-else class="notifications-wrapper">
       <div v-for="(notifs, dateGroup) in groupedNotifications" :key="dateGroup" class="date-group">
         <h3 class="date-header">{{ dateGroup }}</h3>
@@ -26,7 +26,7 @@
             :class="{ 'unread': !notif.read }"
             @click="markAsRead(notif)"
           >
-            <!-- Photo de profil de l'utilisateur qui a généré la notification -->
+            
             <div class="notification-avatar" v-if="notif.triggerUser">
               <img 
                 :src="notif.triggerUser.avatar || `https://ui-avatars.com/api/?name=${encodeURIComponent(notif.triggerUser.username || 'User')}&background=ECBC76&color=fff&size=40&bold=true`" 
@@ -35,7 +35,7 @@
                 @click.stop="navigateToProfile(notif.triggerUser.profileToken)"
               />
             </div>
-            <!-- Icône par défaut si pas d'utilisateur spécifique -->
+            
             <span v-else class="icon" :style="{ color: getNotificationColor(notif.type) }">
               {{ getNotificationIcon(notif.type) }}
             </span>
@@ -49,7 +49,7 @@
         </ul>
       </div>
 
-      <!-- Pagination -->
+      
       <div v-if="pagination && pagination.totalPages > 1" class="pagination">
         <button 
           @click="loadPage(currentPage - 1)"
@@ -72,7 +72,7 @@
         </button>
       </div>
 
-      <!-- Bouton Charger plus (alternative à la pagination) -->
+      
       <div v-if="pagination && pagination.hasNext && !showPagination" class="load-more-container">
         <button 
           @click="loadMore"
@@ -111,10 +111,9 @@ export default {
     }
   },  async mounted() {
     await this.loadNotifications()
-    // Actualisation automatique toutes les 30 secondes
+
     this.startAutoRefresh()
-    
-    // Ajouter un gestionnaire pour les clics sur les pseudos dans les messages
+
     this.addUsernameClickHandlers()
   },
   beforeUnmount() {
@@ -127,21 +126,19 @@ export default {
         const response = await NotificationService.getNotifications(page, 10)
         
         if (this.showPagination) {
-          // Mode pagination classique
+
           this.groupedNotifications = response.notifications
           this.currentPage = page
         } else {
-          // Mode "Charger plus"
+
           if (page === 1) {
             this.allNotifications = []
           }
-          
-          // Ajouter les nouvelles notifications à la liste existante
+
           Object.keys(response.notifications).forEach(dateGroup => {
             this.allNotifications.push(...response.notifications[dateGroup])
           })
-          
-          // Regrouper toutes les notifications par date
+
           this.groupedNotifications = this.groupNotificationsByDate(this.allNotifications)
         }
           this.pagination = response.pagination
@@ -151,7 +148,7 @@ export default {
         toastService.error('Erreur lors du chargement des notifications')
       } finally {
         this.loading = false
-        // Ajouter les gestionnaires pour les pseudos cliquables après le rendu
+
         this.addUsernameClickHandlers()
       }
     },
@@ -177,21 +174,20 @@ export default {
         yesterday.setDate(yesterday.getDate() - 1)
         
         let dateKey
-        
-        // Aujourd'hui
+
         if (date.toDateString() === today.toDateString()) {
           dateKey = "Aujourd'hui"
         }
-        // Hier
+
         else if (date.toDateString() === yesterday.toDateString()) {
           dateKey = "Hier"
         }
-        // Cette semaine (7 derniers jours)
+
         else if (date >= new Date(today.getTime() - 7 * 24 * 60 * 60 * 1000)) {
           const days = ['Dimanche', 'Lundi', 'Mardi', 'Mercredi', 'Jeudi', 'Vendredi', 'Samedi']
           dateKey = days[date.getDay()]
         }
-        // Plus ancien
+
         else {
           dateKey = date.toLocaleDateString('fr-FR', { 
             day: 'numeric', 
@@ -214,8 +210,7 @@ export default {
       try {
         await NotificationService.markAsRead(notification.id)
         notification.read = true
-        
-        // Émettre l'événement pour actualiser les autres composants
+
         eventBus.emit(NotificationEvents.NOTIFICATION_READ)
       } catch (error) {
         console.error('Erreur marquage notification:', error)
@@ -224,8 +219,7 @@ export default {
     },async markAllAsRead() {
       try {
         await NotificationService.markAllAsRead()
-        
-        // Marquer toutes les notifications comme lues dans l'interface
+
         Object.keys(this.groupedNotifications).forEach(dateGroup => {
           this.groupedNotifications[dateGroup].forEach(notif => {
             notif.read = true
@@ -234,15 +228,14 @@ export default {
         
         this.unreadCount = 0
         toastService.success('Toutes les notifications ont été marquées comme lues')
-        
-        // Émettre l'événement pour actualiser les autres composants
+
         eventBus.emit(NotificationEvents.ALL_NOTIFICATIONS_READ)
       } catch (error) {
         console.error('Erreur marquage toutes notifications:', error)
         toastService.error('Erreur lors du marquage des notifications')
       }
     },    async refreshNotifications() {
-      // Actualisation silencieuse sans afficher le loader
+
       try {
         const response = await NotificationService.getNotifications(this.currentPage, 10)
         this.groupedNotifications = response.notifications
@@ -252,7 +245,7 @@ export default {
           this.unreadCount = newUnreadCount          // Émettre l'événement pour actualiser les autres composants
           eventBus.emit(NotificationEvents.UNREAD_COUNT_CHANGED, newUnreadCount)
         }
-        // Ajouter les gestionnaires pour les pseudos cliquables après l'actualisation
+
         this.addUsernameClickHandlers()
       } catch (error) {
         console.error('Erreur actualisation notifications:', error)
@@ -260,7 +253,7 @@ export default {
     },
 
     startAutoRefresh() {
-      // Actualiser toutes les 30 secondes
+
       this.refreshInterval = setInterval(this.refreshNotifications, 30000)
     },
 
@@ -281,16 +274,13 @@ export default {
       return NotificationService.getNotificationColor(type)
     },
 
-    // Nouvelle méthode pour formater le message avec pseudo cliquable
     formatNotificationMessage(notification) {
       let message = notification.message;
-      
-      // Si on a les données de l'utilisateur qui a déclenché la notification
+
       if (notification.triggerUser) {
         const username = notification.triggerUser.username;
         const profileToken = notification.triggerUser.profileToken;
-        
-        // Remplacer le nom d'utilisateur par un lien cliquable
+
         message = message.replace(
           username,
           `<span class="clickable-username" data-profile-token="${profileToken}">${username}</span>`
@@ -305,7 +295,6 @@ export default {
       }
     },
 
-    // Ajouter des gestionnaires d'événements pour les pseudos cliquables
     addUsernameClickHandlers() {
       this.$nextTick(() => {
         const clickableUsernames = document.querySelectorAll('.clickable-username');
@@ -443,7 +432,7 @@ export default {
   justify-content: center;
 }
 
-/* Nouveau style pour l'avatar de l'utilisateur déclencheur */
+
 .notification-avatar {
   margin-right: 16px;
   min-width: 40px;
@@ -479,7 +468,7 @@ export default {
   line-height: 1.5;
 }
 
-/* Style pour les pseudos cliquables dans les messages */
+
 .notif-message :deep(.clickable-username) {
   color: #E48700;
   font-weight: 600;
@@ -509,7 +498,7 @@ export default {
   margin-left: 12px;
 }
 
-/* Pagination */
+
 .pagination {
   display: flex;
   justify-content: center;
@@ -548,7 +537,7 @@ export default {
   font-weight: 500;
 }
 
-/* Bouton Charger plus */
+
 .load-more-container {
   display: flex;
   justify-content: center;
@@ -640,3 +629,4 @@ export default {
   }
 }
 </style>
+

@@ -1,180 +1,33 @@
-const express = require('express');
+﻿const express = require('express');
 const router = express.Router();
 const analyticsController = require('../controllers/analyticsController');
 const { authenticate } = require('../middlewares/authMiddleware');
 
-// Route de test sans authentification
 router.get('/test', analyticsController.getAllKPIs);
 
-// Middleware d'authentification pour toutes les autres routes analytics
 router.use(authenticate);
 
-// Middleware pour vérifier les droits admin (vous pouvez l'adapter selon vos besoins)
 const adminMiddleware = (req, res, next) => {
-  // Ici vous pouvez ajouter votre logique de vérification des droits admin
-  // Par exemple, vérifier si l'utilisateur a un rôle admin
-  // Pour l'instant, on autorise tous les utilisateurs authentifiés
+
+
   next();
 };
 
-/**
- * @swagger
- * /api/analytics/kpis:
- *   get:
- *     summary: Obtenir tous les KPI
- *     tags: [Analytics]
- *     security:
- *       - bearerAuth: []
- *     parameters:
- *       - in: query
- *         name: period
- *         schema:
- *           type: string
- *           enum: [day, week, month, year]
- *         description: Période des données
- *       - in: query
- *         name: date
- *         schema:
- *           type: string
- *         description: Date spécifique (format YYYY-MM-DD ou 'today', 'yesterday')
- *     responses:
- *       200:
- *         description: Liste de tous les KPI
- *       401:
- *         description: Non autorisé
- *       500:
- *         description: Erreur serveur
- */
+
 router.get('/kpis', adminMiddleware, analyticsController.getAllKPIs);
 
-/**
- * @swagger
- * /api/analytics/dashboard:
- *   get:
- *     summary: Obtenir les données du tableau de bord
- *     tags: [Analytics]
- *     security:
- *       - bearerAuth: []
- *     parameters:
- *       - in: query
- *         name: period
- *         schema:
- *           type: string
- *           enum: [day, week, month, year]
- *         description: Période des données
- *       - in: query
- *         name: date
- *         schema:
- *           type: string
- *         description: Date spécifique
- *     responses:
- *       200:
- *         description: Données du tableau de bord
- */
+
 router.get('/dashboard', adminMiddleware, analyticsController.getDashboard);
 
-/**
- * @swagger
- * /api/analytics/kpi/{kpiId}:
- *   get:
- *     summary: Obtenir un KPI spécifique
- *     tags: [Analytics]
- *     security:
- *       - bearerAuth: []
- *     parameters:
- *       - in: path
- *         name: kpiId
- *         required: true
- *         schema:
- *           type: integer
- *         description: ID du KPI (1-30)
- *       - in: query
- *         name: period
- *         schema:
- *           type: string
- *           enum: [day, week, month, year]
- *         description: Période des données
- *       - in: query
- *         name: date
- *         schema:
- *           type: string
- *         description: Date spécifique
- *     responses:
- *       200:
- *         description: Données du KPI demandé
- *       400:
- *         description: ID de KPI invalide
- *       500:
- *         description: Erreur serveur
- */
+
 router.get('/kpi/:kpiId', adminMiddleware, analyticsController.getSpecificKPI);
 
-/**
- * @swagger
- * /api/analytics/trends:
- *   get:
- *     summary: Obtenir les tendances sur une période
- *     tags: [Analytics]
- *     security:
- *       - bearerAuth: []
- *     parameters:
- *       - in: query
- *         name: period
- *         schema:
- *           type: string
- *           enum: [day, week, month]
- *         description: Unité de période
- *       - in: query
- *         name: range
- *         schema:
- *           type: integer
- *           minimum: 1
- *           maximum: 365
- *         description: Nombre de périodes à récupérer
- *     responses:
- *       200:
- *         description: Données de tendance
- */
+
 router.get('/trends', adminMiddleware, analyticsController.getTrends);
 
-/**
- * @swagger
- * /api/analytics/report:
- *   post:
- *     summary: Générer un rapport personnalisé
- *     tags: [Analytics]
- *     security:
- *       - bearerAuth: []
- *     requestBody:
- *       required: true
- *       content:
- *         application/json:
- *           schema:
- *             type: object
- *             required:
- *               - kpis
- *             properties:
- *               kpis:
- *                 type: array
- *                 items:
- *                   type: integer
- *                 description: Liste des IDs de KPI à inclure dans le rapport
- *               period:
- *                 type: string
- *                 enum: [day, week, month, year]
- *                 description: Période des données
- *               date:
- *                 type: string
- *                 description: Date spécifique
- *     responses:
- *       200:
- *         description: Rapport personnalisé généré
- *       400:
- *         description: Données d'entrée invalides
- */
+
 router.post('/report', adminMiddleware, analyticsController.getCustomReport);
 
-// Route pour obtenir la liste des KPI disponibles avec leurs descriptions
 router.get('/kpi-definitions', adminMiddleware, (req, res) => {
   const kpiDefinitions = {
     1: { name: 'Post Publish Clicks', description: 'Nombre de clics sur le bouton "Publier"' },
@@ -216,3 +69,4 @@ router.get('/kpi-definitions', adminMiddleware, (req, res) => {
 });
 
 module.exports = router;
+

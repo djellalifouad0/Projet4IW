@@ -1,35 +1,9 @@
-const Comment = require('../models/comment');
+﻿const Comment = require('../models/comment');
 const User = require('../models/user');
 const Skill = require('../models/skill');
 const NotificationService = require('../services/notificationService');
 
-/**
- * @swagger
- * /skills/{id}/comments:
- *   post:
- *     summary: Ajoute un commentaire à une compétence
- *     tags: [Skills]
- *     security:
- *       - bearerAuth: []
- *     parameters:
- *       - in: path
- *         name: id
- *         schema:
- *           type: integer
- *         required: true
- *     requestBody:
- *       required: true
- *       content:
- *         application/json:
- *           schema:
- *             type: object
- *             properties:
- *               content:
- *                 type: string
- *     responses:
- *       201:
- *         description: Commentaire ajouté
- */
+
 exports.addComment = async (req, res) => {
   try {
     const { content, parentId } = req.body;
@@ -67,22 +41,7 @@ exports.addComment = async (req, res) => {
   }
 };
 
-/**
- * @swagger
- * /skills/{id}/comments:
- *   get:
- *     summary: Liste les commentaires d'une compétence
- *     tags: [Skills]
- *     parameters:
- *       - in: path
- *         name: id
- *         schema:
- *           type: integer
- *         required: true
- *     responses:
- *       200:
- *         description: Liste des commentaires
- */
+
 exports.getComments = async (req, res) => {
   try {
     const comments = await Comment.findAll({
@@ -95,37 +54,7 @@ exports.getComments = async (req, res) => {
   }
 };
 
-/**
- * @swagger
- * /comments/{id}:
- *   patch:
- *     summary: Met à jour un commentaire
- *     tags: [Comments]
- *     security:
- *       - bearerAuth: []
- *     parameters:
- *       - in: path
- *         name: id
- *         required: true
- *         schema:
- *           type: integer
- *     requestBody:
- *       required: true
- *       content:
- *         application/json:
- *           schema:
- *             type: object
- *             properties:
- *               content:
- *                 type: string
- *     responses:
- *       200:
- *         description: Commentaire mis à jour avec succès
- *       403:
- *         description: Non autorisé
- *       404:
- *         description: Commentaire non trouvé
- */
+
 exports.updateComment = async (req, res) => {
   try {
     const comment = await Comment.findByPk(req.params.id);
@@ -140,28 +69,7 @@ exports.updateComment = async (req, res) => {
   }
 };
 
-/**
- * @swagger
- * /comments/{id}:
- *   delete:
- *     summary: Supprime un commentaire
- *     tags: [Comments]
- *     security:
- *       - bearerAuth: []
- *     parameters:
- *       - in: path
- *         name: id
- *         required: true
- *         schema:
- *           type: integer
- *     responses:
- *       200:
- *         description: Commentaire supprimé avec succès
- *       403:
- *         description: Non autorisé
- *       404:
- *         description: Commentaire non trouvé
- */
+
 exports.deleteComment = async (req, res) => {
   try {
     const comment = await Comment.findByPk(req.params.id);
@@ -174,3 +82,4 @@ exports.deleteComment = async (req, res) => {
     res.status(500).json({ error: 'Erreur suppression commentaire' });
   }
 };
+

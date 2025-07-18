@@ -1,11 +1,11 @@
-<template>
+﻿<template>
   <div class="dashboard-content">
     <h1 class="dashboard-title">Tableau de bord</h1>
     <div class="dashboard-welcome">
       Bienvenue sur votre espace personnel SkillSwap !
     </div>
 
-    <!-- Section Statistiques -->
+    
     <div class="stats-section" v-if="!loading">
       <h2 class="section-title">Vos statistiques</h2>
       <div class="stats-grid">
@@ -44,7 +44,7 @@
       </div>
     </div>
 
-    <!-- Section Activité mensuelle -->
+    
     <div class="activity-section" v-if="!loading && stats.monthlyActivity">
       <h2 class="section-title">Votre activité (6 derniers mois)</h2>
       <div class="activity-chart">
@@ -85,13 +85,13 @@
 
 
 
-    <!-- Loading state -->
+    
     <div v-if="loading" class="loading-container">
       <div class="loading-spinner"></div>
       <p>Chargement des statistiques...</p>
     </div>
 
-    <!-- Error state -->
+    
     <div v-if="error" class="error-container">
       <p>{{ error }}</p>
       <button @click="loadStats" class="retry-button">Réessayer</button>
@@ -272,7 +272,7 @@ export default {
 .stat-icon img {
   width: 32px;
   height: 32px;
-  /* filter: brightness(0) invert(1); */
+  
 }
 
 .stat-info {
@@ -583,3 +583,4 @@ export default {
   }
 }
 </style>
+

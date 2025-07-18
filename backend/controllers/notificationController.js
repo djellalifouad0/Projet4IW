@@ -1,18 +1,7 @@
-const Notification = require('../models/notification');
+﻿const Notification = require('../models/notification');
 const User = require('../models/user');
 
-/**
- * @swagger
- * /notifications:
- *   get:
- *     summary: Récupère les notifications de l'utilisateur
- *     tags: [Notifications]
- *     security:
- *       - bearerAuth: []
- *     responses:
- *       200:
- *         description: Liste des notifications
- */
+
 exports.getNotifications = async (req, res) => {
   try {
     const page = parseInt(req.query.page) || 1;
@@ -26,10 +15,8 @@ exports.getNotifications = async (req, res) => {
       offset
     });
 
-    // Enrichir les notifications avec les données utilisateur
     const enrichedNotifications = await enrichNotificationsWithUserData(notifications);
 
-    // Grouper les notifications par date
     const groupedNotifications = groupNotificationsByDate(enrichedNotifications);
 
     res.json({
@@ -49,24 +36,7 @@ exports.getNotifications = async (req, res) => {
   }
 };
 
-/**
- * @swagger
- * /notifications/{id}/read:
- *   patch:
- *     summary: Marque une notification comme lue
- *     tags: [Notifications]
- *     security:
- *       - bearerAuth: []
- *     parameters:
- *       - in: path
- *         name: id
- *         schema:
- *           type: integer
- *         required: true
- *     responses:
- *       200:
- *         description: Notification mise à jour
- */
+
 exports.markAsRead = async (req, res) => {
   try {
     const notification = await Notification.findOne({ where: { id: req.params.id, userId: req.user.id } });
@@ -80,18 +50,7 @@ exports.markAsRead = async (req, res) => {
   }
 };
 
-/**
- * @swagger
- * /notifications/mark-all-read:
- *   patch:
- *     summary: Marque toutes les notifications comme lues
- *     tags: [Notifications]
- *     security:
- *       - bearerAuth: []
- *     responses:
- *       200:
- *         description: Toutes les notifications marquées comme lues
- */
+
 exports.markAllAsRead = async (req, res) => {
   try {
     await Notification.update(
@@ -105,18 +64,7 @@ exports.markAllAsRead = async (req, res) => {
   }
 };
 
-/**
- * @swagger
- * /notifications/unread-count:
- *   get:
- *     summary: Récupère le nombre de notifications non lues
- *     tags: [Notifications]
- *     security:
- *       - bearerAuth: []
- *     responses:
- *       200:
- *         description: Nombre de notifications non lues
- */
+
 exports.getUnreadCount = async (req, res) => {
   try {
     const count = await Notification.count({ 
@@ -129,9 +77,7 @@ exports.getUnreadCount = async (req, res) => {
   }
 };
 
-/**
- * Fonction utilitaire pour créer une notification
- */
+
 exports.createNotification = async (userId, type, message, data = null) => {
   try {
     const notification = await Notification.create({
@@ -148,16 +94,13 @@ exports.createNotification = async (userId, type, message, data = null) => {
   }
 };
 
-/**
- * Fonction pour enrichir les notifications avec les données utilisateur
- */
+
 async function enrichNotificationsWithUserData(notifications) {
   const enrichedNotifications = [];
   
   for (const notification of notifications) {
     const enrichedNotification = notification.toJSON();
-    
-    // Extraire les informations utilisateur depuis les données de la notification
+
     if (notification.data) {
       let notificationData;
       try {
@@ -167,8 +110,7 @@ async function enrichNotificationsWithUserData(notifications) {
       } catch (e) {
         notificationData = {};
       }
-      
-      // Pour les notifications qui contiennent un nom d'utilisateur, chercher les détails complets
+
       if (notificationData.commenterName || notificationData.likerName || notificationData.raterName || notificationData.otherUserName || notificationData.senderName) {
         const username = notificationData.commenterName || 
                         notificationData.likerName || 
@@ -202,9 +144,7 @@ async function enrichNotificationsWithUserData(notifications) {
   return enrichedNotifications;
 }
 
-/**
- * Fonction pour grouper les notifications par date
- */
+
 function groupNotificationsByDate(notifications) {
   const groups = {};
   
@@ -215,21 +155,20 @@ function groupNotificationsByDate(notifications) {
     yesterday.setDate(yesterday.getDate() - 1);
     
     let dateKey;
-    
-    // Aujourd'hui
+
     if (date.toDateString() === today.toDateString()) {
       dateKey = "Aujourd'hui";
     }
-    // Hier
+
     else if (date.toDateString() === yesterday.toDateString()) {
       dateKey = "Hier";
     }
-    // Cette semaine (7 derniers jours)
+
     else if (date >= new Date(today.getTime() - 7 * 24 * 60 * 60 * 1000)) {
       const days = ['Dimanche', 'Lundi', 'Mardi', 'Mercredi', 'Jeudi', 'Vendredi', 'Samedi'];
       dateKey = days[date.getDay()];
     }
-    // Plus ancien
+
     else {
       dateKey = date.toLocaleDateString('fr-FR', { 
         day: 'numeric', 
@@ -248,24 +187,12 @@ function groupNotificationsByDate(notifications) {
   return groups;
 }
 
-/**
- * @swagger
- * /notifications/settings:
- *   get:
- *     summary: Récupère les paramètres de notifications de l'utilisateur
- *     tags: [Notifications]
- *     security:
- *       - bearerAuth: []
- *     responses:
- *       200:
- *         description: Paramètres de notifications
- */
+
 exports.getNotificationSettings = async (req, res) => {
   try {
     const user = await User.findByPk(req.user.id);
     if (!user) return res.status(404).json({ error: 'Utilisateur non trouvé' });
 
-    // Paramètres par défaut si pas encore configurés
     const defaultSettings = {
       messages: true,
       likes: true,
@@ -276,7 +203,6 @@ exports.getNotificationSettings = async (req, res) => {
       profileUpdates: true
     };
 
-    // Si l'utilisateur a des paramètres personnalisés, les utiliser
     const settings = user.notificationSettings ? JSON.parse(user.notificationSettings) : defaultSettings;
 
     res.json(settings);
@@ -286,37 +212,7 @@ exports.getNotificationSettings = async (req, res) => {
   }
 };
 
-/**
- * @swagger
- * /notifications/settings:
- *   put:
- *     summary: Met à jour les paramètres de notifications de l'utilisateur
- *     tags: [Notifications]
- *     security:
- *       - bearerAuth: []
- *     requestBody:
- *       required: true
- *       content:
- *         application/json:
- *           schema:
- *             type: object
- *             properties:
- *               messages:
- *                 type: boolean
- *               likes:
- *                 type: boolean
- *               comments:
- *                 type: boolean
- *               appointments:
- *                 type: boolean
- *               ratings:
- *                 type: boolean
- *               updates:
- *                 type: boolean
- *     responses:
- *       200:
- *         description: Paramètres mis à jour
- */
+
 exports.updateNotificationSettings = async (req, res) => {
   try {
     const { messages, likes, comments, appointments, ratings, updates, profileUpdates } = req.body;
@@ -347,9 +243,7 @@ exports.updateNotificationSettings = async (req, res) => {
   }
 };
 
-/**
- * Types de notifications prédéfinis
- */
+
 exports.NOTIFICATION_TYPES = {
   WELCOME: 'welcome',
   PROFILE_UPDATE: 'profile_update',
@@ -361,3 +255,4 @@ exports.NOTIFICATION_TYPES = {
   NEW_RATING: 'new_rating',
   NEW_MESSAGE: 'new_message'
 };
+

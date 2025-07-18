@@ -1,4 +1,4 @@
-<template>
+﻿<template>
   <nav class="navbar-vertical">
     <div class="navbar-logo" @click="$router.push('/')" style="cursor:pointer">
       <img src="../assets/images/SkillSwap Logo.png" alt="SkillSwap" class="logo" />
@@ -26,8 +26,8 @@
           <img src="../assets/icons/carte.svg" alt="Carte" class="nav-icon" />
           <span class="nav-label">Carte</span>
         </router-link>      </li>
-      <!-- ThemeToggle caché en mobile, disponible dans les paramètres -->
-      <!-- Ajout des boutons mobile pour Notifications et Paramètres -->
+      
+      
       <li class="mobile-only">
         <router-link to="/notifications" exact-active-class="active" class="notification-link">
           <div class="notification-wrapper">
@@ -48,7 +48,7 @@
           <span class="nav-label">Profile</span>
         </div>
       </li>
-    </ul>    <!-- Ajout Notification et Paramètres -->
+    </ul>    
     <ul class="navbar-actions">
       <li class="desktop-only">
         <ThemeToggle />
@@ -117,23 +117,20 @@ export default {
       this.$router.push('/login');
       return;
     }    try {
-      // Utiliser authService qui gère automatiquement l'initialisation WebSocket
+
       this.user = await authService.getUserInfo();
       console.log('User data:', this.user); // Debugging line to verify user data
-        // Charger le compteur de messages non lus
+
       await unreadMessagesService.fetchUnreadCount();
-        // Charger le compteur de notifications
+
       await this.loadNotificationCount();
-        // Configurer les écouteurs d'événements
+
       this.setupEventListeners();
-      
-      // Configurer la détection automatique WebSocket des notifications
+
       NotificationService.setupAutoNotificationDetection();
-      
-      // Démarrer l'actualisation automatique intelligente
+
       this.startSmartAutoRefresh();
-      
-      // Configurer la détection d'activité utilisateur
+
       this.setupActivityDetection();
     } catch (e) {
       this.user = null;
@@ -145,7 +142,7 @@ export default {
     this.stopAutoRefresh()
     this.removeEventListeners()
     this.cleanupActivityDetection()
-    // Nettoyer les écouteurs WebSocket
+
     NotificationService.cleanupAutoNotificationDetection()
   },
   methods: {
@@ -157,7 +154,7 @@ export default {
       }    },
     
     setupEventListeners() {
-      // Écouter les événements de notification
+
       eventBus.on(NotificationEvents.NOTIFICATION_READ, () => {
         this.notificationCount = Math.max(0, this.notificationCount - 1);
       });
@@ -170,17 +167,16 @@ export default {
         this.notificationCount = newCount;
       });      eventBus.on(NotificationEvents.NEW_NOTIFICATION, () => {
         this.notificationCount += 1;
-        // Rafraîchir immédiatement pour avoir les données les plus récentes
+
         this.loadNotificationCount();
       });
 
-      // Écouter les événements de mise à jour du profil
       eventBus.on(ProfileEvents.PROFILE_UPDATED, (profileData) => {
         console.log('Mise à jour du profil reçue:', profileData);
         if (this.user) {
           this.user.username = profileData.username;
           this.user.avatar = profileData.avatar;
-          // Forcer la réactivité de Vue
+
           this.$forceUpdate();
         }
       });
@@ -201,13 +197,12 @@ export default {
         }
       });
 
-      // Écouter les événements qui peuvent déclencher des notifications
       eventBus.on('action-completed', () => {
-        // Vérifier les nouvelles notifications après une action
+
         setTimeout(() => this.loadNotificationCount(), 1000);
       });
     },    removeEventListeners() {
-      // Nettoyer les écouteurs d'événements
+
       eventBus.off(NotificationEvents.NOTIFICATION_READ);
       eventBus.off(NotificationEvents.ALL_NOTIFICATIONS_READ);
       eventBus.off(NotificationEvents.UNREAD_COUNT_CHANGED);
@@ -219,7 +214,7 @@ export default {
     },
 
     startAutoRefresh() {
-      // Actualiser le compteur toutes les 30 secondes
+
       this.refreshInterval = setInterval(async () => {
         await this.loadNotificationCount();
       }, 30000);
@@ -234,38 +229,33 @@ export default {
       }
     },    // Système d'actualisation intelligent basé sur l'activité utilisateur
     startSmartAutoRefresh() {
-      // Polling plus fréquent quand l'utilisateur est actif
+
       this.refreshInterval = setInterval(async () => {
         const interval = this.isUserActive ? 10000 : 60000; // 10s si actif, 1min si inactif
         await this.loadNotificationCount();
       }, this.isUserActive ? 10000 : 60000);
     },
-    
-    // Détecter l'activité utilisateur
+
     setupActivityDetection() {
       this.updateActivityHandler = () => {
         this.lastActivity = Date.now();
         this.isUserActive = true;
       };
 
-      // Événements qui indiquent une activité utilisateur
       ['mousedown', 'mousemove', 'keypress', 'scroll', 'touchstart', 'click'].forEach(event => {
         document.addEventListener(event, this.updateActivityHandler, true);
       });
 
-      // Vérifier périodiquement si l'utilisateur est inactif
       this.activityCheckInterval = setInterval(() => {
         const timeSinceLastActivity = Date.now() - this.lastActivity;
         this.isUserActive = timeSinceLastActivity < 30000; // Inactif après 30s
-        
-        // Redémarrer le polling avec le bon intervalle si nécessaire
+
         if (this.refreshInterval) {
           clearInterval(this.refreshInterval);
           this.startSmartAutoRefresh();
         }      }, 5000);
     },
-    
-    // Nettoyer la détection d'activité
+
     cleanupActivityDetection() {
       if (this.updateActivityHandler) {
         ['mousedown', 'mousemove', 'keypress', 'scroll', 'touchstart', 'click'].forEach(event => {
@@ -278,17 +268,14 @@ export default {
       }
     },
 
-    // Méthode publique pour actualiser le compteur depuis l'extérieur
     async refreshNotificationCount() {
       await this.loadNotificationCount();
     },
 
-    // Méthode pour réduire le compteur quand une notification est lue
     decrementNotificationCount() {
       this.notificationCount = Math.max(0, this.notificationCount - 1);
     },
 
-    // Méthode pour remettre le compteur à zéro
     resetNotificationCount() {
       this.notificationCount = 0;
     },    handleLogout() {
@@ -299,7 +286,7 @@ export default {
     },
     
     handleClickOutside(e) {
-      // Ferme le menu si on clique en dehors du menu ou de l'icône
+
       if (!this.$el.querySelector('.dropdown-menu')) return;
       const menu = this.$el.querySelector('.dropdown-menu');
       const dots = this.$el.querySelector('.dots-icon');
@@ -318,13 +305,12 @@ export default {
     navigateToMyProfile() {
       const profileLink = this.getProfileLink();
       console.log('Navigating to profile:', profileLink);
-      
-      // Forcer la navigation même si on est déjà sur une page de profil
+
       if (this.$route.path.startsWith('/profile/')) {
-        // Si on est déjà sur une page de profil, utiliser replace pour forcer le rechargement
+
         this.$router.replace(profileLink);
       } else {
-        // Sinon, navigation normale
+
         this.$router.push(profileLink);
       }
     },
@@ -385,12 +371,12 @@ export default {
   font-size: 1.08rem;
 }
 
-/* Masquer les éléments mobile-only sur desktop */
+
 .mobile-only {
   display: none;
 }
 
-/* Afficher les éléments desktop-only uniquement sur desktop */
+
 .desktop-only {
   display: block;
 }
@@ -428,14 +414,14 @@ export default {
   font-weight: bold !important;
 }
 
-/* Désactiver explicitement le style pour router-link-active */
+
 .navbar-links a.router-link-active:not(.active) {
   color: #28303F !important;
   background: transparent !important;
   font-weight: normal !important;
 }
 
-/* Règle de priorité pour s'assurer que l'active fonctionne */
+
 .navbar-links a[href="/"].router-link-active:not(.active) {
   color: #28303F !important;
   background: transparent !important;
@@ -608,7 +594,7 @@ export default {
   background: #f5f5f5;
 }
 
-/* --- Responsive version Twitter: icons only --- */
+
 @media (max-width: 1350px) {
   .navbar-vertical {
     width: 70px;
@@ -651,7 +637,7 @@ export default {
 }
 @media (max-width: 902px) {
   .navbar-vertical {
-    /* NAVBAR BAS */
+    
     position: fixed;
     bottom: 0;
     left: 0;
@@ -673,18 +659,18 @@ export default {
   .navbar-profile {
     display: none !important;
   }
-    /* Afficher les éléments mobile-only en responsive */
+    
   .mobile-only {
     display: block !important;
   }
   
-  /* Cacher les éléments desktop-only en responsive */
+  
   .desktop-only {
     display: none !important;
   }
   
   .navbar-links {
-    /* Passe les liens sur une ligne, centrés */
+    
     flex-direction: row;
     gap: 0;
     width: 100vw;
@@ -695,7 +681,7 @@ export default {
     padding: 0;
   }
   .navbar-links li {
-    width: 16.66%; /* 6 éléments au lieu de 4 */
+    width: 16.66%; 
     text-align: center;
   }  .navbar-links a {
     padding: 0;
@@ -728,7 +714,7 @@ export default {
     display: none;
   }
   
-  /* Ajustement des badges de notification en mode mobile */
+  
   .notification-count {
     top: -6px;
     right: -6px;
@@ -743,3 +729,4 @@ export default {
 }
 
 </style>
+

@@ -1,12 +1,12 @@
-<template>
+﻿<template>
   <div class="post-view-container">
-    <!-- Loading state -->
+    
     <div v-if="loading" class="loading-state">
       <div class="spinner"></div>
       <p>Chargement du post...</p>
     </div>
 
-    <!-- Error state -->
+    
     <div v-else-if="error" class="error-state">
       <div class="error-message">
         <h3>Erreur</h3>
@@ -15,7 +15,7 @@
       </div>
     </div>
 
-    <!-- Post content -->
+    
     <div v-else-if="post" class="post-view-content">
       <div class="post-view-header">
         <button @click="$router.go(-1)" class="back-btn">
@@ -25,7 +25,7 @@
       </div>
 
       <div class="post-view-main">
-        <!-- Post Card Component -->        <PostCard
+                <PostCard
           :name="post.User?.username || ''"
           :address="post.location || ''"
           :avatar="post.User?.avatar || `https://ui-avatars.com/api/?name=${encodeURIComponent(post.User?.username || 'User')}&background=ECBC76&color=fff&size=64&bold=true`"
@@ -48,7 +48,7 @@
           class="post-view-card"
         />
 
-        <!-- Additional post information -->
+        
         <div class="post-info-panel">
           <div class="post-stats">
             <h3>Statistiques</h3>
@@ -70,7 +70,7 @@
             </div>
           </div>
 
-          <!-- Related posts from same user -->
+          
           <div v-if="relatedPosts.length > 0" class="related-posts">
             <h3>Autres posts de {{ post.User?.username }}</h3>
             <div class="related-posts-list">
@@ -114,7 +114,7 @@ export default {
       error: null
     }
   },  async created() {
-    // Initialiser la connexion WebSocket pour les statuts en ligne
+
     await this.initializeSocketConnection();
     
     const postId = this.$route.params.id
@@ -127,7 +127,7 @@ export default {
     }
   },
   watch: {
-    // Watch for route changes to handle navigation between posts
+
     '$route.params.id': {
       async handler(newId) {
         if (newId) {
@@ -148,7 +148,6 @@ export default {
         const response = await api.get(`/skills/${postId}`)
         this.post = response.data
 
-        // Load comments count
         try {
           const commentsResponse = await api.get(`/skills/${postId}/comments`)
           this.post.commentsCount = Array.isArray(commentsResponse.data) ? commentsResponse.data.length : 0
@@ -171,9 +170,9 @@ export default {
       if (!this.post?.User?.profileToken) return
 
       try {
-        // Load all posts from the same user using profileToken
+
         const response = await api.get(`/skills?profileToken=${this.post.User.profileToken}`)
-        // Filter out the current post and limit to 5 related posts
+
         this.relatedPosts = response.data
           .filter(post => post.id !== this.post.id)
           .slice(0, 5)
@@ -204,7 +203,7 @@ export default {
     },
 
     async refreshPost() {
-      // Reload the post to get updated comment count
+
       await this.loadPost(this.$route.params.id)
     },
 
@@ -216,7 +215,7 @@ export default {
 
     handlePostDeleted(postId) {
       if (this.post && this.post.id === postId) {
-        // Redirect back since the post was deleted
+
         this.$router.go(-1)
       }
     },
@@ -252,7 +251,6 @@ export default {
       return text.substring(0, maxLength) + '...'
     },
 
-    // === MÉTHODES POUR LA CONNEXION WEBSOCKET ===
     async initializeSocketConnection() {
       const token = localStorage.getItem('token');
       if (!token) return;
@@ -261,8 +259,7 @@ export default {
         if (!socketService.isConnected()) {
           await socketService.connect(token);
         }
-        
-        // Déclencher la récupération des utilisateurs en ligne
+
         setTimeout(() => {
           socketService.getOnlineUsers();
         }, 1000);
@@ -472,7 +469,7 @@ export default {
   font-weight: 600;
 }
 
-/* Responsive design */
+
 @media (max-width: 1024px) {
   .post-view-main {
     grid-template-columns: 1fr;
@@ -521,3 +518,4 @@ export default {
   }
 }
 </style>
+

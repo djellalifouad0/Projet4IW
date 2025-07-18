@@ -1,4 +1,4 @@
-<template>
+﻿<template>
   <div class="notification-badge-container">
     <img src="@/assets/icons/notification.svg" alt="Notifications" class="notification-icon" />
     <span v-if="unreadCount > 0" class="badge">{{ displayCount }}</span>
@@ -25,7 +25,7 @@ export default {
   async mounted() {
     await this.loadUnreadCount()
     this.setupEventListeners()
-    // Actualiser le compteur toutes les 30 secondes
+
     this.refreshInterval = setInterval(this.loadUnreadCount, 30000)
   },
   beforeUnmount() {
@@ -42,7 +42,7 @@ export default {
         console.error('Erreur chargement compteur notifications:', error)
       }
     },    setupEventListeners() {
-      // Écouter les événements de notification
+
       eventBus.on(NotificationEvents.NOTIFICATION_READ, () => {
         this.unreadCount = Math.max(0, this.unreadCount - 1)
       })
@@ -61,14 +61,13 @@ export default {
     },
 
     removeEventListeners() {
-      // Nettoyer les écouteurs d'événements
+
       eventBus.off(NotificationEvents.NOTIFICATION_READ)
       eventBus.off(NotificationEvents.ALL_NOTIFICATIONS_READ)
       eventBus.off(NotificationEvents.UNREAD_COUNT_CHANGED)
       eventBus.off(NotificationEvents.NEW_NOTIFICATION)
     },
-    
-    // Méthode publique pour actualiser le compteur depuis l'extérieur
+
     async refresh() {
       await this.loadUnreadCount()
     }
@@ -113,3 +112,4 @@ export default {
   display: none;
 }
 </style>
+

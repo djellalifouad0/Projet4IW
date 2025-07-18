@@ -1,4 +1,4 @@
-<template>
+﻿<template>
   <div class="toast-container">
     <transition-group name="toast" tag="div" class="toast-list">
       <div
@@ -44,7 +44,7 @@ export default {
     }
   },
   mounted() {
-    // Écouter les événements de toast globaux
+
     window.addEventListener('show-toast', this.handleToastEvent);
   },
   beforeUnmount() {
@@ -65,8 +65,7 @@ export default {
       };
       
       this.toasts.push(toast);
-      
-      // Auto-remove après la durée spécifiée
+
       if (toast.duration > 0) {
         setTimeout(() => {
           this.removeToast(toast.id);
@@ -189,7 +188,7 @@ export default {
   background: rgba(0, 0, 0, 0.05);
 }
 
-/* Animations */
+
 .toast-enter-active {
   transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
 }
@@ -212,7 +211,7 @@ export default {
   transition: transform 0.3s ease;
 }
 
-/* Responsive */
+
 @media (max-width: 768px) {
   .toast-container {
     top: 10px;
@@ -227,3 +226,4 @@ export default {
   }
 }
 </style>
+

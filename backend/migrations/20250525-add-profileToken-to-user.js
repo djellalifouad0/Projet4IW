@@ -1,4 +1,4 @@
-// Migration to add profileToken to User
+﻿
 module.exports = {
   up: async (queryInterface, Sequelize) => {
     const tableDescription = await queryInterface.describeTable('Users');
@@ -15,3 +15,4 @@ module.exports = {
     await queryInterface.removeColumn('Users', 'profileToken');
   }
 };
+

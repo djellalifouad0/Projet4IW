@@ -1,4 +1,4 @@
-
+﻿
 .login-wrapper {
   display: grid;
   grid-template-columns: 1fr 1fr;
@@ -174,7 +174,7 @@ form input {
   font-size: 0.9rem;
 }
 
-/* RESPONSIVE */
+
 @media screen and (max-width: 768px) {
   .login-wrapper {
     display: flex;
@@ -223,3 +223,4 @@ form input {
     margin-top: 10px;
   }
 }
+

@@ -1,10 +1,10 @@
-'use strict';
+﻿'use strict';
 
-/** @type {import('sequelize-cli').Migration} */
+
 module.exports = {
   async up(queryInterface, Sequelize) {
     try {
-      // Vérifier si la colonne 'data' existe déjà
+
       const tableDescription = await queryInterface.describeTable('Notifications');
       
       if (!tableDescription.data) {
@@ -36,3 +36,4 @@ module.exports = {
     }
   }
 };
+

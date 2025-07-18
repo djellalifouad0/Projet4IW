@@ -1,4 +1,4 @@
-<template>
+﻿<template>
   <div class="analytics-dashboard">
     <div class="dashboard-header">
       <h1>Tableau de Bord Analytics</h1>
@@ -29,7 +29,7 @@
     </div>
 
     <div v-else-if="dashboardData" class="dashboard-content">
-      <!-- Résumé général -->
+      
       <div class="summary-cards">
         <div class="summary-card">
           <h3>Utilisateurs Actifs</h3>
@@ -45,9 +45,9 @@
         </div>
       </div>
 
-      <!-- KPI par catégorie -->
+      
       <div class="kpi-sections">
-        <!-- Engagement Utilisateur -->
+        
         <div class="kpi-section">
           <h2>📝 Engagement Utilisateur</h2>
           <div class="kpi-grid">
@@ -74,7 +74,7 @@
           </div>
         </div>
 
-        <!-- Activité Utilisateur -->
+        
         <div class="kpi-section">
           <h2>🔍 Activité & Navigation</h2>
           <div class="kpi-grid">
@@ -101,7 +101,7 @@
           </div>
         </div>
 
-        <!-- Communication -->
+        
         <div class="kpi-section">
           <h2>💬 Communication</h2>
           <div class="kpi-grid">
@@ -118,7 +118,7 @@
           </div>
         </div>
 
-        <!-- Métriques Utilisateur -->
+        
         <div class="kpi-section">
           <h2>👥 Métriques Utilisateur</h2>
           <div class="kpi-grid">
@@ -140,7 +140,7 @@
           </div>
         </div>
 
-        <!-- Temps et Performance -->
+        
         <div class="kpi-section">
           <h2>⏱️ Temps & Performance</h2>
           <div class="kpi-grid">
@@ -153,11 +153,11 @@
         </div>
       </div>
 
-      <!-- Graphiques de tendance -->
+      
       <div class="trends-section" v-if="trendsData">
         <h2>📈 Tendances</h2>
         <div class="trends-chart">
-          <!-- Ici vous pouvez intégrer Chart.js ou une autre bibliothèque de graphiques -->
+          
           <canvas ref="trendsChart"></canvas>
         </div>
       </div>
@@ -221,7 +221,7 @@ export default {
         
         if (response.data.success) {
           this.trendsData = response.data.data
-          // Ici vous pouvez traiter les données pour les graphiques
+
         }
       } catch (error) {
         console.error('Erreur lors du chargement des tendances:', error)
@@ -448,3 +448,4 @@ export default {
   }
 }
 </style>
+

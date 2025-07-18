@@ -1,11 +1,10 @@
-const { User, Skill, Comment, Like, Rating, Appointment } = require('../models/associations');
+﻿const { User, Skill, Comment, Like, Rating, Appointment } = require('../models/associations');
 const { Sequelize } = require('sequelize');
 
 exports.getUserStats = async (req, res) => {
   try {
     const userId = req.user.id;
 
-    // Statistiques des rendez-vous
     const appointmentsStats = await Appointment.findAll({
       where: {
         [Sequelize.Op.or]: [
@@ -31,7 +30,6 @@ exports.getUserStats = async (req, res) => {
       }
     });
 
-    // Statistiques des avis reçus
     const ratingSummary = await Rating.findOne({
       where: { ratedUserId: userId },
       attributes: [
@@ -43,12 +41,10 @@ exports.getUserStats = async (req, res) => {
     const averageRating = parseFloat(ratingSummary?.dataValues?.average) || 0;
     const totalRatings = parseInt(ratingSummary?.dataValues?.total) || 0;
 
-    // Nombre de compétences publiées
     const skillsCount = await Skill.count({
       where: { userId }
     });
 
-    // Nombre de likes reçus sur les compétences
     const likesReceived = await Like.count({
       include: [{
         model: Skill,
@@ -56,7 +52,6 @@ exports.getUserStats = async (req, res) => {
       }]
     });
 
-    // Nombre de commentaires reçus sur les compétences
     const commentsReceived = await Comment.count({
       include: [{
         model: Skill,
@@ -64,11 +59,9 @@ exports.getUserStats = async (req, res) => {
       }]
     });
 
-    // Activité mensuelle (6 derniers mois)
     const sixMonthsAgo = new Date();
     sixMonthsAgo.setMonth(sixMonthsAgo.getMonth() - 6);
 
-    // Rendez-vous par mois
     const monthlyAppointments = await Appointment.findAll({
       where: {
         [Sequelize.Op.or]: [
@@ -87,7 +80,6 @@ exports.getUserStats = async (req, res) => {
       order: [[Sequelize.fn('strftime', '%Y-%m', Sequelize.col('createdAt')), 'ASC']]
     });
 
-    // Avis reçus par mois
     const monthlyRatings = await Rating.findAll({
       where: {
         ratedUserId: userId,
@@ -103,10 +95,8 @@ exports.getUserStats = async (req, res) => {
       order: [[Sequelize.fn('strftime', '%Y-%m', Sequelize.col('createdAt')), 'ASC']]
     });
 
-    // Fusionner les données mensuelles
     const monthlyData = new Map();
-    
-    // Initialiser les 6 derniers mois
+
     for (let i = 5; i >= 0; i--) {
       const date = new Date();
       date.setMonth(date.getMonth() - i);
@@ -114,7 +104,6 @@ exports.getUserStats = async (req, res) => {
       monthlyData.set(monthKey, { appointments: 0, ratings: 0 });
     }
 
-    // Ajouter les données de rendez-vous
     monthlyAppointments.forEach(item => {
       const month = item.dataValues.month;
       if (monthlyData.has(month)) {
@@ -122,7 +111,6 @@ exports.getUserStats = async (req, res) => {
       }
     });
 
-    // Ajouter les données d'avis
     monthlyRatings.forEach(item => {
       const month = item.dataValues.month;
       if (monthlyData.has(month)) {
@@ -130,7 +118,6 @@ exports.getUserStats = async (req, res) => {
       }
     });
 
-    // Convertir en tableau
     const monthlyActivity = Array.from(monthlyData.entries()).map(([month, data]) => ({
       month,
       appointments: data.appointments,

@@ -1,10 +1,9 @@
-import { ref, onMounted, onUnmounted } from 'vue'
+﻿import { ref, onMounted, onUnmounted } from 'vue'
 import matomoService from '../services/matomoService.js'
 
 export function useMatomo() {
   const pageStartTime = ref(Date.now())
 
-  // Méthodes de tracking simplifiées
   const trackPageView = (pageName) => {
     matomoService.trackPageView(pageName)
   }
@@ -13,7 +12,6 @@ export function useMatomo() {
     matomoService.trackEvent(category, action, name, value)
   }
 
-  // KPI spécifiques
   const trackPostPublishClick = () => {
     matomoService.trackPostPublishClick()
   }
@@ -86,7 +84,6 @@ export function useMatomo() {
     matomoService.trackFeatureUsage(featureName)
   }
 
-  // Tracking du temps passé sur la page
   const startPageTimer = () => {
     pageStartTime.value = Date.now()
     matomoService.startPageTimer()
@@ -100,29 +97,25 @@ export function useMatomo() {
     matomoService.endPageTimer(pageName)
   }
 
-  // Tracking des erreurs
   const trackError = (errorMessage, errorUrl) => {
     matomoService.trackError(errorMessage, errorUrl)
   }
 
-  // Tracking des utilisateurs
   const trackUserSession = (userId) => {
     matomoService.trackUserSession(userId)
   }
 
   return {
-    // Variables
+
     pageStartTime,
-    
-    // Méthodes générales
+
     trackPageView,
     trackEvent,
     startPageTimer,
     endPageTimer,
     trackError,
     trackUserSession,
-    
-    // KPI spécifiques
+
     trackPostPublishClick,
     trackPostLike,
     trackPostComment,
@@ -143,3 +136,4 @@ export function useMatomo() {
     trackFeatureUsage
   }
 }
+

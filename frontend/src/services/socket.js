@@ -1,4 +1,4 @@
-import { io } from 'socket.io-client';
+﻿import { io } from 'socket.io-client';
 
 class SocketService {
   constructor() {
@@ -49,7 +49,6 @@ class SocketService {
         reject(error);
       });
 
-      // Timeout de connexion
       setTimeout(() => {
         if (!this.connected) {
           reject(new Error('Timeout de connexion WebSocket'));
@@ -58,7 +57,6 @@ class SocketService {
     });
   }
 
-  // Déconnexion
   disconnect() {
     if (this.socket) {
       this.socket.disconnect();
@@ -67,7 +65,6 @@ class SocketService {
     }
   }
 
-  // Rejoindre une conversation
   joinConversation(conversationId) {
     if (this.socket && this.connected) {
       this.socket.emit('join-conversation', conversationId);
@@ -75,7 +72,6 @@ class SocketService {
     }
   }
 
-  // Quitter une conversation
   leaveConversation(conversationId) {
     if (this.socket && this.connected) {
       this.socket.emit('leave-conversation', conversationId);
@@ -83,7 +79,6 @@ class SocketService {
     }
   }
 
-  // Envoyer un message via WebSocket
   sendMessage(conversationId, message) {
     if (this.socket && this.connected) {
       this.socket.emit('send-message', {
@@ -93,21 +88,18 @@ class SocketService {
     }
   }
 
-  // Écouter les nouveaux messages
   onNewMessage(callback) {
     if (this.socket) {
       this.socket.on('new-message', callback);
     }
   }
 
-  // Arrêter d'écouter les nouveaux messages
   offNewMessage() {
     if (this.socket) {
       this.socket.off('new-message');
     }
   }
 
-  // Envoyer l'indicateur de frappe
   sendTyping(conversationId, isTyping) {
     if (this.socket && this.connected) {
       this.socket.emit('typing', {
@@ -117,21 +109,18 @@ class SocketService {
     }
   }
 
-  // Écouter l'indicateur de frappe
   onUserTyping(callback) {
     if (this.socket) {
       this.socket.on('user-typing', callback);
     }
   }
 
-  // Arrêter d'écouter l'indicateur de frappe
   offUserTyping() {
     if (this.socket) {
       this.socket.off('user-typing');
     }
   }
 
-  // Gestion des statuts utilisateurs
   getOnlineUsers() {
     if (this.socket && this.connected) {
       this.socket.emit('get-online-users');
@@ -156,7 +145,6 @@ class SocketService {
     }
   }
 
-  // Gestion des statuts de messages
   sendMessageDelivered(conversationId, messageId) {
     if (this.socket && this.connected) {
       this.socket.emit('message-delivered', {
@@ -180,55 +168,48 @@ class SocketService {
     }
   }
 
-  // === GESTION DES NOTIFICATIONS ===
-  
-  // Écouter les nouvelles notifications
+
   onNewNotification(callback) {
     if (this.socket) {
       this.socket.on('new-notification', callback);
     }
   }
 
-  // Arrêter d'écouter les nouvelles notifications
   offNewNotification() {
     if (this.socket) {
       this.socket.off('new-notification');
     }
   }
 
-  // Demander une vérification des notifications
   requestNotificationCheck() {
     if (this.socket && this.connected) {
       this.socket.emit('check-notifications');
     }
   }
 
-  // Écouter les mises à jour du compteur de notifications
   onNotificationCountUpdate(callback) {
     if (this.socket) {
       this.socket.on('notification-count-update', callback);
     }
   }
 
-  // Arrêter d'écouter les mises à jour du compteur
   offNotificationCountUpdate() {
     if (this.socket) {
       this.socket.off('notification-count-update');
     }
   }
 
-  // Nettoyer tous les listeners
   removeAllListeners() {
     if (this.socket) {
       this.socket.removeAllListeners();
     }
   }
-  // Vérifier si connecté
+
   isConnected() {
     return this.connected && this.socket && this.socket.connected;
   }
 }
 
-// Instance singleton
 const socketService = new SocketService();
 export default socketService;
+

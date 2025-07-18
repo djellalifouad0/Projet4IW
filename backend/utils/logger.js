@@ -1,4 +1,4 @@
-const { createLogger, format, transports } = require('winston');
+﻿const { createLogger, format, transports } = require('winston');
 const path = require('path');
 
 const logger = createLogger({
@@ -17,3 +17,4 @@ const logger = createLogger({
 });
 
 module.exports = logger;
+

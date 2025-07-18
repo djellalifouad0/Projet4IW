@@ -1,63 +1,59 @@
-/* 
- * DARK MODE COMPLET - NE TOUCHE PAS AU STYLE LIGHT EXISTANT
- * Ce fichier contient UNIQUEMENT les styles pour le dark mode
- * Votre style light mode reste 100% intact
- */
+﻿
 
-/* === VARIABLES DARK MODE === */
+
 .dark-theme {
-  /* Couleurs principales adaptées à votre DA */
-  --bg-primary: #0f1419;           /* Background principal très sombre */
-  --bg-secondary: #1a1f2e;         /* Cards et conteneurs */
-  --bg-tertiary: #242936;          /* Elements plus clairs */
-  --bg-hover: #2d3748;             /* Hover states */
-  --bg-active: #3a4553;            /* Active states */
   
-  /* Couleurs spécialisées */
-  --bg-sidebar: #161b26;           /* Navbar et sidebars */
-  --bg-header: #0f1419;            /* Headers fixes */
-  --bg-card: #1a1f2e;             /* Cards principale */
-  --bg-input: #242936;             /* Inputs et forms */
+  --bg-primary: #0f1419;           
+  --bg-secondary: #1a1f2e;         
+  --bg-tertiary: #242936;          
+  --bg-hover: #2d3748;             
+  --bg-active: #3a4553;            
   
-  /* Textes */
-  --text-primary: #e2e8f0;         /* Texte principal */
-  --text-secondary: #cbd5e0;       /* Texte secondaire */
-  --text-tertiary: #a0aec0;        /* Texte tertiaire */
-  --text-muted: #718096;           /* Texte très discret */
-  --text-brand: #F4A474;           /* Couleur de votre marque adaptée */
   
-  /* Couleurs d'accent inspirées de votre DA */
-  --accent: #F4A474;               /* Orange principal adapté */
-  --accent-hover: #E88B5A;         /* Hover de l'accent */
-  --accent-light: #D4A665;         /* Version claire */
+  --bg-sidebar: #161b26;           
+  --bg-header: #0f1419;            
+  --bg-card: #1a1f2e;             
+  --bg-input: #242936;             
   
-  /* Bordures et séparateurs */
-  --border-color: #2d3748;         /* Bordures normales */
-  --border-input: #4a5568;         /* Bordures d'inputs */
-  --border-active: #F4A474;        /* Bordures actives */
   
-  /* Ombres */
+  --text-primary: #e2e8f0;         
+  --text-secondary: #cbd5e0;       
+  --text-tertiary: #a0aec0;        
+  --text-muted: #718096;           
+  --text-brand: #F4A474;           
+  
+  
+  --accent: #F4A474;               
+  --accent-hover: #E88B5A;         
+  --accent-light: #D4A665;         
+  
+  
+  --border-color: #2d3748;         
+  --border-input: #4a5568;         
+  --border-active: #F4A474;        
+  
+  
   --shadow-card: 0 4px 16px rgba(0, 0, 0, 0.4);
   --shadow-modal: 0 8px 32px rgba(0, 0, 0, 0.6);
   --shadow-input: 0 0 0 2px rgba(244, 164, 116, 0.2);
   
-  /* Statuts et alertes */
+  
   --success: #68d391;
   --warning: #f6e05e;
   --danger: #fc8181;
   --info: #63b3ed;
 }
 
-/* === SCRIPT D'INITIALISATION DARK MODE === */
-/* Ce script doit être exécuté le plus tôt possible pour éviter le flash */
 
-/* === LAYOUT PRINCIPAL === */
+
+
+
 .dark-theme body {
   background-color: var(--bg-primary) !important;
   color: var(--text-primary) !important;
 }
 
-/* === NAVIGATION === */
+
 .dark-theme .navbar-vertical {
   background: var(--bg-sidebar) !important;
   border-right: 1px solid var(--border-color) !important;
@@ -78,7 +74,7 @@
   background: var(--bg-hover) !important;
 }
 
-/* Fix pour l'active state de l'accueil et tous les liens */
+
 .dark-theme .navbar-links a.active,
 .dark-theme .navbar-actions a.active {
   color: var(--accent) !important;
@@ -86,7 +82,7 @@
   border-radius: 8px !important;
 }
 
-/* Désactiver explicitement le style pour router-link-active en dark mode */
+
 .dark-theme .navbar-links a.router-link-active:not(.active),
 .dark-theme .navbar-actions a.router-link-active:not(.active) {
   color: var(--text-secondary) !important;
@@ -94,7 +90,7 @@
   font-weight: normal !important;
 }
 
-/* Règle de priorité pour s'assurer que l'active fonctionne en dark mode */
+
 .dark-theme .navbar-links a[href="/"].router-link-active:not(.active) {
   color: var(--text-secondary) !important;
   background: transparent !important;
@@ -124,7 +120,7 @@
   color: var(--accent) !important;
 }
 
-/* === HOME PAGE === */
+
 .dark-theme .home-content {
   background: var(--bg-primary) !important;
 }
@@ -156,7 +152,7 @@
   background: var(--bg-primary) !important;
 }
 
-/* === POST CARDS === */
+
 .dark-theme .card,
 .dark-theme .card-orange,
 .dark-theme .card-paid {
@@ -188,13 +184,13 @@
   color: var(--bg-primary) !important;
 }
 
-/* Fond différent pour les pastilles sans commentaires */
+
 .dark-theme .pastille:not(.pastille-paid) {
   background: var(--bg-secondary) !important;
   color: var(--text-primary) !important;
 }
 
-/* Fond coloré pour les pastilles avec commentaires */
+
 .dark-theme .pastille.has-comments {
   background: var(--accent-light) !important;
   color: var(--bg-primary) !important;
@@ -226,7 +222,7 @@
   color: var(--text-secondary) !important;
 }
 
-/* === MODALS === */
+
 .dark-theme .modal-overlay {
   background: rgba(0, 0, 0, 0.9) !important;
 }
@@ -246,7 +242,7 @@
   color: var(--bg-primary) !important;
 }
 
-/* === FORMS ET INPUTS === */
+
 .dark-theme input,
 .dark-theme textarea,
 .dark-theme select {
@@ -271,7 +267,7 @@
   color: var(--text-primary) !important;
 }
 
-/* === LOGIN/REGISTER FORMS === */
+
 .dark-theme .login-wrapper {
   background-color: var(--bg-primary) !important;
 }
@@ -302,7 +298,7 @@
   color: var(--accent) !important;
 }
 
-/* === BUTTONS === */
+
 .dark-theme button.primary {
   background-color: var(--accent) !important;
   color: var(--bg-primary) !important;
@@ -323,7 +319,7 @@
   color: var(--bg-primary) !important;
 }
 
-/* === PAGE CARTE === */
+
 .dark-theme .carte-page {
   background: var(--bg-primary) !important;
 }
@@ -341,7 +337,7 @@
   background: var(--bg-sidebar) !important;
 }
 
-/* === DASHBOARD === */
+
 .dark-theme .dashboard-content {
   background: var(--bg-primary) !important;
 }
@@ -360,7 +356,7 @@
   color: var(--bg-primary) !important;
 }
 
-/* === PROFILE AMÉLIORÉ === */
+
 .dark-theme .profile-content {
   background: var(--bg-primary) !important;
 }
@@ -395,7 +391,7 @@
   color: var(--text-primary) !important;
 }
 
-/* === CALENDAR === */
+
 .dark-theme .calendar-nav-btn {
   background: var(--accent) !important;
   color: var(--bg-primary) !important;
@@ -425,7 +421,7 @@
   color: var(--bg-primary) !important;
 }
 
-/* === NOTIFICATIONS === */
+
 .dark-theme .notifications-content {
   background: var(--bg-primary) !important;
 }
@@ -471,7 +467,7 @@
   color: var(--text-muted) !important;
 }
 
-/* === DISCUSSIONS AMÉLIORÉES === */
+
 .dark-theme .discussions-layout {
   background: var(--bg-primary) !important;
 }
@@ -515,7 +511,7 @@
   box-shadow: 0 2px 8px rgba(244, 164, 116, 0.3) !important;
 }
 
-/* Rendez-vous dans les conversations */
+
 .dark-theme .appointment-card,
 .dark-theme .pending-appointment-card,
 .dark-theme .month-appointment-card {
@@ -561,7 +557,7 @@
   color: var(--text-primary) !important;
 }
 
-/* === COMMENTS === */
+
 .dark-theme .modal-comments {
   background: transparent !important;
 }
@@ -619,7 +615,7 @@
   background: var(--accent-hover) !important;
 }
 
-/* === INLINE EDITING === */
+
 .dark-theme .inline-edit-container {
   background: var(--bg-secondary) !important;
   border-color: var(--border-active) !important;
@@ -654,7 +650,7 @@
   color: var(--text-muted) !important;
 }
 
-/* === FILTER DROPDOWN === */
+
 .dark-theme .filter-dropdown {
   background: var(--bg-card) !important;
   border-color: var(--border-color) !important;
@@ -670,7 +666,7 @@
   color: var(--bg-primary) !important;
 }
 
-/* === POST VIEW PAGE === */
+
 .dark-theme .post-view-container {
   background: var(--bg-primary) !important;
 }
@@ -732,7 +728,7 @@
   color: var(--bg-primary) !important;
 }
 
-/* === SETTINGS === */
+
 .dark-theme .settings-content {
   background: var(--bg-primary) !important;
 }
@@ -792,7 +788,7 @@
   background: var(--accent-hover) !important;
 }
 
-/* === ERROR MESSAGES === */
+
 .dark-theme .error-message {
   background: var(--bg-card) !important;
   border-color: var(--danger) !important;
@@ -807,7 +803,7 @@
   color: var(--text-secondary) !important;
 }
 
-/* === CITY SUGGESTIONS === */
+
 .dark-theme .city-suggestions {
   background: var(--bg-card) !important;
   border-color: var(--border-color) !important;
@@ -822,7 +818,7 @@
   background: var(--bg-hover) !important;
 }
 
-/* === CONFIRMATION DIALOG === */
+
 .dark-theme .confirmation-dialog {
   background: var(--bg-card) !important;
   box-shadow: var(--shadow-modal) !important;
@@ -840,7 +836,7 @@
   background: var(--text-muted) !important;
 }
 
-/* === SCROLLBARS === */
+
 .dark-theme ::-webkit-scrollbar {
   width: 8px;
   height: 8px;
@@ -860,24 +856,24 @@
   background: var(--text-muted);
 }
 
-/* === ICÔNES SPÉCIFIQUES === */
-/* Icônes cœur et commentaire toujours en #28303F */
+
+
 .dark-theme .icon-svg {
   filter: brightness(0) saturate(100%) invert(19%) sepia(8%) saturate(1834%) hue-rotate(203deg) brightness(95%) contrast(88%) !important;
 }
 
-/* Garde les icônes nav en version claire */
+
 .dark-theme .nav-icon,
 .dark-theme .modal-icon-svg {
   filter: brightness(0) saturate(100%) invert(80%) sepia(8%) saturate(343%) hue-rotate(185deg) brightness(94%) contrast(88%) !important;
 }
 
-/* Exception pour les avatars - ne pas appliquer de filtre */
+
 .dark-theme .nav-icon.profile-avatar {
   filter: none !important;
 }
 
-/* Exception pour les trois petits points du profil - les rendre blancs en dark mode */
+
 .dark-theme .dots-icon {
   filter: brightness(0) saturate(100%) invert(100%) sepia(0%) saturate(7500%) hue-rotate(180deg) brightness(100%) contrast(100%) !important;
 }
@@ -890,23 +886,23 @@
   filter: brightness(0) saturate(100%) invert(80%) sepia(8%) saturate(343%) hue-rotate(185deg) brightness(94%) contrast(88%) !important;
 }
 
-/* === LIKES ET HEARTS === */
-/* Nombre de likes avec la même couleur que les icônes cœur en dark mode */
+
+
 .dark-theme .icon-number {
   color: #28303F !important;
 }
 
-/* Règle plus spécifique pour contrer les styles scopés de Vue */
+
 .dark-theme .icon-number[data-v-a46cdd76] {
   color: #28303F !important;
 }
 
-/* Règle générale pour tous les attributs data-v-* */
+
 .dark-theme .icon-number[class*="data-v-"] {
   color: #28303F !important;
 }
 
-/* === TABLES === */
+
 .dark-theme table,
 .dark-theme thead,
 .dark-theme tbody,
@@ -918,7 +914,7 @@
   border-color: var(--border-color) !important;
 }
 
-/* === PAGINATION === */
+
 .dark-theme .pagination-btn {
   background: var(--accent) !important;
   color: var(--bg-primary) !important;
@@ -933,7 +929,7 @@
   color: var(--bg-primary) !important;
 }
 
-/* === BADGES ET INDICATORS === */
+
 .dark-theme .notification-count,
 .dark-theme .unread-badge {
   background: var(--danger) !important;
@@ -944,19 +940,19 @@
   background: var(--info) !important;
 }
 
-/* === TRANSITIONS FLUIDES === */
+
 .dark-theme * {
   transition: background-color 0.3s ease, color 0.3s ease, border-color 0.3s ease, box-shadow 0.3s ease;
 }
 
-/* Éviter les transitions sur certains éléments */
+
 .dark-theme .modal-overlay,
 .dark-theme .toast,
 .dark-theme .notification-toast {
   transition: none !important;
 }
 
-/* === HEADINGS === */
+
 .dark-theme h1,
 .dark-theme h2,
 .dark-theme h3,
@@ -966,21 +962,21 @@
   color: var(--text-brand) !important;
 }
 
-/* === AMÉLIORATIONS SPÉCIFIQUES === */
 
-/* Améliore les bordures des avatars en dark mode */
+
+
 .dark-theme .avatar {
   border-color: var(--accent) !important;
 }
 
-/* Améliore le style des badges de notification */
+
 .dark-theme .notification-count,
 .dark-theme .unread-badge {
   background: var(--danger) !important;
   border: 2px solid var(--bg-sidebar) !important;
 }
 
-/* Retire l'effet hover sur les cards */
+
 .dark-theme .card:hover,
 .dark-theme .card-orange:hover,
 .dark-theme .card-paid:hover {
@@ -988,13 +984,13 @@
   transform: none !important;
 }
 
-/* Améliore le status dot (en ligne) */
+
 .dark-theme .status-dot {
   background: var(--success) !important;
   box-shadow: 0 0 0 2px var(--bg-card) !important;
 }
 
-/* Améliore les liens underlined */
+
 .dark-theme .address {
   text-decoration-color: var(--text-secondary) !important;
 }
@@ -1004,7 +1000,7 @@
   text-decoration-color: var(--accent) !important;
 }
 
-/* Améliore les champs de recherche */
+
 .dark-theme .carte-search input {
   background: var(--bg-input) !important;
   color: var(--text-primary) !important;
@@ -1016,27 +1012,27 @@
   box-shadow: var(--shadow-input) !important;
 }
 
-/* Améliore les suggestions de ville */
+
 .dark-theme .city-suggestions {
   background: var(--bg-card) !important;
   border-color: var(--border-color) !important;
 }
 
-/* Améliore les messages d'erreur */
+
 .dark-theme .error-message {
   background: rgba(252, 129, 129, 0.1) !important;
   border-color: var(--danger) !important;
   color: var(--text-primary) !important;
 }
 
-/* Améliore les messages de succès */
+
 .dark-theme .success-message {
   background: rgba(104, 211, 145, 0.1) !important;
   border: 1px solid var(--success) !important;
   color: var(--text-primary) !important;
 }
 
-/* Améliore les tooltips */
+
 .dark-theme [title]:hover::after {
   background: var(--bg-card) !important;
   color: var(--text-primary) !important;
@@ -1044,13 +1040,13 @@
   box-shadow: var(--shadow-card) !important;
 }
 
-/* Améliore les loading states */
+
 .dark-theme .loading {
   color: var(--text-muted) !important;
   background: var(--bg-secondary) !important;
 }
 
-/* Améliore les éléments disabled */
+
 .dark-theme button:disabled,
 .dark-theme input:disabled,
 .dark-theme textarea:disabled {
@@ -1060,18 +1056,18 @@
   opacity: 0.6;
 }
 
-/* Améliore les sélections de texte */
+
 .dark-theme ::selection {
   background: rgba(244, 164, 116, 0.3) !important;
   color: var(--text-primary) !important;
 }
 
-/* Améliore les focus outlines */
+
 .dark-theme *:focus {
   outline-color: var(--accent) !important;
 }
 
-/* Spécifique aux boutons de toggle mobile */
+
 .dark-theme .mobile-toggle-btn-header {
   background: var(--accent) !important;
   color: var(--bg-primary) !important;
@@ -1085,7 +1081,7 @@
   background: var(--text-primary) !important;
 }
 
-/* === AMÉLIORATION DES ANIMATIONS === */
+
 .dark-theme .modal-card {
   animation: modalPopDark 0.25s cubic-bezier(.4,1.6,.6,1) 1;
 }
@@ -1103,7 +1099,7 @@
   }
 }
 
-/* === AMÉLIORATION POUR LES DIFFÉRENTS ÉTATS === */
+
 .dark-theme .card.liked {
   border-color: var(--accent) !important;
 }
@@ -1114,7 +1110,7 @@
   box-shadow: 0 0 0 2px rgba(244, 164, 116, 0.3) !important;
 }
 
-/* === CORRECTIONS SPÉCIFIQUES POUR LES ICÔNES === */
+
 .dark-theme .filter .icon-svg {
   filter: brightness(0) saturate(100%) invert(15%) sepia(0%) saturate(0%) hue-rotate(0deg) brightness(100%) contrast(100%) !important;
 }
@@ -1123,7 +1119,7 @@
   filter: brightness(0) saturate(100%) invert(15%) sepia(0%) saturate(0%) hue-rotate(0deg) brightness(100%) contrast(100%) !important;
 }
 
-/* === AMÉLIORATION POUR LE MOBILE === */
+
 @media (max-width: 768px) {
   .dark-theme .carte-list {
     background: var(--bg-primary) !important;
@@ -1134,21 +1130,21 @@
   }
 }
 
-/* === AMÉLIORATION POUR L'ACCESSIBILITÉ === */
+
 .dark-theme .sr-only {
   color: var(--text-primary) !important;
 }
 
-/* Améliore le contraste pour l'accessibilité */
+
 .dark-theme .high-contrast {
   --text-primary: #ffffff;
   --text-secondary: #e2e8f0;
   --bg-card: #1a202c;
 }
 
-/* === AMÉLIORATIONS FINALES === */
 
-/* Assure que tous les textes héritent de la bonne couleur */
+
+
 .dark-theme * {
   box-sizing: border-box;
 }
@@ -1157,19 +1153,19 @@
   color: inherit;
 }
 
-/* Force l'héritage des couleurs pour éviter les conflits */
+
 .dark-theme p,
 .dark-theme span,
 .dark-theme div:not(.theme-toggle):not(.theme-toggle *) {
   color: inherit;
 }
 
-/* Assure la cohérence des arrière-plans */
+
 .dark-theme div:not(.theme-toggle):not(.theme-toggle *) {
   background-color: inherit;
 }
 
-/* === FIX POUR LES ÉLÉMENTS QUI POURRAIENT RÉSISTER === */
+
 .dark-theme [style*="color: #000"] {
   color: var(--text-primary) !important;
 }
@@ -1178,9 +1174,9 @@
   background: var(--bg-card) !important;
 }
 
-/* === HOVER EFFECTS POUR LES NOMS D'UTILISATEURS === */
 
-/* Effet hover underline pour les noms d'utilisateurs dans les posts */
+
+
 .name {
   transition: text-decoration 0.2s ease, color 0.2s ease !important;
   text-decoration: none !important;
@@ -1193,7 +1189,7 @@
   text-decoration-thickness: 2px !important;
 }
 
-/* Désactiver l'underline sur le span de temps dans les noms */
+
 .name .post-time-ago-inline,
 .name .post-time-ago-inline:hover,
 .name:hover .post-time-ago-inline {
@@ -1203,12 +1199,12 @@
   text-decoration-color: transparent !important;
 }
 
-/* Dark mode hover */
+
 .dark-theme .name:hover {
   text-decoration-color: #ffffff !important;
 }
 
-/* S'assurer que le span de temps n'hérite pas de l'underline en dark mode */
+
 .dark-theme .name .post-time-ago-inline,
 .dark-theme .name .post-time-ago-inline:hover,
 .dark-theme .name:hover .post-time-ago-inline {
@@ -1218,7 +1214,7 @@
   text-decoration-color: transparent !important;
 }
 
-/* Noms d'utilisateurs dans les commentaires */
+
 .comment-author {
   transition: text-decoration 0.2s ease, color 0.2s ease !important;
   text-decoration: none !important;
@@ -1236,7 +1232,7 @@
   text-decoration-color: #ffffff !important;
 }
 
-/* Noms d'utilisateurs dans les notifications */
+
 .notif-message .clickable-username {
   transition: text-decoration 0.2s ease !important;
   text-decoration: none !important;
@@ -1253,7 +1249,7 @@
   text-decoration-color: #ffffff !important;
 }
 
-/* Noms d'utilisateurs dans les profils et ratings */
+
 .rating-username {
   transition: text-decoration 0.2s ease, color 0.2s ease !important;
   text-decoration: none !important;
@@ -1271,8 +1267,8 @@
   text-decoration-color: var(--accent) !important;
 }
 
-/* === FIX SPÉCIFIQUE POUR L'UNDERLINE DU TEMPS === */
-/* Règles ultra-spécifiques pour empêcher l'underline sur le temps des posts */
+
+
 .card .name .post-time-ago-inline,
 .card .name:hover .post-time-ago-inline,
 .card-header .name .post-time-ago-inline,
@@ -1289,7 +1285,7 @@
   text-underline-offset: 0 !important;
 }
 
-/* Dark mode */
+
 .dark-theme .card .name .post-time-ago-inline,
 .dark-theme .card .name:hover .post-time-ago-inline,
 .dark-theme .card-header .name .post-time-ago-inline,
@@ -1305,3 +1301,4 @@
   text-decoration-thickness: 0 !important;
   text-underline-offset: 0 !important;
 }
+

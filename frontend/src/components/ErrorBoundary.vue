@@ -1,4 +1,4 @@
-<template>
+﻿<template>
   <div class="error-boundary">
     <slot v-if="!hasError" />
     <div v-else class="error-message">
@@ -32,7 +32,7 @@ export default {
   },
   watch: {
     '$route'() {
-      // Réinitialiser l'erreur lors d'un changement de route
+
       if (this.hasError) {
         this.resetError()
       }
@@ -86,3 +86,4 @@ export default {
   background: #b91c1c;
 }
 </style>
+

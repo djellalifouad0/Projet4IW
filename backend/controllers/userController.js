@@ -1,15 +1,13 @@
-const crypto = require('crypto');
+﻿const crypto = require('crypto');
 const User = require('../models/user');
 const Rating = require('../models/rating');
 const { Sequelize } = require('sequelize');
 const NotificationService = require('../services/notificationService');
 
-// Generate a unique profile token for a user
 function generateProfileToken() {
   return crypto.randomBytes(16).toString('hex');
 }
 
-// Update or create user logic
 User.beforeCreate((user) => {
   user.profileToken = generateProfileToken();
 });
@@ -20,7 +18,6 @@ User.beforeUpdate((user) => {
   }
 });
 
-// ✅ Récupérer tous les utilisateurs (admin)
 exports.getAllUsers = async (req, res) => {
   try {
     const users = await User.findAll({ attributes: { exclude: ['password'] } });
@@ -30,7 +27,6 @@ exports.getAllUsers = async (req, res) => {
   }
 };
 
-// ✅ Activer/Désactiver un utilisateur
 exports.toggleUserActive = async (req, res) => {
   try {
     const user = await User.findByPk(req.params.id);
@@ -45,7 +41,6 @@ exports.toggleUserActive = async (req, res) => {
   }
 };
 
-// ✅ Supprimer un utilisateur
 exports.deleteUser = async (req, res) => {
   try {
     const user = await User.findByPk(req.params.id);
@@ -58,7 +53,6 @@ exports.deleteUser = async (req, res) => {
   }
 };
 
-// ✅ Mettre à jour le profil utilisateur
 exports.updateUserProfile = async (req, res) => {
   try {
     const { username, bio, address, avatar, cover } = req.body;
@@ -87,7 +81,6 @@ exports.updateUserProfile = async (req, res) => {
   }
 };
 
-// ✅ Récupérer un utilisateur par son token de profil
 exports.getUserByProfileToken = async (req, res) => {
   try {
     const { profileToken } = req.params;
@@ -100,7 +93,6 @@ exports.getUserByProfileToken = async (req, res) => {
       return res.status(404).json({ error: 'Utilisateur non trouvé' });
     }
 
-    // Récupérer les statistiques de notation
     const ratingStats = await Rating.findOne({
       where: { ratedUserId: user.id },
       attributes: [
@@ -112,7 +104,6 @@ exports.getUserByProfileToken = async (req, res) => {
     const averageRating = parseFloat(ratingStats?.dataValues?.average) || 0;
     const totalRatings = parseInt(ratingStats?.dataValues?.total) || 0;
 
-    // Ajouter les statistiques au profil utilisateur
     const userWithRatings = {
       ...user.toJSON(),
       ratingStats: {
@@ -128,7 +119,6 @@ exports.getUserByProfileToken = async (req, res) => {
   }
 };
 
-// ✅ Rechercher des utilisateurs par email ou username
 exports.searchUsers = async (req, res) => {
   try {
     const { q } = req.query;
@@ -173,3 +163,4 @@ exports.searchUsers = async (req, res) => {
     res.status(500).json({ error: 'Erreur lors de la recherche d\'utilisateurs' });
   }
 };
+

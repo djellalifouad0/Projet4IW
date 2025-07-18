@@ -1,4 +1,4 @@
-@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;700&display=swap');
+﻿@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;700&display=swap');
 
 * {
   margin: 0;
@@ -12,7 +12,7 @@ body {
   color: #1e1e1e;
   line-height: 1.6;
   min-height: 100vh;
-  overflow-x: hidden; /* Prevent horizontal scroll */
+  overflow-x: hidden; 
 }
 
 a {
@@ -34,3 +34,4 @@ input, button {
   margin: 0 auto;
   padding: 0 20px;
 }
+

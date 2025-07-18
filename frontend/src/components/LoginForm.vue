@@ -1,4 +1,4 @@
-<template>
+﻿<template>
   <div class="login-wrapper">
     <div class="login-left">
       <img src="../assets/images/SkillSwap Logo.png" alt="SkillSwap" class="login-logo" />
@@ -62,3 +62,4 @@ export default {
   },
 };
 </script>
+

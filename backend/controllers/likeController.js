@@ -1,26 +1,9 @@
-const Like = require('../models/like');
+﻿const Like = require('../models/like');
 const Skill = require('../models/skill');
 const User = require('../models/user');
 const NotificationService = require('../services/notificationService');
 
-/**
- * @swagger
- * /skills/{id}/like:
- *   post:
- *     summary: Aime une compétence
- *     tags: [Skills]
- *     security:
- *       - bearerAuth: []
- *     parameters:
- *       - in: path
- *         name: id
- *         schema:
- *           type: integer
- *         required: true
- *     responses:
- *       200:
- *         description: Compétence aimée
- */
+
 exports.likeSkill = async (req, res) => {
   try {
     console.log('LIKE: userId:', req.user && req.user.id, 'skillId:', req.params.id);
@@ -29,13 +12,11 @@ exports.likeSkill = async (req, res) => {
     });
     console.log('LIKE RESULT:', like, 'CREATED:', created);
 
-    // Récupérer les informations de la compétence pour la notification
     const skill = await Skill.findByPk(req.params.id, {
       include: [{ model: User, attributes: ['id', 'username'] }]
     });
 
-    // Créer une notification pour le propriétaire de la compétence (si ce n'est pas lui qui like)
-    // Même si le like existait déjà, on crée une nouvelle notification pour actualiser l'heure
+
     if (skill && skill.User && skill.User.id !== req.user.id) {
       try {
         const likerName = req.user.username;
@@ -62,24 +43,7 @@ exports.likeSkill = async (req, res) => {
   }
 };
 
-/**
- * @swagger
- * /skills/{id}/unlike:
- *   delete:
- *     summary: Retire un like d'une compétence
- *     tags: [Skills]
- *     security:
- *       - bearerAuth: []
- *     parameters:
- *       - in: path
- *         name: id
- *         schema:
- *           type: integer
- *         required: true
- *     responses:
- *       200:
- *         description: Like retiré
- */
+
 exports.unlikeSkill = async (req, res) => {
   try {
     const result = await Like.destroy({ where: { userId: req.user.id, skillId: req.params.id } });
@@ -91,3 +55,4 @@ exports.unlikeSkill = async (req, res) => {
     res.status(500).json({ error: 'Erreur lors du unlike' });
   }
 };
+

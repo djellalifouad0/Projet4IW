@@ -1,7 +1,6 @@
-// Service pour gérer les toasts de manière globale
+﻿
 class ToastService {
-  
-  // Afficher un toast de succès
+
   success(message, title = null, duration = 5000) {
     this.show({
       type: 'success',
@@ -11,7 +10,6 @@ class ToastService {
     });
   }
 
-  // Afficher un toast d'erreur
   error(message, title = null, duration = 7000) {
     this.show({
       type: 'error',
@@ -21,7 +19,6 @@ class ToastService {
     });
   }
 
-  // Afficher un toast d'avertissement
   warning(message, title = null, duration = 6000) {
     this.show({
       type: 'warning',
@@ -31,7 +28,6 @@ class ToastService {
     });
   }
 
-  // Afficher un toast d'information
   info(message, title = null, duration = 5000) {
     this.show({
       type: 'info',
@@ -41,7 +37,6 @@ class ToastService {
     });
   }
 
-  // Méthode générique pour afficher un toast
   show(options) {
     const event = new CustomEvent('show-toast', {
       detail: options
@@ -49,7 +44,6 @@ class ToastService {
     window.dispatchEvent(event);
   }
 
-  // Méthodes de raccourci avec messages prédéfinis courants
   saveSuccess() {
     this.success('Les modifications ont été enregistrées avec succès !', 'Succès');
   }
@@ -99,7 +93,7 @@ class ToastService {
   }
 }
 
-// Instance unique du service
 const toastService = new ToastService();
 
 export default toastService;
+

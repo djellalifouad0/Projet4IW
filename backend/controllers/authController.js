@@ -1,4 +1,4 @@
-const bcrypt = require('bcryptjs');
+﻿const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
 const crypto = require('crypto');
 const User = require('../models/user');
@@ -6,7 +6,6 @@ const NotificationService = require('../services/notificationService');
 
 const JWT_SECRET = 'votre_clé_secrète'; // Remplace avec un .env sécurisé
 
-// ➕ Inscription normale (user/admin)
 exports.register = async (req, res) => {
   try {
     const { username, email, password, role } = req.body;
@@ -36,7 +35,6 @@ exports.register = async (req, res) => {
   }
 };
 
-// ➕ Connexion email / mot de passe
 exports.login = async (req, res) => {
   try {
     const { email, password, otp } = req.body;
@@ -48,7 +46,6 @@ exports.login = async (req, res) => {
     const match = await bcrypt.compare(password, user.password);
     if (!match) return res.status(401).json({ error: 'Mot de passe incorrect' });
 
-    // ➕ Vérification 2FA si activée
     if (user.totpSecret) {
       if (!otp || !verifyTOTP(otp, user.totpSecret)) {
         return res.status(401).json({ error: 'Code de vérification invalide' });
@@ -69,7 +66,6 @@ exports.login = async (req, res) => {
   }
 };
 
-// ➕ Connexion via Google (OAuth simulée ici)
 exports.googleAuthCallback = async (req, res) => {
   try {
     const { email, googleId, username } = req.body;
@@ -101,15 +97,10 @@ exports.googleAuthCallback = async (req, res) => {
 };
 
 
-
-// ===== AJOUTS POUR L'AUTHENTIFICATION 2 FACTEURS (TOTP) =====
-
-// 🔐 Générer une clé secrète TOTP (hex string)
 function generateSecret() {
   return crypto.randomBytes(20).toString('hex');
 }
 
-// 🔁 Générer un code TOTP
 function generateTOTP(secret, window = 0) {
   const key = Buffer.from(secret, 'hex');
   const time = Math.floor(Date.now() / 30000) + window;
@@ -129,7 +120,6 @@ function generateTOTP(secret, window = 0) {
   return code.toString().padStart(6, '0');
 }
 
-// ✅ Vérifier un code TOTP reçu
 function verifyTOTP(token, secret) {
   for (let errorWindow = -1; errorWindow <= 1; errorWindow++) {
     if (generateTOTP(secret, errorWindow) === token) {
@@ -139,7 +129,6 @@ function verifyTOTP(token, secret) {
   return false;
 }
 
-// 🔧 Activer la 2FA pour un utilisateur connecté
 exports.enable2FA = async (req, res) => {
   try {
     const user = await User.findByPk(req.userId); // req.userId injecté par middleware JWT
@@ -161,7 +150,6 @@ exports.enable2FA = async (req, res) => {
   }
 };
 
-// 🔧 Changer le mot de passe
 exports.changePassword = async (req, res) => {
   try {
     const { currentPassword, newPassword } = req.body;
@@ -170,11 +158,9 @@ exports.changePassword = async (req, res) => {
     const user = await User.findByPk(userId);
     if (!user) return res.status(404).json({ error: 'Utilisateur non trouvé' });
 
-    // Vérifier le mot de passe actuel
     const match = await bcrypt.compare(currentPassword, user.password);
     if (!match) return res.status(400).json({ error: 'Mot de passe actuel incorrect' });
 
-    // Hasher le nouveau mot de passe
     const hashedNewPassword = await bcrypt.hash(newPassword, 10);
     user.password = hashedNewPassword;
     await user.save();
@@ -185,7 +171,6 @@ exports.changePassword = async (req, res) => {
   }
 };
 
-// 🔧 Changer l'adresse email
 exports.changeEmail = async (req, res) => {
   try {
     const { newEmail, password } = req.body;
@@ -194,11 +179,9 @@ exports.changeEmail = async (req, res) => {
     const user = await User.findByPk(userId);
     if (!user) return res.status(404).json({ error: 'Utilisateur non trouvé' });
 
-    // Vérifier le mot de passe
     const match = await bcrypt.compare(password, user.password);
     if (!match) return res.status(400).json({ error: 'Mot de passe incorrect' });
 
-    // Vérifier que le nouvel email n'est pas déjà utilisé
     const existingUser = await User.findOne({ where: { email: newEmail } });
     if (existingUser && existingUser.id !== userId) {
       return res.status(400).json({ error: 'Cette adresse email est déjà utilisée' });
@@ -213,13 +196,13 @@ exports.changeEmail = async (req, res) => {
   }
 };
 
-// 🔧 Déconnecter tous les appareils (simulation)
 exports.logoutAll = async (req, res) => {
   try {
-    // Dans une vraie application, on invaliderait tous les tokens JWT
-    // Ici on simule juste la déconnexion
+
+
     res.json({ message: 'Déconnecté de tous les appareils' });
   } catch (error) {
     res.status(500).json({ error: 'Erreur lors de la déconnexion', details: error.message });
   }
 };
+

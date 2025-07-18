@@ -1,25 +1,9 @@
-const Skill = require('../models/skill');
+﻿const Skill = require('../models/skill');
 const User = require('../models/user'); // Import du modèle User
 const Like = require('../models/like'); // Import du modèle Like
 const Comment = require('../models/comment'); // Import du modèle Comment
 
-/**
- * @swagger
- * tags:
- *   name: Skills
- *   description: API de gestion des compétences
- */
 
-/**
- * @swagger
- * /skills:
- *   get:
- *     summary: Liste toutes les compétences
- *     tags: [Skills]
- *     responses:
- *       200:
- *         description: Liste des compétences
- */
 exports.getAllSkills = async (req, res) => {
   try {
     const userId = req.user ? req.user.id : null;
@@ -49,7 +33,7 @@ exports.getAllSkills = async (req, res) => {
         }
       ],
     });
-    // Ajout des infos de like et commentaires pour le front
+
     const result = skills.map(skill => {
       const likes = skill.Likes ? skill.Likes.length : 0;
       const likedByMe = userId ? skill.Likes.some(l => l.userId === userId) : false;
@@ -67,24 +51,7 @@ exports.getAllSkills = async (req, res) => {
   }
 };
 
-/**
- * @swagger
- * /skills/{id}:
- *   get:
- *     summary: Récupère une compétence par ID
- *     tags: [Skills]
- *     parameters:
- *       - in: path
- *         name: id
- *         required: true
- *         schema:
- *           type: integer
- *     responses:
- *       200:
- *         description: Compétence trouvée
- *       404:
- *         description: Compétence non trouvée
- */
+
 exports.getSkillById = async (req, res) => {
   try {
     const userId = req.user ? req.user.id : null;    const skill = await Skill.findByPk(req.params.id, {
@@ -107,8 +74,7 @@ exports.getSkillById = async (req, res) => {
     });
     
     if (!skill) return res.status(404).json({ error: 'Compétence non trouvée' });
-    
-    // Ajout des infos de like et commentaires pour le front
+
     const likes = skill.Likes ? skill.Likes.length : 0;
     const likedByMe = userId ? skill.Likes.some(l => l.userId === userId) : false;
     const commentsCount = skill.Comments ? skill.Comments.length : 0;
@@ -126,31 +92,7 @@ exports.getSkillById = async (req, res) => {
   }
 };
 
-/**
- * @swagger
- * /skills:
- *   post:
- *     summary: Crée une nouvelle compétence
- *     tags: [Skills]
- *     security:
- *       - bearerAuth: []
- *     requestBody:
- *       required: true
- *       content:
- *         application/json:
- *           schema:
- *             type: object
- *             properties:
- *               description:
- *                 type: string
- *               pricePerHour:
- *                 type: number
- *               location:
- *                 type: string
- *     responses:
- *       201:
- *         description: Compétence créée avec succès
- */
+
 exports.createSkill = async (req, res) => {
   try {
     const { description, pricePerHour, location } = req.body;
@@ -166,39 +108,7 @@ exports.createSkill = async (req, res) => {
   }
 };
 
-/**
- * @swagger
- * /skills/{id}:
- *   patch:
- *     summary: Met à jour une compétence existante
- *     tags: [Skills]
- *     security:
- *       - bearerAuth: []
- *     parameters:
- *       - in: path
- *         name: id
- *         required: true
- *         schema:
- *           type: integer
- *     requestBody:
- *       required: true
- *       content:
- *         application/json:
- *           schema:
- *             type: object
- *             properties:
- *               description:
- *                 type: string
- *               pricePerHour:
- *                 type: number
- *               location:
- *                 type: string
- *     responses:
- *       200:
- *         description: Compétence mise à jour avec succès
- *       403:
- *         description: Non autorisé
- */
+
 exports.updateSkill = async (req, res) => {
   try {
     const skill = await Skill.findByPk(req.params.id);
@@ -211,26 +121,7 @@ exports.updateSkill = async (req, res) => {
   }
 };
 
-/**
- * @swagger
- * /skills/{id}:
- *   delete:
- *     summary: Supprime une compétence
- *     tags: [Skills]
- *     security:
- *       - bearerAuth: []
- *     parameters:
- *       - in: path
- *         name: id
- *         required: true
- *         schema:
- *           type: integer
- *     responses:
- *       200:
- *         description: Compétence supprimée avec succès
- *       403:
- *         description: Non autorisé
- */
+
 exports.deleteSkill = async (req, res) => {
   const sequelize = require('../config/db');
   const Comment = require('../models/comment');
@@ -257,10 +148,8 @@ exports.deleteSkill = async (req, res) => {
     }
     
     console.log('Suppression manuelle des enregistrements liés...');
-    
-    // Supprimer manuellement tous les enregistrements liés dans l'ordre approprié
-    
-    // 1. Supprimer les commentaires enfants (réponses) d'abord
+
+
     await Comment.destroy({
       where: { 
         skillId: req.params.id,
@@ -269,8 +158,7 @@ exports.deleteSkill = async (req, res) => {
       transaction
     });
     console.log('Commentaires enfants supprimés');
-    
-    // 2. Supprimer les commentaires parents
+
     await Comment.destroy({
       where: { 
         skillId: req.params.id,
@@ -279,15 +167,13 @@ exports.deleteSkill = async (req, res) => {
       transaction
     });
     console.log('Commentaires parents supprimés');
-    
-    // 3. Supprimer tous les likes
+
     await Like.destroy({
       where: { skillId: req.params.id },
       transaction
     });
     console.log('Likes supprimés');
-    
-    // 4. Enfin, supprimer le skill
+
     await skill.destroy({ transaction });
     console.log('Skill supprimé');
     

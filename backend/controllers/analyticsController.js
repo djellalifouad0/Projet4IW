@@ -1,11 +1,10 @@
-const MatomoAnalyticsService = require('../services/matomoAnalyticsService');
+﻿const MatomoAnalyticsService = require('../services/matomoAnalyticsService');
 
 class AnalyticsController {
   constructor() {
     this.matomoService = new MatomoAnalyticsService();
   }
 
-  // Obtenir tous les KPI
   async getAllKPIs(req, res) {
     try {
       const { period = 'day', date = 'today' } = req.query;
@@ -25,25 +24,22 @@ class AnalyticsController {
           period,
           date,
           kpis: {
-            // Engagement utilisateur
+
             1: { name: 'Post Publish Clicks', value: kpis.postPublishClicks },
             2: { name: 'Post Likes', value: kpis.postLikes },
             3: { name: 'Post Comments', value: kpis.postComments },
             4: { name: 'Post Views', value: kpis.postViews },
             5: { name: 'Profile Views', value: kpis.profileViews },
-            
-            // Recherche et navigation
+
             6: { name: 'Search Executed', value: kpis.searchExecuted },
             7: { name: 'Filter Clicks', value: kpis.filterClicks },
             8: { name: 'Clear Search Clicks', value: kpis.clearSearchClicks },
             9: { name: 'Map Clicks', value: kpis.mapClicks },
             10: { name: 'Homepage Time Spent', value: kpis.homepageTimeSpent },
-            
-            // Communication
+
             11: { name: 'Conversations Started', value: kpis.conversationsStarted },
             12: { name: 'Messages Sent', value: kpis.messagesSent },
-            
-            // Métriques utilisateur
+
             22: { name: 'Daily Active Users', value: kpis.dailyActiveUsers },
             23: { name: 'Weekly Active Users', value: kpis.weeklyActiveUsers },
             24: { name: 'Monthly Active Users', value: kpis.monthlyActiveUsers }
@@ -59,7 +55,6 @@ class AnalyticsController {
     }
   }
 
-  // Obtenir les données du tableau de bord
   async getDashboard(req, res) {
     try {
       const { period = 'day', date = 'today' } = req.query;
@@ -86,7 +81,6 @@ class AnalyticsController {
     }
   }
 
-  // Obtenir un KPI spécifique
   async getSpecificKPI(req, res) {
     try {
       const { kpiId } = req.params;
@@ -165,16 +159,13 @@ class AnalyticsController {
     }
   }
 
-  // Obtenir les tendances sur une période
   async getTrends(req, res) {
     try {
       const { period = 'day', range = '7' } = req.query;
-      
-      // Générer les dates pour la période demandée
+
       const dates = this.generateDateRange(period, parseInt(range));
       const trendsData = {};
-      
-      // Obtenir les données pour chaque date
+
       for (const date of dates) {
         const kpis = await this.matomoService.getAllKPIs(period, date);
         if (kpis) {
@@ -199,7 +190,6 @@ class AnalyticsController {
     }
   }
 
-  // Méthode utilitaire pour générer une plage de dates
   generateDateRange(period, range) {
     const dates = [];
     const today = new Date();
@@ -221,7 +211,6 @@ class AnalyticsController {
     return dates.reverse();
   }
 
-  // Obtenir un rapport personnalisé
   async getCustomReport(req, res) {
     try {
       const { kpis, period = 'day', date = 'today' } = req.body;
@@ -262,7 +251,6 @@ class AnalyticsController {
     }
   }
 
-  // Méthode utilitaire pour obtenir un KPI par ID
   async getKPIById(kpiId, period, date) {
     switch (parseInt(kpiId)) {
       case 1: return await this.matomoService.getPostPublishClicks(period, date);
@@ -284,7 +272,6 @@ class AnalyticsController {
     }
   }
 
-  // Obtenir un rapport personnalisé
   async getCustomReport(req, res) {
     try {
       const { metrics, period = 'day', date = 'today' } = req.body;
@@ -327,7 +314,6 @@ class AnalyticsController {
 
 const analyticsController = new AnalyticsController();
 
-// Lier les méthodes pour préserver le contexte 'this'
 module.exports = {
   getAllKPIs: analyticsController.getAllKPIs.bind(analyticsController),
   getDashboard: analyticsController.getDashboard.bind(analyticsController),
@@ -335,3 +321,4 @@ module.exports = {
   getTrends: analyticsController.getTrends.bind(analyticsController),
   getCustomReport: analyticsController.getCustomReport.bind(analyticsController)
 };
+

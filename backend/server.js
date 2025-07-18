@@ -1,4 +1,4 @@
-const http = require('http');
+﻿const http = require('http');
 const socketIo = require('socket.io');
 const jwt = require('jsonwebtoken');
 const logger = require('./utils/logger');
@@ -11,7 +11,6 @@ const sequelize = require('./config/db');
 
 const PORT = process.env.PORT || 5000;
 
-// Gestion globale des erreurs
 process.on('uncaughtException', (err) => {
   logger.error(`❌ Uncaught Exception: ${err}`);
   process.exit(1);
@@ -21,10 +20,8 @@ process.on('unhandledRejection', (reason) => {
   logger.error(`❌ Unhandled Rejection: ${reason}`);
 });
 
-// Créer le serveur HTTP
 const server = http.createServer(app);
 
-// Configurer Socket.IO
 const io = socketIo(server, {
   cors: {
     origin: ["http://localhost:3000", "http://localhost:5173", "http://localhost:8080"],
@@ -154,3 +151,4 @@ const { setupAssociations } = require('./models/associations.js');
     process.exit(1);
   }
 })();
+
