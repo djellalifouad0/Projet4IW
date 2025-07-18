@@ -1,0 +1,21 @@
+User-agent: *
+Allow: /
+
+# Sitemap
+Sitemap: https://skillswap.com/sitemap.xml
+
+# Délai de crawl recommandé (en secondes)
+Crawl-delay: 1
+
+# Pages à exclure du crawl
+Disallow: /api/
+Disallow: /admin/
+Disallow: /*.json$
+Disallow: /parametres
+Disallow: /notifications
+
+# Autoriser les ressources importantes
+Allow: /src/assets/images/
+Allow: /src/assets/styles/
+Allow: /*.css$
+Allow: /*.js$

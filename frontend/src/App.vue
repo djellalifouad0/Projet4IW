@@ -8,12 +8,22 @@
 <script>
 import ErrorBoundary from './components/ErrorBoundary.vue'
 import ToastContainer from './components/ToastContainer.vue'
+import { useSEO } from './composables/useSEO.js'
 
 export default {
   name: 'App',
   components: { 
     ErrorBoundary,
     ToastContainer
+  },
+  setup() {
+    // Initialiser le SEO global
+    const { setSEO } = useSEO()
+    
+    // Configuration SEO par défaut pour l'application
+    setSEO()
+
+    return {}
   }
 }
 </script>
