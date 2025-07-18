@@ -49,6 +49,11 @@ export default {
     handleSearch() {
       if (!this.searchQuery.trim()) return
       
+      // Tracker la recherche exécutée (KPI 6)
+      if (this.$matomo) {
+        this.$matomo.trackSearchExecuted(this.searchQuery.trim())
+      }
+      
       // Rediriger vers la home avec le paramètre de recherche
       this.$router.push({
         path: '/',

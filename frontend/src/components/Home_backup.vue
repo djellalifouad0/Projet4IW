@@ -12,7 +12,7 @@
           <button @click="setSort('moinsCher')">Moins cher</button>
         </div>
       </div>
-      <button class="publish-btn" @click="handlePublishClick">+ Publier</button>
+      <button class="publish-btn" @click="showForm = true">+ Publier</button>
     </div>
 
     <div v-if="likeError" class="error-message" style="margin-bottom: 10px;">{{ likeError }}</div>
@@ -104,9 +104,7 @@ import socketService from '../services/socket'
 export default {
   name: 'Home',
   components: { PostCard },
-  inject: ['matomo'], // Injecter le service Matomo
-  
-  data() {
+  inject: ['matomo'], // Injecter le service Matomo  data() {
     return {
       posts: [],
       allPosts: [], // Tous les posts pour la recherche
@@ -400,16 +398,8 @@ export default {
       }
     },
     clearSearch() {
-      // Tracker le clic sur "Effacer la recherche"
-      this.matomo.trackClearSearchClick();
       // Supprimer le paramètre de recherche de l'URL
       this.$router.push({ path: '/', query: {} });
-    },
-    
-    // Nouvelle méthode pour tracker le clic sur publier
-    handlePublishClick() {
-      this.matomo.trackPostPublishClick();
-      this.showForm = true;
     },
   }
 }

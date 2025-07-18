@@ -15,15 +15,36 @@ services:
       - DB_PASSWORD=root
       - DB_HOST=mysql
       - DB_DIALECT=mysql
+      - MATOMO_URL=http://matomo:80
+      - MATOMO_SITE_ID=1
+      - MATOMO_TOKEN=72ea5aa686306b06832abb37dc0675bb
     depends_on:
       mysql:
         condition: service_healthy
+      matomo:
+        condition: service_started
     volumes:
       - sqlite-data:/app/database
     command: >
       sh -c "
         npm start
       "
+
+  frontend:
+    build:
+      context: ./frontend
+    container_name: frontend-app
+    ports:
+      - "3000:3000"
+    environment:
+      - VITE_API_URL=http://localhost:5000/api
+      - VITE_MATOMO_URL=http://localhost:8080
+      - VITE_MATOMO_SITE_ID=1
+    depends_on:
+      - app
+    volumes:
+      - ./frontend:/app
+      - /app/node_modules
 
   mysql:
     image: mysql:8
@@ -42,6 +63,44 @@ services:
       retries: 10
       start_period: 10s
 
+  matomo:
+    image: matomo:latest
+    container_name: matomo
+    restart: unless-stopped
+    ports:
+      - "8080:80"
+    environment:
+      - MATOMO_DATABASE_HOST=matomo-db
+      - MATOMO_DATABASE_ADAPTER=mysql
+      - MATOMO_DATABASE_TABLES_PREFIX=matomo_
+      - MATOMO_DATABASE_USERNAME=matomo_user
+      - MATOMO_DATABASE_PASSWORD=matomo_password
+      - MATOMO_DATABASE_DBNAME=matomo_db
+    depends_on:
+      matomo-db:
+        condition: service_healthy
+    volumes:
+      - matomo-data:/var/www/html
+
+  matomo-db:
+    image: mysql:8
+    container_name: matomo-db
+    restart: unless-stopped
+    environment:
+      MYSQL_DATABASE: matomo_db
+      MYSQL_USER: matomo_user
+      MYSQL_PASSWORD: matomo_password
+      MYSQL_ROOT_PASSWORD: root_password
+    volumes:
+      - matomo-db-data:/var/lib/mysql
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost"]
+      interval: 5s
+      retries: 10
+      start_period: 10s
+
 volumes:
   sqlite-data:
   mysql-data:
+  matomo-data:
+  matomo-db-data:

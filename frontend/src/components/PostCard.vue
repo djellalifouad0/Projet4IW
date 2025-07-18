@@ -206,7 +206,10 @@ import NotificationService from '../services/notificationService'
 import socketService from '../services/socket'
 
 export default {
-  name: 'PostCard',  props: {
+  name: 'PostCard',
+  inject: ['matomo'], // Injecter le service Matomo
+  
+  props: {
     name: { type: String, required: true },
     address: { type: String, required: true },
     avatar: { type: String, required: true },
@@ -221,7 +224,9 @@ export default {
     commentsCount: { type: Number, default: 0 },
     profileToken: { type: String, default: '' },
     userId: { type: Number, required: true }
-  },data() {
+  },
+  
+  data() {
     return {
       showModal: false,
       charLimit: 270,

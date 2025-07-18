@@ -11,7 +11,8 @@ const routes = [
     component: MainLayout,
     children: [
       { path: '', component: Home },
-      { path: 'dashboard', component: () => import('../components/Dashboard.vue') },      { path: 'profile', component: () => import('../components/Profile.vue') },
+      { path: 'dashboard', component: () => import('../components/Dashboard.vue') },
+      { path: 'analytics', component: () => import('../components/AnalyticsDashboard.vue') },      { path: 'profile', component: () => import('../components/Profile.vue') },
       { path: 'profile/:profileToken', component: () => import('../components/Profile.vue') },
       { path: 'post/:id', component: () => import('../components/PostView.vue') },
       { path: 'carte', component: () => import('../components/Carte.vue') },

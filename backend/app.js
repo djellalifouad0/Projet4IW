@@ -12,6 +12,7 @@ const likeRoutes = require('./routes/likeRoutes');
 const conversationRoutes = require('./routes/conversationRoutes');
 const appointmentRoutes = require('./routes/appointmentRoutes');
 const ratingRoutes = require('./routes/ratingRoutes');
+const analyticsRoutes = require('./routes/analyticsRoutes');
 
 // Swagger
 const setupSwagger = require('./swagger/swagger');
@@ -33,6 +34,7 @@ app.use('/api/likes', likeRoutes);
 app.use('/api/conversations', conversationRoutes);
 app.use('/api/appointments', appointmentRoutes);
 app.use('/api/ratings', ratingRoutes);
+app.use('/api/analytics', analyticsRoutes);
 // app.use('/api/dashboard', dashboardRoutes);
 // ➕ Swagger (dispo sur /api-docs)
 setupSwagger(app);
