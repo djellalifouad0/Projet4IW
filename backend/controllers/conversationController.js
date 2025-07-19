@@ -295,6 +295,8 @@ exports.getMessages = async (req, res) => {
  *       201:
  *         description: Message envoyé
  */
+const { chatgptCheckContacts } = require('../services/chatgptService');
+
 exports.sendMessage = async (req, res) => {
   try {
     const conversationId = req.params.id;
@@ -304,6 +306,12 @@ exports.sendMessage = async (req, res) => {
     if (!content || !content.trim()) {
       return res.status(400).json({ error: 'Le contenu du message est requis' });
     }
+    const hasContacts = await chatgptCheckContacts(content);
+
+    if (hasContacts) {
+      return res.status(400).json({ error: 'envoyer des coordonnées personnelles n\'est pas autorisé' });
+    }
+    console.log(hasContacts);
 
     // Vérifier que l'utilisateur fait partie de cette conversation
     const conversation = await Conversation.findOne({
@@ -376,6 +384,7 @@ exports.sendMessage = async (req, res) => {
       }
     });
   } catch (error) {
+    console.log('Error sending message:', error);
     res.status(500).json({ error: 'Erreur envoi message' });
   }
 };

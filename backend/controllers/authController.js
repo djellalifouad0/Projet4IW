@@ -3,6 +3,7 @@ const jwt = require('jsonwebtoken');
 const crypto = require('crypto');
 const User = require('../models/user');
 const NotificationService = require('../services/notificationService');
+const e = require('express');
 
 const JWT_SECRET = 'votre_clé_secrète'; // Remplace avec un .env sécurisé
 
@@ -68,11 +69,27 @@ exports.login = async (req, res) => {
     res.status(500).json({ error: 'Erreur connexion', details: error.message });
   }
 };
-
+const { OAuth2Client } = require('google-auth-library');
+const client = new OAuth2Client('211678426929-22c5s4tksctlud2p36qt3q9p10jdnpf4.apps.googleusercontent.com'); 
 // ➕ Connexion via Google (OAuth simulée ici)
 exports.googleAuthCallback = async (req, res) => {
   try {
-    const { email, googleId, username } = req.body;
+    const { idToken } = req.body;
+
+    if (!idToken) {
+      return res.status(400).json({ error: 'idToken manquant' });
+    }
+
+    // Vérifier et décoder le id_token
+    const ticket = await client.verifyIdToken({
+      idToken,
+      audience: '211678426929-22c5s4tksctlud2p36qt3q9p10jdnpf4.apps.googleusercontent.com' // 👈 remplace ici aussi
+    });
+
+    const payload = ticket.getPayload();
+    const email = payload.email;
+    const googleId = payload.sub; // identifiant Google unique
+    const username = payload.name || email.split('@')[0];
 
     let user = await User.findOne({ where: { email } });
 
@@ -88,14 +105,15 @@ exports.googleAuthCallback = async (req, res) => {
 
     const token = jwt.sign({
       id: user.id,
-      userId: user.id, // Ajouter pour compatibilité WebSocket
-      username: user.username, // Ajouter le username pour les notifications
+      userId: user.id,
+      username: user.username,
       role: user.role,
       profileToken: user.profileToken
     }, JWT_SECRET, { expiresIn: '2h' });
 
     res.json({ token });
   } catch (error) {
+    console.error(error);
     res.status(500).json({ error: 'Erreur authentification Google', details: error.message });
   }
 };

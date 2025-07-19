@@ -38,18 +38,28 @@ const NotificationService = require('../services/notificationService');
  *       201:
  *         description: Rendez-vous créé avec succès
  */
+
+const Stripe = require('stripe');
+const stripe = Stripe(process.env.STRIPE_SECRET_KEY);
 exports.createAppointment = async (req, res) => {
   try {
-    const { receiverId, conversationId, title, description, appointmentDate, location } = req.body;
+    const { receiverId, conversationId, title, description, appointmentDate, location, price } = req.body;
     const requesterId = req.user.id;
 
-    // Vérifier que l'utilisateur ne peut pas créer un rendez-vous avec lui-même
     if (requesterId === receiverId) {
       return res.status(400).json({ error: 'Vous ne pouvez pas créer un rendez-vous avec vous-même' });
-    }    // Vérifier que la date est dans le futur
+    }
+
     if (new Date(appointmentDate) <= new Date()) {
       return res.status(400).json({ error: 'La date du rendez-vous doit être dans le futur' });
     }
+
+    if (!price || price <= 0) {
+      return res.status(400).json({ error: 'Un tarif valide doit être fourni' });
+    }
+
+    const siteCommission = +(price * 0.11).toFixed(2);
+    const totalToPay = +(price + siteCommission).toFixed(2);
 
     const appointment = await Appointment.create({
       requesterId,
@@ -59,31 +69,14 @@ exports.createAppointment = async (req, res) => {
       description,
       appointmentDate,
       location,
-      status: 'pending'
+      price,
+      commission: siteCommission,
+      totalPrice: totalToPay,
+      status: 'pending',
+      paymentStatus: 'unpaid'
     });
 
-    // Récupérer l'appointment avec les relations
-    const createdAppointment = await Appointment.findByPk(appointment.id, {
-      include: [
-        { model: User, as: 'requester', attributes: ['id', 'username', 'avatar'] },
-        { model: User, as: 'receiver', attributes: ['id', 'username', 'avatar'] }
-      ]
-    });    // Créer une notification pour le destinataire
-    try {
-      const requesterName = createdAppointment.requester.username;
-      const io = req.app.get('socketio'); // Récupérer l'instance WebSocket
-      await NotificationService.createAppointmentNotification(
-        receiverId,
-        'created',
-        requesterName,
-        title,
-        io
-      );
-    } catch (notifError) {
-      console.error('Erreur création notification rendez-vous:', notifError);
-    }
-
-    res.status(201).json(createdAppointment);
+    res.status(201).json(appointment);
   } catch (error) {
     console.error('Erreur création rendez-vous:', error);
     res.status(500).json({ error: 'Erreur serveur lors de la création du rendez-vous' });

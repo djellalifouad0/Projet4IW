@@ -1,48 +1,79 @@
-2025-07-14 16:28:59 [ERROR]: Unhandled Rejection: NoDatabaseAdapterError: There are no adapters supporting one of the database you provided
-2025-07-14 16:29:50 [ERROR]: Unhandled Rejection: NoDatabaseAdapterError: There are no adapters supporting one of the database you provided
-2025-07-14 16:30:10 [ERROR]: Unhandled Rejection: NoDatabaseAdapterError: There are no adapters supporting one of the database you provided
-2025-07-14 16:31:09 [ERROR]: Unhandled Rejection: SequelizeDatabaseError: Failed to open the referenced table 'User'
-2025-07-14 16:31:09 [ERROR]: Unhandled Rejection: NoDatabaseAdapterError: There are no adapters supporting one of the database you provided
-2025-07-14 16:33:03 [ERROR]: Unhandled Rejection: NoDatabaseAdapterError: There are no adapters supporting one of the database you provided
-2025-07-14 16:33:03 [ERROR]: Unhandled Rejection: SequelizeDatabaseError: Failed to open the referenced table 'User'
-2025-07-14 16:33:31 [ERROR]: Unhandled Rejection: NoDatabaseAdapterError: There are no adapters supporting one of the database you provided
-2025-07-14 16:33:31 [ERROR]: Unhandled Rejection: SequelizeDatabaseError: Failed to open the referenced table 'User'
-2025-07-14 16:33:34 [ERROR]: Unhandled Rejection: NoDatabaseAdapterError: There are no adapters supporting one of the database you provided
-2025-07-14 16:33:34 [ERROR]: Unhandled Rejection: SequelizeDatabaseError: Failed to open the referenced table 'User'
-2025-07-14 16:33:41 [ERROR]: Unhandled Rejection: NoDatabaseAdapterError: There are no adapters supporting one of the database you provided
-2025-07-14 16:33:41 [ERROR]: Unhandled Rejection: SequelizeDatabaseError: Failed to open the referenced table 'User'
-2025-07-14 16:34:21 [ERROR]: Unhandled Rejection: SequelizeDatabaseError: Failed to open the referenced table 'User'
-2025-07-14 16:34:21 [ERROR]: Unhandled Rejection: NoDatabaseAdapterError: There are no adapters supporting one of the database you provided
-2025-07-14 16:36:29 [ERROR]: Unhandled Rejection: NoDatabaseAdapterError: There are no adapters supporting one of the database you provided
-2025-07-14 16:36:29 [ERROR]: Unhandled Rejection: SequelizeDatabaseError: Failed to open the referenced table 'User'
-2025-07-14 16:38:32 [ERROR]: Unhandled Rejection: SequelizeDatabaseError: Failed to open the referenced table 'User'
-2025-07-14 16:38:32 [ERROR]: Unhandled Rejection: NoDatabaseAdapterError: There are no adapters supporting one of the database you provided
-2025-07-14 16:40:13 [ERROR]: Unhandled Rejection: SequelizeDatabaseError: Failed to open the referenced table 'User'
-2025-07-14 16:40:27 [ERROR]: Unhandled Rejection: NoDatabaseAdapterError: There are no adapters supporting one of the database you provided
-2025-07-14 16:41:02 [ERROR]: Unhandled Rejection: NoDatabaseAdapterError: There are no adapters supporting one of the database you provided
-2025-07-14 16:41:02 [ERROR]: Unhandled Rejection: SequelizeDatabaseError: Failed to open the referenced table 'Conversations'
-2025-07-14 16:41:33 [ERROR]: Unhandled Rejection: NoDatabaseAdapterError: There are no adapters supporting one of the database you provided
-2025-07-14 16:41:34 [ERROR]: Unhandled Rejection: SequelizeDatabaseError: Failed to open the referenced table 'Conversations'
-2025-07-14 16:44:52 [ERROR]: Unhandled Rejection: NoDatabaseAdapterError: There are no adapters supporting one of the database you provided
-2025-07-14 16:46:12 [ERROR]: Unhandled Rejection: NoDatabaseAdapterError: There are no adapters supporting one of the database you provided
-2025-07-14 16:46:19 [ERROR]: Unhandled Rejection: NoDatabaseAdapterError: There are no adapters supporting one of the database you provided
-2025-07-14 16:46:27 [ERROR]: Unhandled Rejection: NoDatabaseAdapterError: There are no adapters supporting one of the database you provided
-2025-07-14 16:46:38 [ERROR]: Unhandled Rejection: NoDatabaseAdapterError: There are no adapters supporting one of the database you provided
-2025-07-14 16:46:50 [ERROR]: Unhandled Rejection: NoDatabaseAdapterError: There are no adapters supporting one of the database you provided
-2025-07-14 16:47:08 [ERROR]: Unhandled Rejection: NoDatabaseAdapterError: There are no adapters supporting one of the database you provided
-2025-07-14 16:47:28 [ERROR]: Unhandled Rejection: NoDatabaseAdapterError: There are no adapters supporting one of the database you provided
-2025-07-14 16:47:38 [ERROR]: Unhandled Rejection: NoDatabaseAdapterError: There are no adapters supporting one of the database you provided
-2025-07-14 16:47:42 [ERROR]: Unhandled Rejection: NoDatabaseAdapterError: There are no adapters supporting one of the database you provided
-2025-07-14 16:47:52 [ERROR]: Unhandled Rejection: NoDatabaseAdapterError: There are no adapters supporting one of the database you provided
-2025-07-14 16:47:57 [ERROR]: Unhandled Rejection: NoDatabaseAdapterError: There are no adapters supporting one of the database you provided
-2025-07-14 16:48:21 [ERROR]: Unhandled Rejection: NoDatabaseAdapterError: There are no adapters supporting one of the database you provided
-2025-07-14 16:48:26 [ERROR]: Unhandled Rejection: NoDatabaseAdapterError: There are no adapters supporting one of the database you provided
-2025-07-14 16:48:35 [ERROR]: Unhandled Rejection: NoDatabaseAdapterError: There are no adapters supporting one of the database you provided
-2025-07-14 16:49:45 [ERROR]: Unhandled Rejection: NoDatabaseAdapterError: There are no adapters supporting one of the database you provided
-2025-07-14 16:50:47 [ERROR]: Unhandled Rejection: NoDatabaseAdapterError: There are no adapters supporting one of the database you provided
-2025-07-14 16:50:57 [ERROR]: Unhandled Rejection: NoDatabaseAdapterError: There are no adapters supporting one of the database you provided
-2025-07-14 16:51:59 [ERROR]: Unhandled Rejection: NoDatabaseAdapterError: There are no adapters supporting one of the database you provided
-2025-07-14 20:06:40 [ERROR]: Unhandled Rejection: ReferenceError: express is not defined
-2025-07-14 20:06:45 [ERROR]: Unhandled Rejection: SequelizeDatabaseError: Too many keys specified; max 64 keys allowed
-2025-07-14 20:06:49 [ERROR]: Unhandled Rejection: SequelizeDatabaseError: Too many keys specified; max 64 keys allowed
-2025-07-14 20:09:58 [ERROR]: Unhandled Rejection: SequelizeDatabaseError: Too many keys specified; max 64 keys allowed
+2025-07-15 20:59:48 [ERROR]: Error
+    at Query.run (C:\Users\fdjellali\OneDrive - Neurones IT\Bureau\Projet4IW\backend\node_modules\sequelize\lib\dialects\mysql\query.js:52:25)
+    at C:\Users\fdjellali\OneDrive - Neurones IT\Bureau\Projet4IW\backend\node_modules\sequelize\lib\sequelize.js:315:28
+    at async User.sync (C:\Users\fdjellali\OneDrive - Neurones IT\Bureau\Projet4IW\backend\node_modules\sequelize\lib\model.js:984:11)
+    at async Sequelize.sync (C:\Users\fdjellali\OneDrive - Neurones IT\Bureau\Projet4IW\backend\node_modules\sequelize\lib\sequelize.js:377:9)
+    at async C:\Users\fdjellali\OneDrive - Neurones IT\Bureau\Projet4IW\backend\server.js:144:5
+2025-07-15 21:00:48 [ERROR]: Error
+    at Query.run (C:\Users\fdjellali\OneDrive - Neurones IT\Bureau\Projet4IW\backend\node_modules\sequelize\lib\dialects\mysql\query.js:52:25)
+    at C:\Users\fdjellali\OneDrive - Neurones IT\Bureau\Projet4IW\backend\node_modules\sequelize\lib\sequelize.js:315:28
+    at async User.sync (C:\Users\fdjellali\OneDrive - Neurones IT\Bureau\Projet4IW\backend\node_modules\sequelize\lib\model.js:984:11)
+    at async Sequelize.sync (C:\Users\fdjellali\OneDrive - Neurones IT\Bureau\Projet4IW\backend\node_modules\sequelize\lib\sequelize.js:377:9)
+    at async C:\Users\fdjellali\OneDrive - Neurones IT\Bureau\Projet4IW\backend\server.js:144:5
+2025-07-16 22:24:31 [ERROR]: ReferenceError: setupAssociations is not defined
+    at C:\Users\fdjellali\OneDrive - Neurones IT\Bureau\Projet4IW\backend\server.js:141:5
+    at process.processTicksAndRejections (node:internal/process/task_queues:95:5)
+2025-07-18 17:04:40 [ERROR]: SequelizeConnectionRefusedError
+    at ConnectionManager.connect (C:\Users\fdjellali\OneDrive - Neurones IT\Bureau\Projet4IW\backend\node_modules\sequelize\lib\dialects\mysql\connection-manager.js:92:17)
+    at process.processTicksAndRejections (node:internal/process/task_queues:95:5)
+    at async ConnectionManager._connect (C:\Users\fdjellali\OneDrive - Neurones IT\Bureau\Projet4IW\backend\node_modules\sequelize\lib\dialects\abstract\connection-manager.js:222:24)
+    at async C:\Users\fdjellali\OneDrive - Neurones IT\Bureau\Projet4IW\backend\node_modules\sequelize\lib\dialects\abstract\connection-manager.js:174:32
+    at async ConnectionManager.getConnection (C:\Users\fdjellali\OneDrive - Neurones IT\Bureau\Projet4IW\backend\node_modules\sequelize\lib\dialects\abstract\connection-manager.js:197:7)
+    at async C:\Users\fdjellali\OneDrive - Neurones IT\Bureau\Projet4IW\backend\node_modules\sequelize\lib\sequelize.js:305:26
+    at async Sequelize.authenticate (C:\Users\fdjellali\OneDrive - Neurones IT\Bureau\Projet4IW\backend\node_modules\sequelize\lib\sequelize.js:457:5)
+    at async C:\Users\fdjellali\OneDrive - Neurones IT\Bureau\Projet4IW\backend\server.js:138:5
+2025-07-18 17:41:05 [ERROR]: Error
+    at Query.run (C:\Users\fdjellali\OneDrive - Neurones IT\Bureau\Projet4IW\backend\node_modules\sequelize\lib\dialects\mysql\query.js:52:25)
+    at C:\Users\fdjellali\OneDrive - Neurones IT\Bureau\Projet4IW\backend\node_modules\sequelize\lib\sequelize.js:315:28
+    at process.processTicksAndRejections (node:internal/process/task_queues:95:5)
+    at async User.sync (C:\Users\fdjellali\OneDrive - Neurones IT\Bureau\Projet4IW\backend\node_modules\sequelize\lib\model.js:984:11)
+    at async Sequelize.sync (C:\Users\fdjellali\OneDrive - Neurones IT\Bureau\Projet4IW\backend\node_modules\sequelize\lib\sequelize.js:377:9)
+    at async C:\Users\fdjellali\OneDrive - Neurones IT\Bureau\Projet4IW\backend\server.js:143:5
+2025-07-18 17:41:15 [ERROR]: Error
+    at Query.run (C:\Users\fdjellali\OneDrive - Neurones IT\Bureau\Projet4IW\backend\node_modules\sequelize\lib\dialects\mysql\query.js:52:25)
+    at C:\Users\fdjellali\OneDrive - Neurones IT\Bureau\Projet4IW\backend\node_modules\sequelize\lib\sequelize.js:315:28
+    at process.processTicksAndRejections (node:internal/process/task_queues:95:5)
+    at async User.sync (C:\Users\fdjellali\OneDrive - Neurones IT\Bureau\Projet4IW\backend\node_modules\sequelize\lib\model.js:984:11)
+    at async Sequelize.sync (C:\Users\fdjellali\OneDrive - Neurones IT\Bureau\Projet4IW\backend\node_modules\sequelize\lib\sequelize.js:377:9)
+    at async C:\Users\fdjellali\OneDrive - Neurones IT\Bureau\Projet4IW\backend\server.js:143:5
+2025-07-18 17:41:32 [ERROR]: Error
+    at Query.run (C:\Users\fdjellali\OneDrive - Neurones IT\Bureau\Projet4IW\backend\node_modules\sequelize\lib\dialects\mysql\query.js:52:25)
+    at C:\Users\fdjellali\OneDrive - Neurones IT\Bureau\Projet4IW\backend\node_modules\sequelize\lib\sequelize.js:315:28
+    at process.processTicksAndRejections (node:internal/process/task_queues:95:5)
+    at async User.sync (C:\Users\fdjellali\OneDrive - Neurones IT\Bureau\Projet4IW\backend\node_modules\sequelize\lib\model.js:984:11)
+    at async Sequelize.sync (C:\Users\fdjellali\OneDrive - Neurones IT\Bureau\Projet4IW\backend\node_modules\sequelize\lib\sequelize.js:377:9)
+    at async C:\Users\fdjellali\OneDrive - Neurones IT\Bureau\Projet4IW\backend\server.js:143:5
+2025-07-18 17:41:38 [ERROR]: Error
+    at Query.run (C:\Users\fdjellali\OneDrive - Neurones IT\Bureau\Projet4IW\backend\node_modules\sequelize\lib\dialects\mysql\query.js:52:25)
+    at C:\Users\fdjellali\OneDrive - Neurones IT\Bureau\Projet4IW\backend\node_modules\sequelize\lib\sequelize.js:315:28
+    at process.processTicksAndRejections (node:internal/process/task_queues:95:5)
+    at async User.sync (C:\Users\fdjellali\OneDrive - Neurones IT\Bureau\Projet4IW\backend\node_modules\sequelize\lib\model.js:984:11)
+    at async Sequelize.sync (C:\Users\fdjellali\OneDrive - Neurones IT\Bureau\Projet4IW\backend\node_modules\sequelize\lib\sequelize.js:377:9)
+    at async C:\Users\fdjellali\OneDrive - Neurones IT\Bureau\Projet4IW\backend\server.js:143:5
+2025-07-18 17:41:46 [ERROR]: Error
+    at Query.run (C:\Users\fdjellali\OneDrive - Neurones IT\Bureau\Projet4IW\backend\node_modules\sequelize\lib\dialects\mysql\query.js:52:25)
+    at C:\Users\fdjellali\OneDrive - Neurones IT\Bureau\Projet4IW\backend\node_modules\sequelize\lib\sequelize.js:315:28
+    at process.processTicksAndRejections (node:internal/process/task_queues:95:5)
+    at async User.sync (C:\Users\fdjellali\OneDrive - Neurones IT\Bureau\Projet4IW\backend\node_modules\sequelize\lib\model.js:984:11)
+    at async Sequelize.sync (C:\Users\fdjellali\OneDrive - Neurones IT\Bureau\Projet4IW\backend\node_modules\sequelize\lib\sequelize.js:377:9)
+    at async C:\Users\fdjellali\OneDrive - Neurones IT\Bureau\Projet4IW\backend\server.js:143:5
+2025-07-18 17:42:19 [ERROR]: Error
+    at Query.run (C:\Users\fdjellali\OneDrive - Neurones IT\Bureau\Projet4IW\backend\node_modules\sequelize\lib\dialects\mysql\query.js:52:25)
+    at C:\Users\fdjellali\OneDrive - Neurones IT\Bureau\Projet4IW\backend\node_modules\sequelize\lib\sequelize.js:315:28
+    at process.processTicksAndRejections (node:internal/process/task_queues:95:5)
+    at async User.sync (C:\Users\fdjellali\OneDrive - Neurones IT\Bureau\Projet4IW\backend\node_modules\sequelize\lib\model.js:984:11)
+    at async Sequelize.sync (C:\Users\fdjellali\OneDrive - Neurones IT\Bureau\Projet4IW\backend\node_modules\sequelize\lib\sequelize.js:377:9)
+    at async C:\Users\fdjellali\OneDrive - Neurones IT\Bureau\Projet4IW\backend\server.js:143:5
+2025-07-18 21:00:07 [ERROR]: ❌ Unhandled Rejection: TypeError: AdminJSExpress.withAuthentication is not a function
+2025-07-18 21:00:38 [ERROR]: ❌ Unhandled Rejection: TypeError: AdminJSExpress.withAuthentication is not a function
+2025-07-18 21:15:11 [ERROR]: ❌ Unhandled Rejection: Error: Cannot find module 'bcrypt'
+Require stack:
+- C:\Users\fdjellali\OneDrive - Neurones IT\Bureau\Projet4IW\backend\app.js
+- C:\Users\fdjellali\OneDrive - Neurones IT\Bureau\Projet4IW\backend\server.js
+2025-07-18 21:15:42 [ERROR]: ❌ Unhandled Rejection: Error: Cannot find module 'bcrypt'
+Require stack:
+- C:\Users\fdjellali\OneDrive - Neurones IT\Bureau\Projet4IW\backend\app.js
+- C:\Users\fdjellali\OneDrive - Neurones IT\Bureau\Projet4IW\backend\server.js
+2025-07-18 21:20:18 [ERROR]: ❌ Unhandled Rejection: SequelizeValidationError: notNull Violation: User.profileToken cannot be null
+2025-07-18 21:20:40 [ERROR]: ❌ Unhandled Rejection: SequelizeValidationError: notNull Violation: User.profileToken cannot be null
+2025-07-18 21:20:54 [ERROR]: ❌ Unhandled Rejection: TypeError: crypto.randomBytes is not a function

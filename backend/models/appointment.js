@@ -91,6 +91,22 @@ const Appointment = sequelize.define('Appointment', {
     type: DataTypes.DATE,
     allowNull: false
   },
+  price: {
+  type: DataTypes.FLOAT,
+  allowNull: false
+},
+commission: {
+  type: DataTypes.FLOAT,
+  allowNull: false
+},
+totalPrice: {
+  type: DataTypes.FLOAT,
+  allowNull: false
+},
+paymentStatus: {
+  type: DataTypes.STRING,
+  defaultValue: 'unpaid' // unpaid, paid
+},
   status: {
     type: DataTypes.ENUM('pending', 'accepted', 'declined', 'cancelled'),
     defaultValue: 'pending'

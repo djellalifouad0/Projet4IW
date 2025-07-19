@@ -4,6 +4,7 @@
     "@admin-bro/sequelize": "^1.2.1",
     "admin-bro": "^4.0.1",
     "jwt-decode": "^4.0.0",
+    "nodemailer": "^7.0.5",
     "socket.io-client": "^4.8.1",
     "sqlite3": "^5.1.7"
   },

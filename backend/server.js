@@ -137,20 +137,20 @@ const { setupAssociations } = require('./models/associations.js');
   try {
     await sequelize.authenticate();
 
-    logger.info('✅ Connexion à la base de données OK');
+    logger.info('Connexion à la base de données OK');
     setupAssociations();
 
-    await sequelize.sync({ alter: true, logging: console.log });
+    await sequelize.sync({ alter: false, logging: console.log });
 
 
     server.listen(PORT, () => {
-      console.log(`🚀 Serveur démarré sur http://localhost:${PORT}`);
-      console.log(`📘 Swagger sur http://localhost:${PORT}/api-docs`);
+      console.log(`Serveur démarré sur http://localhost:${PORT}`);
+      console.log(`Swagger sur http://localhost:${PORT}/api-docs`);
       console.log(`🔌 WebSocket activé`);
     });
   } catch (err) {
     console
-    logger.error('❌ Échec de démarrage', err);
+    logger.error('Échec de démarrage', err);
     process.exit(1);
   }
 })();
