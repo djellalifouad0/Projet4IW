@@ -183,6 +183,20 @@
           </div>
           
           <div class="form-group">
+            <label for="appointment-price">Prix du service (€) *</label>
+            <input 
+              id="appointment-price"
+              v-model.number="appointmentForm.price" 
+              type="number" 
+              min="1"
+              step="0.01"
+              placeholder="Ex: 25.00"
+              required
+            />
+            <small class="price-note">Une commission de 11% sera ajoutée au moment du paiement</small>
+          </div>
+          
+          <div class="form-group">
             <label for="appointment-description">Description (optionnel)</label>
             <textarea 
               id="appointment-description"
@@ -317,7 +331,9 @@ export default {
         date: '',
         time: '',
         location: '',
-        description: ''      },      conversationAppointments: [], // Nouveau: rendez-vous de la conversation actuelle
+        description: '',
+        price: ''
+      },      conversationAppointments: [], // Nouveau: rendez-vous de la conversation actuelle
       showPendingAppointments: true, // Nouveau: contrôle l'affichage des rendez-vous
       isNavbarHidden: false, // Nouvel état pour tracker si la navbar est cachée      showSearchModal: false, // Nouveau: état pour le modal de recherche
       searchQuery: '', // Nouveau: requête de recherche
@@ -337,7 +353,9 @@ export default {
     isAppointmentFormValid() {
       return this.appointmentForm.title.trim() && 
              this.appointmentForm.date && 
-             this.appointmentForm.time;
+             this.appointmentForm.time &&
+             this.appointmentForm.price && 
+             this.appointmentForm.price > 0;
     },    // Nouveau: rendez-vous en attente pour la conversation actuelle
     pendingAppointments() {
       return this.conversationAppointments.filter(appointment => 
@@ -871,7 +889,8 @@ export default {
         date: '',
         time: '',
         location: '',
-        description: ''
+        description: '',
+        price: ''
       };
     },    async createAppointment() {
       if (!this.isAppointmentFormValid || !this.selectedConversation) {
@@ -890,7 +909,8 @@ export default {
           title: this.appointmentForm.title,
           description: this.appointmentForm.description,
           appointmentDate: appointmentDateTime.toISOString(),
-          location: this.appointmentForm.location
+          location: this.appointmentForm.location,
+          price: parseFloat(this.appointmentForm.price)
         };
 
         const response = await api.post('/appointments', appointmentData);
@@ -1824,6 +1844,13 @@ export default {
 
 .appointment-modal .submit-btn:not(:disabled):hover {
   background: #e4a94f;
+}
+
+.appointment-modal .price-note {
+  font-size: 0.8rem;
+  color: #666;
+  margin-top: 4px;
+  font-style: italic;
 }
 
 /* Modal de confirmation de suppression */

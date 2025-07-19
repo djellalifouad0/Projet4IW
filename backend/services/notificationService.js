@@ -142,12 +142,16 @@ class NotificationService {
       case 'rejected':
         message = `${otherUserName} a refusé votre demande de rendez-vous pour "${appointmentTitle}".`;
         break;
+      case 'payment_confirmed':
+        message = `Votre paiement pour le rendez-vous "${appointmentTitle}" a été confirmé.`;
+        break;
     }
 
     const notification = await createNotification(
       userId,
       type === 'created' ? NOTIFICATION_TYPES.APPOINTMENT_CREATED :
       type === 'accepted' ? NOTIFICATION_TYPES.APPOINTMENT_ACCEPTED :
+      type === 'payment_confirmed' ? NOTIFICATION_TYPES.APPOINTMENT_ACCEPTED :
       NOTIFICATION_TYPES.APPOINTMENT_REJECTED,
       message,
       { appointmentTitle, otherUserName }
