@@ -1,4 +1,4 @@
-import { Resend } from 'resend';
+const { Resend } = require('resend');
 
 const resend = new Resend(process.env.MAIL_KEY);
 
