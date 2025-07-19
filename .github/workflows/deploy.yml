@@ -62,7 +62,15 @@ jobs:
             OPENAI_API_KEY="$OPENAI_API_KEY" \
             MAILGUN_KEY="$MAILGUN_KEY" \
             MAILGUN_DOMAIN="$MAILGUN_DOMAIN" \
-            docker-compose up -d --build
+
+                        cat > .env_temp <<EOF
+            MATOMO_TOKEN=${MATOMO_TOKEN}
+            STRIPE_SECRET_KEY=${STRIPE_SECRET_KEY}
+            OPENAI_API_KEY=${OPENAI_API_KEY}
+            MAILGUN_KEY=${MAILGUN_KEY}
+            MAILGUN_DOMAIN=${MAILGUN_DOMAIN}
+            EOF
+            docker-compose --env-file .env_temp up -d --build
 
             echo "📋 État des containers :"
             docker ps -a
