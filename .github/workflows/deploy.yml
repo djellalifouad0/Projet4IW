@@ -55,27 +55,21 @@ jobs:
               git reset --hard origin/main
             fi
 
-            echo "📝 Création d'un .env temporaire…"
-                        cat > .env.temp <<EOF
-            MATOMO_TOKEN=${MATOMO_TOKEN}
-            STRIPE_SECRET_KEY=${STRIPE_SECRET_KEY}
-            OPENAI_API_KEY=${OPENAI_API_KEY}
-            MAILGUN_KEY=${MAILGUN_KEY}
-            MAILGUN_DOMAIN=${MAILGUN_DOMAIN}
-            EOF
-
             echo "🐳 Reconstruction et redémarrage des containers…"
-            docker-compose --env-file .env.temp down
-            docker-compose --env-file .env.temp up -d --build
+            docker compose down
 
-            echo "🧹 Suppression du .env temporaire…"
-            rm -f .env.temp
+            docker compose up -d --build \
+              -e MATOMO_TOKEN="${MATOMO_TOKEN}" \
+              -e STRIPE_SECRET_KEY="${STRIPE_SECRET_KEY}" \
+              -e OPENAI_API_KEY="${OPENAI_API_KEY}" \
+              -e MAILGUN_KEY="${MAILGUN_KEY}" \
+              -e MAILGUN_DOMAIN="${MAILGUN_DOMAIN}"
 
             echo "📋 État des containers :"
             docker ps -a
 
             echo "📄 Logs backend :"
-            docker-compose logs -t --tail=20 app
+            docker compose logs -t --tail=20 app
 
             echo "📄 Logs Matomo :"
-            docker-compose logs -t --tail=20 matomo
+            docker compose logs -t --tail=20 matomo
