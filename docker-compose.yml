@@ -7,10 +7,15 @@ services:
     ports:
       - "5000:5000"
     environment:
-      - DB_HOST=db
-      - DB_USER=root
-      - DB_PASSWORD=root
-      - DB_NAME=monapp
+      DB_HOST: db
+      DB_USER: root
+      DB_PASSWORD: root
+      DB_NAME: monapp
+      MATOMO_TOKEN: ${MATOMO_TOKEN}
+      STRIPE_SECRET_KEY: ${STRIPE_SECRET_KEY}
+      OPENAI_API_KEY: ${OPENAI_API_KEY}
+      MAILGUN_KEY: ${MAILGUN_KEY}
+      MAILGUN_DOMAIN: ${MAILGUN_DOMAIN}
     depends_on:
       - db
 
@@ -33,12 +38,13 @@ services:
     ports:
       - "8080:80"
     environment:
-      - MATOMO_DATABASE_HOST=db
-      - MATOMO_DATABASE_ADAPTER=mysql
-      - MATOMO_DATABASE_TABLES_PREFIX=matomo_
-      - MATOMO_DATABASE_USERNAME=root
-      - MATOMO_DATABASE_PASSWORD=root
-      - MATOMO_DATABASE_DBNAME=matomo
+      MATOMO_DATABASE_HOST: db
+      MATOMO_DATABASE_ADAPTER: mysql
+      MATOMO_DATABASE_TABLES_PREFIX: matomo_
+      MATOMO_DATABASE_USERNAME: root
+      MATOMO_DATABASE_PASSWORD: root
+      MATOMO_DATABASE_DBNAME: matomo
+      MATOMO_TOKEN: ${MATOMO_TOKEN}
     depends_on:
       - db
 

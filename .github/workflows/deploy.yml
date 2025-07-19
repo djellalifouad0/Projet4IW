@@ -21,7 +21,6 @@ jobs:
           sudo apt-get update
           sudo apt-get install -y docker-compose default-mysql-client
 
-  
       - name: Build & start containers (CI)
         run: docker-compose up -d --build
 
@@ -41,24 +40,35 @@ jobs:
           host: ${{ secrets.VPS_HOST }}
           username: ${{ secrets.VPS_USER }}
           password: ${{ secrets.VPS_PASSWORD }}
+          envs: MATOMO_TOKEN,STRIPE_SECRET_KEY,OPENAI_API_KEY,MAILGUN_KEY,MAILGUN_DOMAIN
           script: |
-            # Aller dans le dossier de déploiement
+            echo "🚀 Déploiement sur VPS…"
             mkdir -p /opt/app
             cd /opt/app
 
-            # Cloner ou mettre à jour le dépôt
             if [ ! -d ".git" ]; then
+              echo "🆕 Clonage du dépôt…"
               git clone https://github.com/djellalifouad0/Projet4IW.git .
             else
-              git reset --hard
-              git pull origin main
+              echo "🔄 Mise à jour du dépôt…"
+              git fetch origin main
+              git reset --hard origin/main
             fi
 
-            # Build & restart containers
+            echo "🐳 Reconstruction et redémarrage des containers…"
             docker-compose down
+            MATOMO_TOKEN="$MATOMO_TOKEN" \
+            STRIPE_SECRET_KEY="$STRIPE_SECRET_KEY" \
+            OPENAI_API_KEY="$OPENAI_API_KEY" \
+            MAILGUN_KEY="$MAILGUN_KEY" \
+            MAILGUN_DOMAIN="$MAILGUN_DOMAIN" \
             docker-compose up -d --build
 
-            # Vérifier les logs principaux
+            echo "📋 État des containers :"
             docker ps -a
+
+            echo "📄 Logs backend :"
             docker-compose logs -t --tail=20 app
+
+            echo "📄 Logs Matomo :"
             docker-compose logs -t --tail=20 matomo
