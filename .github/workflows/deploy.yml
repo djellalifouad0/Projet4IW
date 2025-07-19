@@ -54,11 +54,6 @@ jobs:
               git reset --hard origin/main
             fi
 
-            echo "🔄 Chargement des variables d'environnement…"
-            set -o allexport
-            source /etc/environment
-            set +o allexport
-
             echo "🐳 Reconstruction et redémarrage des containers…"
             docker compose down
             docker compose up -d --build
