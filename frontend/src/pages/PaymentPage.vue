@@ -202,7 +202,6 @@ export default {
 <style scoped>
 .payment-page {
   min-height: 100vh;
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
   padding: 20px;
   display: flex;
   align-items: center;
@@ -370,7 +369,7 @@ export default {
 }
 
 .btn-pay {
-  background-color: #635bff;
+  background-color: #E48700;
   color: white;
   display: flex;
   align-items: center;

@@ -167,3 +167,7 @@ Require stack:
     at async C:\Users\Samuel\Documents\GitHub\Projet4IW\backend\node_modules\sequelize\lib\sequelize.js:305:26
     at async Sequelize.authenticate (C:\Users\Samuel\Documents\GitHub\Projet4IW\backend\node_modules\sequelize\lib\sequelize.js:457:5)
     at async C:\Users\Samuel\Documents\GitHub\Projet4IW\backend\server.js:135:5
+2025-07-19 22:31:41 [ERROR]: ❌ Uncaught Exception: Error: listen EADDRINUSE: address already in use :::5000
+2025-07-19 22:56:59 [ERROR]: ❌ Uncaught Exception: Error: listen EADDRINUSE: address already in use :::5000
+2025-07-19 23:22:13 [ERROR]: ❌ Uncaught Exception: Error: listen EADDRINUSE: address already in use :::5000
+2025-07-19 23:32:03 [ERROR]: ❌ Uncaught Exception: Error: listen EADDRINUSE: address already in use :::5000

@@ -1,14 +1,6 @@
 <template>
   <div class="payment-page">
-    <div class="payment-c          <button @click="proceedToPayment" class="btn-pay" :disabled="isProcessing">
-            <span v-if="!isProcessing">
-              Payer avec Stripe
-            </span>
-            <span v-else>
-              <div class="spinner-small"></div>
-              Redirection...
-            </span>
-          </button>
+    <div class="payment-container">
       <div class="payment-header">
         <h1>Confirmer le paiement</h1>
         <p class="payment-subtitle">Finalisez votre réservation</p>
@@ -172,7 +164,7 @@ export default {
 <style scoped>
 .payment-page {
   min-height: 100vh;
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  background: #f8f9fa;
   padding: 20px;
   display: flex;
   align-items: center;
@@ -194,7 +186,7 @@ export default {
 }
 
 .payment-header h1 {
-  color: #333;
+  color: #28303F;
   margin: 0 0 8px 0;
   font-size: 2rem;
   font-weight: 600;
@@ -216,7 +208,7 @@ export default {
   width: 40px;
   height: 40px;
   border: 4px solid #f3f3f3;
-  border-top: 4px solid #667eea;
+  border-top: 4px solid #ECBC76;
   border-radius: 50%;
   animation: spin 1s linear infinite;
   margin: 0 auto 16px auto;
@@ -228,7 +220,7 @@ export default {
 }
 
 .error-state h3 {
-  color: #333;
+  color: #28303F;
   margin: 0 0 12px 0;
 }
 
@@ -245,7 +237,7 @@ export default {
 }
 
 .appointment-card h2 {
-  color: #333;
+  color: #28303F;
   margin: 0 0 16px 0;
   font-size: 1.5rem;
 }
@@ -264,12 +256,12 @@ export default {
 
 .detail-row .label {
   font-weight: 500;
-  color: #555;
+  color: #28303F;
   min-width: 100px;
 }
 
 .detail-row .value {
-  color: #333;
+  color: #28303F;
   text-align: right;
   flex: 1;
   margin-left: 16px;
@@ -283,7 +275,7 @@ export default {
 }
 
 .payment-summary h3 {
-  color: #333;
+  color: #28303F;
   margin: 0 0 16px 0;
   font-size: 1.25rem;
 }
@@ -302,10 +294,11 @@ export default {
 }
 
 .price-line.total {
-  border-top: 2px solid #ddd;
+  border-top: 2px solid #ECBC76;
   padding-top: 16px;
   margin-top: 8px;
   font-size: 1.1rem;
+  color: #ECBC76;
 }
 
 .payment-actions {
@@ -340,7 +333,7 @@ export default {
 }
 
 .btn-pay {
-  background-color: #635bff;
+  background-color: #ECBC76;
   color: white;
   display: flex;
   align-items: center;
@@ -349,7 +342,7 @@ export default {
 }
 
 .btn-pay:hover:not(:disabled) {
-  background-color: #5a54d9;
+  background-color: #C6553B;
   transform: translateY(-1px);
 }
 
