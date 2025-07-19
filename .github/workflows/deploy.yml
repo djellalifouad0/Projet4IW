@@ -10,29 +10,31 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - name:  Checkout code
+      - name: Checkout code
         uses: actions/checkout@v4
 
-      - name:  Set up Docker
+      - name: Set up Docker
         uses: docker/setup-buildx-action@v2
 
-      - name:  Install docker-compose
+      - name: Install docker-compose & MySQL client
         run: |
           sudo apt-get update
           sudo apt-get install -y docker-compose default-mysql-client
 
-      - name:  Build & start containers (CI)
-        run: |
-          docker-compose up -d --build
+  
+      - name: Build & start containers (CI)
+        run: docker-compose up -d --build
 
-
-      - name:  Show containers
+      - name: Show containers
         run: docker ps -a
 
-      - name:  Backend logs
+      - name: Backend logs
         run: docker-compose logs app
 
-      - name:  Deploy to VPS
+      - name: Matomo logs
+        run: docker-compose logs matomo
+
+      - name: Deploy to VPS
         if: github.ref == 'refs/heads/main'
         uses: appleboy/ssh-action@v1
         with:
@@ -40,17 +42,23 @@ jobs:
           username: ${{ secrets.VPS_USER }}
           password: ${{ secrets.VPS_PASSWORD }}
           script: |
-            # Créer le dossier si absent
+            # Aller dans le dossier de déploiement
             mkdir -p /opt/app
             cd /opt/app
 
-            # Cloner si c'est la première fois
+            # Cloner ou mettre à jour le dépôt
             if [ ! -d ".git" ]; then
               git clone https://github.com/djellalifouad0/Projet4IW.git .
             else
+              git reset --hard
               git pull origin main
             fi
 
-            # Build & restart
+            # Build & restart containers
             docker-compose down
             docker-compose up -d --build
+
+            # Vérifier les logs principaux
+            docker ps -a
+            docker-compose logs -t --tail=20 app
+            docker-compose logs -t --tail=20 matomo
