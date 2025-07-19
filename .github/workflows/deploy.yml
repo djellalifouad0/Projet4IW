@@ -40,7 +40,6 @@ jobs:
           host: ${{ secrets.VPS_HOST }}
           username: ${{ secrets.VPS_USER }}
           password: ${{ secrets.VPS_PASSWORD }}
-          envs: MATOMO_TOKEN,STRIPE_SECRET_KEY,OPENAI_API_KEY,MAILGUN_KEY,MAILGUN_DOMAIN
           script: |
             echo "🚀 Déploiement sur VPS…"
             mkdir -p /opt/app
@@ -56,14 +55,11 @@ jobs:
             fi
 
             echo "🐳 Reconstruction et redémarrage des containers…"
-            docker compose down
+            # Recharger l'environnement global
+            source /etc/environment
 
-            docker compose up -d --build \
-              -e MATOMO_TOKEN="${MATOMO_TOKEN}" \
-              -e STRIPE_SECRET_KEY="${STRIPE_SECRET_KEY}" \
-              -e OPENAI_API_KEY="${OPENAI_API_KEY}" \
-              -e MAILGUN_KEY="${MAILGUN_KEY}" \
-              -e MAILGUN_DOMAIN="${MAILGUN_DOMAIN}"
+            docker compose down
+            docker compose up -d --build
 
             echo "📋 État des containers :"
             docker ps -a
