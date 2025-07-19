@@ -1,6 +1,6 @@
+
 const express = require('express');
-const express = require('express');
-const cors = require('cors');
+
 const path = require('path');
 const cors = require('cors');
 const session = require('express-session');
@@ -17,7 +17,7 @@ const conversationRoutes = require('./routes/conversationRoutes');
 const appointmentRoutes = require('./routes/appointmentRoutes');
 const ratingRoutes = require('./routes/ratingRoutes');
 const analyticsRoutes = require('./routes/analyticsRoutes');
-const analyticsRoutes = require('./routes/analyticsRoutes');
+
 
 const setupSwagger = require('./swagger/swagger');
 
@@ -25,7 +25,7 @@ const setupSwagger = require('./swagger/swagger');
 app.use(cors());
 
 // 📄 Swagger
-const setupSwagger = require('./swagger/swagger');
+
 const { profile } = require('console');
 setupSwagger(app);
 
@@ -38,7 +38,7 @@ app.use('/api/likes', likeRoutes);
 app.use('/api/conversations', conversationRoutes);
 app.use('/api/appointments', appointmentRoutes);
 app.use('/api/ratings', ratingRoutes);
-app.use('/api/analytics', analyticsRoutes);
+
 
 
 app.use('/api/analytics', analyticsRoutes);
