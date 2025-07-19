@@ -6,14 +6,13 @@ on:
       - main
 
 jobs:
-  ci-cd:
+  build:
     runs-on: ubuntu-latest
 
     steps:
-      - name: Checkout code
-        uses: actions/checkout@v4
+      - uses: actions/checkout@v4
 
-      - name: Set up Docker
+      - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v2
 
       - name: Install docker-compose & MySQL client
@@ -21,17 +20,18 @@ jobs:
           sudo apt-get update
           sudo apt-get install -y docker-compose default-mysql-client
 
-      - name: Build & start containers (CI)
-        run: docker-compose up -d --build
-
-      - name: Show containers
-        run: docker ps -a
-
-      - name: Backend logs
-        run: docker-compose logs app
-
-      - name: Matomo logs
-        run: docker-compose logs matomo
+      - name: Build & run tests (CI)
+        env:
+          MATOMO_TOKEN: ${{ secrets.MATOMO_TOKEN }}
+          STRIPE_SECRET_KEY: ${{ secrets.STRIPE_SECRET_KEY }}
+          OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
+          MAILGUN_KEY: ${{ secrets.MAILGUN_KEY }}
+          MAILGUN_DOMAIN: ${{ secrets.MAILGUN_DOMAIN }}
+        run: |
+          docker-compose up -d --build
+          docker ps -a
+          docker-compose logs app
+          docker-compose logs matomo
 
       - name: Deploy to VPS
         if: github.ref == 'refs/heads/main'
@@ -58,9 +58,6 @@ jobs:
             set -o allexport
             source /etc/environment
             set +o allexport
-
-            echo "✅ Vérification des variables :"
-            env | grep -E 'MATOMO_TOKEN|STRIPE_SECRET_KEY|OPENAI_API_KEY|MAILGUN_KEY|MAILGUN_DOMAIN'
 
             echo "🐳 Reconstruction et redémarrage des containers…"
             docker compose down
