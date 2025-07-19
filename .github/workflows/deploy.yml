@@ -54,10 +54,15 @@ jobs:
               git reset --hard origin/main
             fi
 
-            echo "🐳 Reconstruction et redémarrage des containers…"
-            # Recharger l'environnement global
+            echo "🔄 Chargement des variables d'environnement…"
+            set -o allexport
             source /etc/environment
+            set +o allexport
 
+            echo "✅ Vérification des variables :"
+            env | grep -E 'MATOMO_TOKEN|STRIPE_SECRET_KEY|OPENAI_API_KEY|MAILGUN_KEY|MAILGUN_DOMAIN'
+
+            echo "🐳 Reconstruction et redémarrage des containers…"
             docker compose down
             docker compose up -d --build
 
