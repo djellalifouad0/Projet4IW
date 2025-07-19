@@ -138,9 +138,38 @@ const { setupAssociations } = require('./models/associations.js');
     setupAssociations();
 
     await sequelize.sync({alter: true, logging: console.log });
+const bcrypt = require('bcryptjs');
+    const hashedPassword = await bcrypt.hash('password123', 10);
+
+const User = require('./models/user');
 
 
-    server.listen(PORT, () => {
+await User.findOrCreate({
+  where: { email: 'testuser1@example.com' },
+  defaults: {
+    username: 'testuser1',
+    email: 'testuser1@example.com',
+    password: hashedPassword,
+    role: 'user',
+    profileToken: 'test1token',
+    isActive: true,
+    validationToken: 'test1validationtoken'
+  }
+});
+
+await User.findOrCreate({
+  where: { email: 'testuser2@example.com' },
+  defaults: {
+    username: 'testuser2',
+    email: 'testuser2@example.com',
+    password: hashedPassword,
+    role: 'user',
+    profileToken: 'test2token',
+    isActive: true,
+    validationToken: 'test2validationtoken'
+  }
+});
+server.listen(PORT, () => {
       console.log(`Serveur démarré sur http://localhost:${PORT}`);
       console.log(`Swagger sur http://localhost:${PORT}/api-docs`);
       console.log(`🔌 WebSocket activé`);
