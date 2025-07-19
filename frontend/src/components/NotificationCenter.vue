@@ -1,6 +1,6 @@
-<template>
+﻿<template>
   <div class="notification-center">
-    <!-- Notifications toast -->
+    
     <div 
       v-for="notification in activeNotifications" 
       :key="notification.id"
@@ -39,12 +39,12 @@ export default {
     }
   },
   mounted() {
-    // Écouter les événements de nouvelles notifications
+
     window.addEventListener('new-notification', this.handleNewNotification)
   },
   beforeUnmount() {
     window.removeEventListener('new-notification', this.handleNewNotification)
-    // Nettoyer les timeouts
+
     this.activeNotifications.forEach(notif => {
       if (notif.timeoutId) {
         clearTimeout(notif.timeoutId)
@@ -58,20 +58,17 @@ export default {
     },
     
     addNotification(notification) {
-      // Limiter le nombre de notifications affichées
+
       if (this.activeNotifications.length >= this.maxNotifications) {
         this.removeNotification(this.activeNotifications[0])
       }
-      
-      // Ajouter un ID unique si pas présent
+
       if (!notification.id) {
         notification.id = Date.now() + Math.random()
       }
-      
-      // Ajouter la notification
+
       this.activeNotifications.push(notification)
-      
-      // Programmer la suppression automatique
+
       const timeoutId = setTimeout(() => {
         this.removeNotification(notification)
       }, this.notificationTimeout)
@@ -90,15 +87,13 @@ export default {
     },
     
     handleNotificationClick(notification) {
-      // Marquer comme lue si c'est une vraie notification de la DB
+
       if (notification.id && typeof notification.id === 'number') {
         this.markAsRead(notification)
       }
-      
-      // Navigation selon le type de notification
+
       this.navigateBasedOnType(notification)
-      
-      // Supprimer la notification toast
+
       this.removeNotification(notification)
     },
     
@@ -111,7 +106,7 @@ export default {
     },
     
     navigateBasedOnType(notification) {
-      // Navigation selon le type de notification
+
       switch (notification.type) {
         case 'new_message':
           this.$router.push('/discussions')
@@ -123,7 +118,7 @@ export default {
           break
         case 'new_comment':
         case 'new_like':
-          // Si on a des données sur la compétence, naviguer vers elle
+
           if (notification.data && notification.data.skillId) {
             this.$router.push(`/skill/${notification.data.skillId}`)
           } else {
@@ -266,3 +261,4 @@ export default {
   }
 }
 </style>
+

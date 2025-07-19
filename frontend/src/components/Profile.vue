@@ -1,4 +1,4 @@
-<template>
+﻿<template>
   <div class="profile-content">
     <div class="profile-card-v2">
       <div class="profile-cover">
@@ -7,7 +7,7 @@
       <div class="profile-card-bottom-v2">        <div class="profile-avatar-block">
           <img class="profile-avatar-v2" :src="user?.avatar || `https://ui-avatars.com/api/?name=${encodeURIComponent(user?.username || 'User')}&background=ECBC76&color=fff&size=128&bold=true`" alt="Avatar utilisateur" />
           <div class="profile-name-v2">{{ user?.username || '' }}</div>
-          <!-- Moyenne des avis intégrée dans le profil -->          <div v-if="user?.ratingStats && user.ratingStats.totalRatings > 0" class="profile-rating-inline">            <div class="stars-display-inline">
+                    <div v-if="user?.ratingStats && user.ratingStats.totalRatings > 0" class="profile-rating-inline">            <div class="stars-display-inline">
               <span v-for="star in 5" :key="star" class="star-inline">
                 <img 
                   :src="star <= user.ratingStats.averageRating ? '/src/assets/icons/star_full.svg' : '/src/assets/icons/star.svg'" 
@@ -20,12 +20,12 @@
           </div>
         </div>        <div class="profile-infos-v2">
           <div class="profile-address-v2">{{ user?.address || '' }}</div>
-        </div><!-- Show 'Edit Profile' button only if the profile belongs to the logged-in user -->
+        </div>
         <div v-if="user?.profileToken === loggedInUser?.profileToken" class="profile-actions">
           <button class="profile-btn-icon" @click="showEditModal = true" title="Modifier le profil">
             <img src="@/assets/icons/edit.svg" alt="Modifier" class="btn-icon-only" />
           </button>
-        </div>        <!-- Show 'Send Message' button if viewing someone else's profile -->        <div v-else class="profile-actions">
+        </div>                <div v-else class="profile-actions">
           <button class="profile-btn-icon profile-btn-message" @click="startConversation" title="Envoyer un message">
             <img src="@/assets/icons/message.svg" alt="Message" class="btn-icon-only" />
           </button>
@@ -35,7 +35,7 @@
       </div>
     </div>
     
-    <!-- Section avec onglets pour Posts et Rendez-vous -->
+    
     <div class="profile-section" v-if="userPosts.length || (user?.profileToken === loggedInUser?.profileToken)">
       <div class="profile-tabs">
         <button 
@@ -63,10 +63,10 @@
           :class="['tab-button', { active: activeTab === 'ratings' }]"
           @click="activeTab = 'ratings'; loadUserRatings()"
         >
-          <!-- <img src="@/assets/icons/star.svg" alt="Avis" class="tab-icon" /> -->
+          
           Avis ({{ user?.ratingStats?.totalRatings || 0 }})
         </button>
-      </div>      <!-- Contenu de l'onglet Posts -->
+      </div>      
       <div v-if="activeTab === 'posts'" class="tab-content">
         <ul class="profile-posts-list">          <li 
             v-for="post in userPosts" 
@@ -116,7 +116,7 @@
         </ul>
       </div>
 
-      <!-- Contenu de l'onglet Rendez-vous -->
+      
       <div v-if="activeTab === 'appointments'" class="tab-content">
         <div class="appointments-list">
           <div v-for="appointment in appointments" :key="appointment.id" class="appointment-card">
@@ -141,7 +141,7 @@
               <div v-if="appointment.description" class="appointment-description">
                 {{ appointment.description }}
               </div>            </div>
-            <!-- Actions pour les rendez-vous en attente -->
+            
             <div v-if="appointment.status === 'pending'" class="appointment-actions">
               <button 
                 v-if="appointment.receiverId === loggedInUser.id" 
@@ -165,7 +165,7 @@
               </button>
             </div>
             
-            <!-- Actions pour les rendez-vous acceptés -->
+            
             <div v-else-if="appointment.status === 'accepted'" class="appointment-actions">
               <button 
                 @click="updateAppointmentStatus(appointment.id, 'cancelled')"
@@ -178,7 +178,7 @@
               </div>
             </div>
             
-            <!-- Statut pour les rendez-vous terminés -->
+            
             <div v-else class="appointment-actions">
               <div class="appointment-status-final">
                 {{ getStatusText(appointment.status) }}
@@ -188,7 +188,7 @@
         </div>
       </div>
 
-      <!-- Contenu de l'onglet Calendrier -->
+      
       <div v-if="activeTab === 'calendar'" class="tab-content">
         <div class="calendar-container">
           <div class="calendar-header">
@@ -226,7 +226,7 @@
             </div>
           </div>
           
-          <!-- Liste des rendez-vous du mois -->
+          
           <div class="calendar-appointments-list">
             <h4>Rendez-vous de {{ formatCalendarTitle(currentDate) }}</h4>
             <div v-if="monthAppointments.length === 0" class="no-appointments">
@@ -250,9 +250,9 @@
                     {{ getStatusText(appointment.status) }}
                   </span>
                 </div>
-                <!-- Actions pour les rendez-vous dans le calendrier -->
+                
                 <div class="month-appointment-actions">
-                  <!-- Actions pour les rendez-vous en attente -->
+                  
                   <div v-if="appointment.status === 'pending'" class="appointment-quick-actions">                    <button 
                       v-if="appointment.receiverId === loggedInUser.id" 
                       @click="updateAppointmentStatus(appointment.id, 'accepted')"
@@ -276,7 +276,7 @@
                       <img src="@/assets/icons/close.svg" alt="Annuler" class="quick-action-icon" />
                     </button>
                   </div>
-                    <!-- Actions pour les rendez-vous acceptés -->
+                    
                   <div v-else-if="appointment.status === 'accepted'" class="appointment-quick-actions">
                     <button 
                       @click="updateAppointmentStatus(appointment.id, 'cancelled')"
@@ -289,7 +289,7 @@
                 </div>
               </div>
             </div>          </div>        </div>
-      </div>      <!-- Contenu de l'onglet Avis -->
+      </div>      
       <div v-if="activeTab === 'ratings'" class="tab-content">
         <div class="ratings-container">
           <div v-if="!userRatings.length" class="no-ratings">
@@ -315,7 +315,7 @@
                         </span>
                       </div>
                       <span class="rating-value">{{ rating.rating }}/5</span>
-                    </div>                    <!-- Actions pour modifier/supprimer si c'est notre avis -->
+                    </div>                    
                     <div v-if="rating.raterId === loggedInUser?.id" class="rating-actions">
                       <button @click="editRating(rating)" class="btn-edit" title="Modifier">
                         <img src="@/assets/icons/edit.svg" alt="Modifier" class="action-icon" />
@@ -338,7 +338,7 @@
       </div>
     </div>
 
-    <!-- MODALE EDITION PROFIL -->
+    
     <div v-if="showEditModal" class="modal-overlay">
       <div class="modal-profile-edit">
         <button class="modal-close" @click="showEditModal = false">×</button>
@@ -350,689 +350,9 @@
             <img v-if="edit.cover || user?.cover" class="modal-cover-img" :src="edit.cover || user?.cover" alt="cover" />
           </div>          <div class="modal-cover-actions">
             <label class="modal-cover-upload">
-              <input type="file" accept="image/*" @change="onCoverChange" style="display:none" />
-              <img src="@/assets/icons/avatar_change.svg" alt="Changer couverture" class="modal-camera-icon" />
-            </label>
-            <button v-if="edit.cover || user?.cover" class="modal-cover-remove" @click="removeCover">
-              <img src="@/assets/icons/trash.svg" alt="Supprimer bannière" class="modal-remove-icon" />
-            </button>
-          </div>
-        </div>
-        <div class="modal-avatar-block">
-          <img class="modal-avatar-img" :src="edit.avatar || user?.avatar || `https://ui-avatars.com/api/?name=${encodeURIComponent(user?.username || 'User')}&background=ECBC76&color=fff&size=128&bold=true`" alt="avatar" />          <label class="modal-avatar-upload">
-            <input type="file" accept="image/*" @change="onAvatarChange" style="display:none" />
-            <img src="@/assets/icons/avatar_change.svg" alt="Changer avatar" class="modal-camera-icon" />
-          </label>
-        </div>
-        <div class="modal-form">
-          <input v-model="edit.username" placeholder="Nom" />
-          <textarea v-model="edit.bio" placeholder="Bio"></textarea>
-          <input v-model="edit.address" placeholder="Localisation" />
-        </div>      </div>    </div>
-    <!-- FIN MODALE EDITION -->    <!-- MODALE NOTATION UTILISATEUR -->
-    <div v-if="showRatingModal" class="modal-overlay" @click.self="resetRatingForm">      <div class="modal-rating">
-        <button class="modal-close" @click="resetRatingForm">×</button>
-        <div class="modal-header">
-          <h2>{{ editingRating ? 'Modifier votre avis' : 'Noter' }} {{ user?.username }}</h2>
-        </div>
-        <div class="modal-body">
-          <div class="rating-form">            <div class="rating-stars">
-              <label>Note :</label>              <div class="stars-input">
-                <span v-for="star in 5" :key="star" 
-                      :class="['star-input']"
-                      @click="newRating.rating = star"
-                      @mouseenter="hoverRating = star"
-                      @mouseleave="hoverRating = 0">                  <img 
-                    :src="(hoverRating > 0 ? star <= hoverRating : star <= newRating.rating) 
-                          ? '/src/assets/icons/star_full.svg' 
-                          : '/src/assets/icons/star.svg'" 
-                    alt="étoile" 
-                    class="star-icon-input"
-                  />
-                </span>
-              </div>
-            </div>
-            <div class="rating-comment">
-              <label>Commentaire (optionnel) :</label>
-              <textarea 
-                v-model="newRating.comment" 
-                placeholder="Partagez votre expérience avec cet utilisateur..."
-                rows="4"
-              ></textarea>
-            </div>
-          </div>
-          <div class="modal-actions">
-            <button @click="resetRatingForm" class="btn btn-cancel">Annuler</button>
-            <button @click="submitRating" class="btn btn-primary" :disabled="!newRating.rating">
-              {{ editingRating ? 'Modifier l\'avis' : 'Publier l\'avis' }}
-            </button>
-          </div>
-        </div>
-      </div>    </div>
-    <!-- FIN MODALE NOTATION -->
-
-    <!-- DIALOG DE CONFIRMATION -->
-    <div v-if="confirmDialog.show" class="modal-overlay" @click="cancelConfirmation">
-      <div class="confirm-dialog" @click.stop>
-        <div class="confirm-header">
-          <h3>Confirmation</h3>
-        </div>
-        <div class="confirm-body">
-          <p>{{ confirmDialog.message }}</p>
-        </div>
-        <div class="confirm-actions">
-          <button @click="cancelConfirmation" class="btn btn-cancel">Annuler</button>
-          <button @click="confirmAction" class="btn btn-danger">Supprimer</button>
-        </div>
-      </div>
-    </div>    <!-- FIN DIALOG DE CONFIRMATION -->
-    
-    <!-- IMAGE CROPPER -->
-    <ImageCropper
-      :show="showImageCropper"
-      :imageData="cropperImageData"
-      :cropType="cropperType"
-      @crop-complete="onCropComplete"
-      @cancel="closeCropper"
-    />
-    <!-- FIN IMAGE CROPPER -->
-  </div>
-</template>
-
-<script>
-import api from '../services/api'
-import toast from '../services/toast'
-import ImageCropper from './ImageCropper.vue'
-import NotificationService from '../services/notificationService'
-import eventBus, { ProfileEvents } from '../services/eventBus'
-
-export default {
-  name: 'Profile',
-  components: {
-    ImageCropper
-  },  data() {    return {
-      user: null,
-      userPosts: [],
-      appointments: [],
-      loggedInUser: null, // Store the logged-in user's data
-      showEditModal: false,      showRatingModal: false,
-      editingRating: null, // Pour stocker l'avis en cours de modification
-      userRatings: [],      newRating: {
-        rating: 0,
-        comment: ''
-      },      hoverRating: 0, // Pour l'effet de survol des étoiles
-      confirmDialog: {
-        show: false,
-        message: '',
-        action: null
-      },
-      activeTab: 'posts', // Onglet actif par défaut
-      currentDate: new Date(), // Date actuelle pour le calendrier
-      dayHeaders: ['Dim', 'Lun', 'Mar', 'Mer', 'Jeu', 'Ven', 'Sam'],
-      edit: {
-        username: '',
-        bio: '',
-        address: '',
-        avatar: '',
-        cover: ''
-      },
-      // Image cropper
-      showImageCropper: false,
-      cropperImageData: '',
-      cropperType: '', // 'avatar' or 'banner'
-      pendingImageFile: null
-    }  },
-  computed: {
-    upcomingAppointments() {
-      const now = new Date();
-      return this.appointments.filter(appointment => {
-        const appointmentDate = new Date(appointment.appointmentDate);
-        return appointmentDate >= now && appointment.status === 'accepted';
-      });
-    },    calendarDays() {
-      console.log('Calculating calendar days for:', this.currentDate);
-      console.log('Appointments available:', this.appointments);
-      
-      const year = this.currentDate.getFullYear();
-      const month = this.currentDate.getMonth();
-      
-      // Premier jour du mois
-      const firstDay = new Date(year, month, 1);
-      // Dernier jour du mois
-      const lastDay = new Date(year, month + 1, 0);
-      
-      // Premier jour de la semaine à afficher (peut être du mois précédent)
-      const firstCalendarDay = new Date(firstDay);
-      firstCalendarDay.setDate(firstDay.getDate() - firstDay.getDay());
-      
-      // Dernier jour de la semaine à afficher (peut être du mois suivant)
-      const lastCalendarDay = new Date(lastDay);
-      lastCalendarDay.setDate(lastDay.getDate() + (6 - lastDay.getDay()));
-      
-      const days = [];
-      const today = new Date();
-      
-      for (let d = new Date(firstCalendarDay); d <= lastCalendarDay; d.setDate(d.getDate() + 1)) {
-        const dayAppointments = this.appointments.filter(appointment => {
-          const appointmentDate = new Date(appointment.appointmentDate);
-          return appointmentDate.toDateString() === d.toDateString();
-        });
-        
-        days.push({
-          date: d.toISOString(),
-          day: d.getDate(),
-          isCurrentMonth: d.getMonth() === month,
-          isToday: d.toDateString() === today.toDateString(),
-          hasAppointment: dayAppointments.length > 0,
-          appointments: dayAppointments
-        });
-      }
-      
-      return days;
-    },
-    monthAppointments() {
-      const year = this.currentDate.getFullYear();
-      const month = this.currentDate.getMonth();
-      
-      return this.appointments.filter(appointment => {
-        const appointmentDate = new Date(appointment.appointmentDate);
-        return appointmentDate.getFullYear() === year && appointmentDate.getMonth() === month;
-      }).sort((a, b) => new Date(a.appointmentDate) - new Date(b.appointmentDate));
-    }
-  },
-  async mounted() {
-    await this.loadProfileData();
-  },  watch: {
-    // Surveiller les changements de route pour recharger le profil
-    '$route'(to, from) {
-      if (to.params.profileToken !== from.params.profileToken) {
-        this.loadProfileData();
-      }
-    }
-  },
-  methods: {    async loadProfileData() {
-      try {
-        const profileToken = this.$route.params.profileToken; // Get profileToken from the URL
-
-        // Fetch the logged-in user's data
-        const loggedInRes = await api.get('/auth/me');
-        this.loggedInUser = loggedInRes.data;
-
-        // Fetch the visited user's profile data
-        const res = await api.get(`/users/profile/${profileToken}`);
-        this.user = res.data;
-        this.edit.username = this.user.username;
-        this.edit.bio = this.user.bio || '';
-        this.edit.address = this.user.address || '';
-        this.edit.avatar = this.user.avatar || '';
-        this.edit.cover = this.user.cover || '';
-
-        // Fetch posts of the visited user
-        const postsRes = await api.get(`/skills?profileToken=${profileToken}`);
-        this.userPosts = postsRes.data;        // Fetch appointments only if viewing own profile
-        if (this.user?.profileToken === this.loggedInUser?.profileToken) {
-          await this.loadAppointments();
-        }
-
-        // Déterminer l'onglet par défaut
-        this.setDefaultTab();
-      } catch (e) {
-        this.user = null;
-        this.$router.push('/login');
-      }    },    setDefaultTab() {
-      console.log('Posts:', this.userPosts.length);
-      console.log('Appointments:', this.appointments.length);
-      console.log('Is own profile:', this.user?.profileToken === this.loggedInUser?.profileToken);
-      
-      // Si on a des posts, afficher l'onglet posts par défaut
-      if (this.userPosts.length > 0) {
-        this.activeTab = 'posts';
-      }
-      // Sinon si on a des rendez-vous et c'est notre profil, afficher l'onglet rendez-vous
-      else if (this.user?.profileToken === this.loggedInUser?.profileToken && this.appointments.length > 0) {
-        this.activeTab = 'appointments';
-      }
-      // Par défaut, rester sur posts
-      else {
-        this.activeTab = 'posts';
-      }
-        console.log('Active tab:', this.activeTab);
-    },    // Méthode pour naviguer vers la vue individuelle du post
-    navigateToPost(postId) {
-      this.$router.push(`/post/${postId}`);
-    },
-
-    // Méthode pour formater la date des posts de manière plus lisible
-    formatPostDate(dateString) {
-      const date = new Date(dateString);
-      const now = new Date();
-      const diffTime = Math.abs(now - date);
-      const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
-      
-      if (diffDays === 1) {
-        return 'Hier';
-      } else if (diffDays <= 7) {
-        return `Il y a ${diffDays} jour${diffDays > 1 ? 's' : ''}`;
-      } else if (diffDays <= 30) {
-        const weeks = Math.floor(diffDays / 7);
-        return `Il y a ${weeks} semaine${weeks > 1 ? 's' : ''}`;
-      } else {
-        return date.toLocaleDateString('fr-FR', { 
-          day: 'numeric', 
-          month: 'long', 
-          year: 'numeric' 
-        });
-      }
-    },onAvatarChange(e) {
-      const file = e.target.files[0]
-      if (file) {
-        // Vérifier le type de fichier
-        if (!file.type.startsWith('image/')) {
-          toast.error('Veuillez sélectionner une image valide.');
-          return;
-        }
-        
-        // Vérifier la taille du fichier (max 5MB)
-        if (file.size > 5 * 1024 * 1024) {
-          toast.error('L\'image ne doit pas dépasser 5MB.');
-          return;
-        }
-        
-        const reader = new FileReader()
-        reader.onload = (ev) => {
-          this.cropperImageData = ev.target.result
-          this.cropperType = 'avatar'
-          this.pendingImageFile = file
-          this.showImageCropper = true
-        }
-        reader.readAsDataURL(file)
-      }
-      // Réinitialiser l'input pour permettre de sélectionner le même fichier
-      e.target.value = ''
-    },
-    onCoverChange(e) {
-      const file = e.target.files[0]
-      if (file) {
-        // Vérifier le type de fichier
-        if (!file.type.startsWith('image/')) {
-          toast.error('Veuillez sélectionner une image valide.');
-          return;
-        }
-        
-        // Vérifier la taille du fichier (max 5MB)
-        if (file.size > 5 * 1024 * 1024) {
-          toast.error('L\'image ne doit pas dépasser 5MB.');
-          return;
-        }
-        
-        const reader = new FileReader()
-        reader.onload = (ev) => {
-          this.cropperImageData = ev.target.result
-          this.cropperType = 'banner'
-          this.pendingImageFile = file
-          this.showImageCropper = true
-        }
-        reader.readAsDataURL(file)
-      }
-      // Réinitialiser l'input pour permettre de sélectionner le même fichier
-      e.target.value = ''
-    },    removeCover() {
-      this.edit.cover = ''
-      // Force la mise à jour de l'affichage pour montrer le fond #FFF4E3
-      this.$forceUpdate();
-    },
-    
-    // Méthodes pour le cropper d'images
-    onCropComplete(result) {
-      if (result.cropType === 'avatar') {
-        this.edit.avatar = result.dataUrl
-      } else if (result.cropType === 'banner') {
-        this.edit.cover = result.dataUrl
-      }
-      this.closeCropper()
-      toast.success('Image recadrée avec succès !')
-    },
-    
-    closeCropper() {
-      this.showImageCropper = false
-      this.cropperImageData = ''
-      this.cropperType = ''
-      this.pendingImageFile = null
-    },    saveProfile() {
-      const updatedProfile = {
-        username: this.edit.username,
-        bio: this.edit.bio,
-        address: this.edit.address,
-        avatar: this.edit.avatar,
-        cover: this.edit.cover
-      };
-
-      const oldUsername = this.user.username;
-      const oldAvatar = this.user.avatar;
-
-      api.put('/profile', updatedProfile)
-        .then(() => {
-          // Mettre à jour les données locales
-          this.user.username = this.edit.username;
-          this.user.bio = this.edit.bio;
-          this.user.address = this.edit.address;
-          this.user.avatar = this.edit.avatar;
-          this.user.cover = this.edit.cover;
-          
-          // Émettre les événements de mise à jour du profil
-          eventBus.emit(ProfileEvents.PROFILE_UPDATED, {
-            username: this.edit.username,
-            avatar: this.edit.avatar,
-            cover: this.edit.cover,
-            bio: this.edit.bio,
-            address: this.edit.address
-          });
-
-          // Émettre des événements spécifiques si le nom d'utilisateur ou l'avatar ont changé
-          if (oldUsername !== this.edit.username) {
-            eventBus.emit(ProfileEvents.USERNAME_CHANGED, this.edit.username);
-          }
-          
-          if (oldAvatar !== this.edit.avatar) {
-            eventBus.emit(ProfileEvents.AVATAR_CHANGED, this.edit.avatar);
-          }
-
-          // Déclencher la vérification des notifications (pour la notification de mise à jour du profil)
-          NotificationService.triggerNotificationCheck();
-          
-          this.showEditModal = false;
-          toast.success('Profil mis à jour avec succès !');
-        })
-        .catch((error) => {
-          console.error('Error updating profile:', error);
-          toast.error('Erreur lors de la mise à jour du profil');
-        });
-    },async startConversation() {
-      try {
-        // Créer une conversation avec l'utilisateur visité
-        const response = await api.post('/conversations', {
-          profileToken: this.user.profileToken,
-          initialMessage: `Bonjour ${this.user.username} !`
-        });
-        
-        // Rediriger vers la page des discussions avec un délai pour s'assurer que la conversation est bien créée
-        this.$router.push('/discussions');
-        
-        // Optionnel : afficher un message de succès
-        console.log('Conversation créée avec succès !');
-      } catch (error) {
-        console.error('Error creating conversation:', error);
-        if (error.response && error.response.status === 404) {
-          alert('Utilisateur introuvable');
-        } else if (error.response && error.response.status === 400) {
-          alert(error.response.data.error || 'Vous ne pouvez pas créer une conversation avec vous-même');
-        } else {
-          alert('Erreur lors de la création de la conversation');
-        }
-      }
-    },
-    // Méthodes pour les rendez-vous
-    async loadAppointments() {
-      try {
-        const response = await api.get('/appointments');
-        this.appointments = response.data.sort((a, b) => new Date(a.appointmentDate) - new Date(b.appointmentDate));
-      } catch (error) {
-        console.error('Error loading appointments:', error);
-      }
-    },    async updateAppointmentStatus(appointmentId, status) {
-      try {
-        await api.patch(`/appointments/${appointmentId}/status`, { status });
-        // Recharger les rendez-vous après mise à jour
-        await this.loadAppointments();
-        // Déclencher la vérification des notifications après mise à jour du statut
-        NotificationService.triggerNotificationCheck();
-      } catch (error) {
-        console.error('Error updating appointment status:', error);
-      }
-    },
-    getStatusText(status) {
-      const statusTexts = {
-        pending: 'En attente',
-        accepted: 'Accepté',
-        declined: 'Refusé',
-        cancelled: 'Annulé'
-      };
-      return statusTexts[status] || status;
-    },
-    formatAppointmentDate(dateString) {
-      const date = new Date(dateString);
-      return date.toLocaleDateString('fr-FR', {
-        weekday: 'long',
-        year: 'numeric',
-        month: 'long',
-        day: 'numeric',
-        hour: '2-digit',
-        minute: '2-digit'
-      });
-    },
-    getOtherUserName(appointment) {
-      if (appointment.requesterId === this.loggedInUser?.id) {
-        return appointment.receiver?.username || 'Utilisateur inconnu';      } else {
-        return appointment.requester?.username || 'Utilisateur inconnu';
-      }
-    },
-    // Méthodes pour le calendrier
-    previousMonth() {
-      this.currentDate = new Date(this.currentDate.getFullYear(), this.currentDate.getMonth() - 1, 1);
-    },
-    nextMonth() {
-      this.currentDate = new Date(this.currentDate.getFullYear(), this.currentDate.getMonth() + 1, 1);
-    },
-    formatCalendarTitle(date) {
-      return date.toLocaleDateString('fr-FR', {
-        year: 'numeric',
-        month: 'long'
-      });
-    },
-    formatAppointmentTime(dateString) {
-      const date = new Date(dateString);
-      return date.toLocaleTimeString('fr-FR', {
-        hour: '2-digit',
-        minute: '2-digit'
-      });
-    },    formatAppointmentDateShort(dateString) {
-      const date = new Date(dateString);
-      return date.toLocaleDateString('fr-FR', {
-        weekday: 'short',
-        day: 'numeric',
-        month: 'short',
-        hour: '2-digit',
-        minute: '2-digit'
-      });
-    },    // Méthodes pour les avis
-    async loadUser() {
-      try {
-        const profileToken = this.$route.params.profileToken;
-        const res = await api.get(`/users/profile/${profileToken}`);
-        this.user = res.data;
-      } catch (error) {
-        console.error('Error reloading user data:', error);
-      }
-    },
-
-    async loadUserRatings() {
-      try {
-        const response = await api.get(`/ratings/user/${this.user.id}`);
-        this.userRatings = response.data.ratings;
-      } catch (error) {
-        console.error('Error loading user ratings:', error);
-      }
-    },    async submitRating() {
-      try {        if (this.editingRating) {
-          // Mode modification
-          await api.put(`/ratings/${this.editingRating.id}`, {
-            rating: this.newRating.rating,
-            comment: this.newRating.comment
-          });
-          toast.success('Votre avis a été modifié avec succès !');
-        } else {
-          // Mode création
-          await api.post('/ratings', {
-            ratedUserId: this.user.id,
-            rating: this.newRating.rating,
-            comment: this.newRating.comment
-          });
-          toast.success('Votre avis a été publié avec succès !');
-        }
-
-        // Réinitialiser le formulaire
-        this.newRating = { rating: 0, comment: '' };
-        this.editingRating = null;
-        this.showRatingModal = false;
-        
-        // Déclencher une vérification des notifications
-        NotificationService.triggerNotificationCheck();
-        
-        // Recharger les avis et les stats
-        await this.loadUserRatings();
-        await this.loadUser(); // Pour mettre à jour les stats
-      } catch (error) {
-        console.error('Error submitting rating:', error);
-        if (error.response?.status === 409) {
-          toast.error('Vous avez déjà noté cet utilisateur');
-        } else if (error.response?.status === 400) {
-          toast.error('Vous ne pouvez pas vous noter vous-même');        } else {
-          toast.error('Erreur lors de la publication de l\'avis');
-        }
-      }
-    },
-
-    formatRatingDate(dateString) {
-      const date = new Date(dateString);
-      return date.toLocaleDateString('fr-FR', {
-        year: 'numeric',
-        month: 'long',
-        day: 'numeric'
-      });
-    },
-
-    // Méthodes pour modifier/supprimer les avis
-    editRating(rating) {
-      this.editingRating = rating;
-      this.newRating = {
-        rating: rating.rating,
-        comment: rating.comment || ''
-      };
-      this.showRatingModal = true;
-    },    async deleteRating(ratingId) {
-      this.showConfirmation('Êtes-vous sûr de vouloir supprimer cet avis ?', async () => {        try {
-          await api.delete(`/ratings/${ratingId}`);
-          
-          // Recharger les avis et les stats
-          await this.loadUserRatings();
-          await this.loadUser();
-          
-          toast.success('Votre avis a été supprimé avec succès !');
-        } catch (error) {
-          console.error('Error deleting rating:', error);        
-          toast.error('Erreur lors de la suppression de l\'avis');
-        }
-      });
-    },
-
-    // Méthode pour déterminer la classe d'une étoile
-    getStarClass(starPosition, rating) {
-      if (starPosition <= Math.floor(rating)) {
-        return 'filled';
-      } else if (starPosition === Math.ceil(rating) && rating % 1 >= 0.5) {
-        return 'half-filled';
-      } else {
-        return 'empty';
-      }
-    },    // Réinitialiser le formulaire de notation quand on ferme la modale
-    resetRatingForm() {
-      this.newRating = { rating: 0, comment: '' };
-      this.editingRating = null;
-      this.showRatingModal = false;
-      this.hoverRating = 0;
-    },    // Méthodes pour le dialog de confirmation
-    showConfirmation(message, action) {
-      this.confirmDialog.message = message;
-      this.confirmDialog.action = action;
-      this.confirmDialog.show = true;
-    },
-
-    confirmAction() {
-      if (this.confirmDialog.action) {
-        this.confirmDialog.action();
-      }
-      this.cancelConfirmation();
-    },
-
-    cancelConfirmation() {
-      this.confirmDialog.show = false;
-      this.confirmDialog.message = '';
-      this.confirmDialog.action = null;
-    },
-  }
-}
-</script>
-
-<style scoped>
-.profile-content {
-  flex: 1;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  padding: 1.2rem 1rem 2.2rem 1rem;
-  background: #FFFEF9;
-  width: 1000px;
-  max-width: 100%;
-  margin: 0 auto;
-}
-.profile-title {
-  font-size: 2.1rem;
-  color: #E48700;
-  margin-bottom: 0.7rem;
-  font-weight: bold;
-}
-.profile-card-v2 {
-  background: #fff8f2;
-  border-radius: 18px;
-  box-shadow: 0 2px 12px #0001;
-  overflow: hidden;
-  max-width: 700px;
-  width: 100%;
-  margin: 0 auto 2.2rem auto;
-  padding: 0;
-  position: relative;
-}
-.profile-cover {
-  width: 100%;
-  height: 220px;
-  overflow: hidden;
-  border-top-left-radius: 18px;
-  border-top-right-radius: 18px;
-}
-.profile-cover-img {
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
-  display: block;
-}
-.profile-card-bottom-v2 {
-  display: flex;
-  flex-direction: row;
-  align-items: center;
-  justify-content: space-between;
-  background: #fdf3e6;
-  padding: 0 1.5rem 1.6rem 1.5rem;
-  border-bottom-left-radius: 18px;
-  border-bottom-right-radius: 18px;
-  position: relative;
-  gap: 1.1rem;
-  min-height: 120px;
-}
-.profile-avatar-block {
-  display: flex;
-  flex-direction: column; /* Stack avatar and name vertically */
-  align-items: flex-start; /* Align items to the left */
-  gap: 0.3rem; /* Add spacing between avatar and name */
+              <input type="file" accept="image
+  align-items: flex-start; 
+  gap: 0.3rem; 
 }
 .profile-avatar-v2 {
   width: 110px;
@@ -1047,8 +367,8 @@ export default {
   font-size: 1.35rem;
   font-weight: bold;
   color: #181b26;
-  margin: 0; /* Remove unnecessary margins */
-  text-align: left; /* Align the username to the left */
+  margin: 0; 
+  text-align: left; 
 }
 .profile-infos-v2 {
   display: flex;
@@ -1063,7 +383,7 @@ export default {
   text-align: left;
 }
 
-/* Styles pour la moyenne des avis intégrée dans le profil */
+
 .profile-rating-inline {
   display: flex;
   align-items: center;
@@ -1144,7 +464,7 @@ export default {
   margin-bottom: 0.7rem;
 }
 
-/* Styles pour les onglets */
+
 .profile-tabs {
   display: flex;
   border-bottom: 2px solid #ECBC76;
@@ -1214,7 +534,7 @@ export default {
   min-height: 80px;
 }
 
-/* Styles pour les posts cliquables */
+
 .clickable-post {
   cursor: pointer;
   transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
@@ -1235,7 +555,7 @@ export default {
   transform: translateY(0);
 }
 
-/* Structure du contenu des posts */
+
 .post-content {
   flex: 1;
   padding: 1.25rem;
@@ -1257,14 +577,14 @@ export default {
   line-height: 1.4;
   margin: 0;
   flex: 1;
-  /* Fallback for browsers that don't support line-clamp */
-  max-height: 2.8rem; /* Approximately 2 lines at 1.4 line height */
-  overflow: hidden;  /* Modern line-clamp with fallback */
+  
+  max-height: 2.8rem; 
+  overflow: hidden;  
   display: -webkit-box;
   -webkit-line-clamp: 2;
   line-clamp: 2;
   -webkit-box-orient: vertical;
-  /* Alternative fallback using text-overflow */
+  
   text-overflow: ellipsis;
   word-wrap: break-word;
 }
@@ -1298,7 +618,7 @@ export default {
   flex-shrink: 0;
 }
 
-/* Styles améliorés pour les statistiques des posts */
+
 .profile-post-stats {
   display: flex;
   align-items: center;
@@ -1340,7 +660,7 @@ export default {
   font-weight: 500;
 }
 
-/* Indicateur de hover */
+
 .post-hover-indicator {
   padding: 1rem;
   color: #E48700;
@@ -1351,7 +671,7 @@ export default {
   align-items: center;
 }
 
-/* Responsive */
+
 @media (max-width: 768px) {
   .profile-post-item {
     min-height: auto;
@@ -1591,7 +911,7 @@ export default {
   max-height: 180px;
 }
 
-/* Styles pour les rendez-vous */
+
 .appointments-list {
   display: flex;
   flex-direction: column;
@@ -1730,7 +1050,7 @@ export default {
   text-transform: capitalize;
 }
 
-/* Styles pour le calendrier */
+
 .calendar-container {
   width: 100%;
 }
@@ -2075,7 +1395,7 @@ export default {
     top: 100px;
   }
   
-  /* Responsive pour les onglets */
+  
   .tab-button {
     padding: 10px 15px;
     font-size: 0.9rem;
@@ -2086,7 +1406,7 @@ export default {
   }
 }
 
-/* Styles pour le système d'avis */
+
 .ratings-section {
   background: rgba(255, 255, 255, 0.6);
   border-radius: 8px;
@@ -2100,7 +1420,7 @@ export default {
   text-align: center;
 }
 
-/* Design subtil pour le badge de note */
+
 .rating-badge-subtle {
   display: inline-flex;
   align-items: center;
@@ -2155,7 +1475,7 @@ export default {
   font-size: 0.85rem;
 }
 
-/* Étoiles pour la liste des avis */
+
 .stars-display-small {
   display: flex;
   gap: 1px;
@@ -2181,7 +1501,7 @@ export default {
   color: #e0e0e0;
 }
 
-/* Actions de modification/suppression */
+
 .rating-score-actions {
   display: flex;
   justify-content: space-between;
@@ -2328,7 +1648,7 @@ export default {
   color: #888;
 }
 
-/* Styles pour la modale de notation */
+
 .modal-rating {
   background: white;
   border-radius: 12px;
@@ -2476,7 +1796,7 @@ export default {
   background: #cc7700;
 }
 
-/* Icon styles */
+
 .btn-icon {
   width: 20px;
   height: 20px;
@@ -2484,7 +1804,7 @@ export default {
   vertical-align: middle;
 }
 
-/* Boutons avec icônes uniquement */
+
 .profile-btn-icon {
   background: #ECBC76;
   border: none;
@@ -2536,17 +1856,17 @@ export default {
   margin-right: 8px;
   vertical-align: middle;
   filter: brightness(0) saturate(100%) invert(40%) sepia(0%) saturate(0%) hue-rotate(0deg) brightness(100%) contrast(100%);
-  /* #666 color filter */
+  
 }
 
 .tab-button:hover .tab-icon {
   filter: brightness(0) saturate(100%) invert(55%) sepia(85%) saturate(5068%) hue-rotate(24deg) brightness(95%) contrast(95%);
-  /* #E48700 color filter */
+  
 }
 
 .tab-button.active .tab-icon {
   filter: brightness(0) saturate(100%) invert(55%) sepia(85%) saturate(5068%) hue-rotate(24deg) brightness(95%) contrast(95%);
-  /* #E48700 color filter */
+  
 }
 
 .detail-icon {
@@ -2583,7 +1903,7 @@ export default {
   height: 16px;  vertical-align: middle;  filter: brightness(0) saturate(100%) invert(100%) sepia(0%) saturate(0%) hue-rotate(0deg) brightness(100%) contrast(100%);
 }
 
-/* Styles pour le dialog de confirmation */
+
 .confirm-dialog {
   background: white;
   border-radius: 12px;
@@ -2648,7 +1968,7 @@ export default {
   }
 }
 
-/* Styles pour les icônes de remplacement des emojis */
+
 .quick-action-icon {
   width: 16px;
   height: 16px;

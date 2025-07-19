@@ -1,4 +1,4 @@
-'use strict';
+﻿'use strict';
 
 module.exports = {
   up: async (queryInterface, Sequelize) => {
@@ -51,7 +51,6 @@ module.exports = {
       }
     });
 
-    // Ajouter un index unique pour empêcher qu'un utilisateur note plusieurs fois le même utilisateur
     await queryInterface.addIndex('Ratings', ['raterId', 'ratedUserId'], {
       unique: true,
       name: 'unique_rating_per_user'
@@ -62,3 +61,4 @@ module.exports = {
     await queryInterface.dropTable('Ratings');
   }
 };
+

@@ -1,6 +1,6 @@
-<template>
+﻿<template>
   <div>
-    <!-- Post Card -->
+    
     <div :class="['card', paid ? 'card-paid' : 'card-orange']" @click="openModal"><div class="card-header" @click.stop>
         <img class="avatar" :src="avatar || `https://ui-avatars.com/api/?name=${encodeURIComponent(name || 'User')}&background=ECBC76&color=fff&size=64&bold=true`" alt="avatar" @click.stop />        <div>          <div class="user-info-row">
             <div class="name" @click.stop="handleProfileClick" style="cursor:pointer;">
@@ -16,7 +16,7 @@
             :class="paid ? 'rate-paid' : ''"
             v-if="rate"
             @click.stop
-          >{{ rate }}</div>          <!-- Actions pour le propriétaire du post -->
+          >{{ rate }}</div>          
           <div v-if="isOwnPost" class="post-actions">
             <button class="post-action-btn" @click.stop.prevent="startInlineEdit" title="Modifier">
               <img src="@/assets/icons/edit.svg" alt="Modifier" class="action-icon-small" />
@@ -27,7 +27,7 @@
           </div>
         </div>
       </div>      <div class="card-body">
-        <!-- Mode édition inline -->
+        
         <div v-if="isEditingInline" class="inline-edit-container" @click.stop>
           <textarea 
             v-model="editPostDescription" 
@@ -43,7 +43,7 @@
             <span class="inline-edit-hint">Ctrl+Entrée pour sauvegarder</span>
           </div>
         </div>
-        <!-- Mode affichage normal -->
+        
         <p v-else>
           {{ truncatedDescription }}
           <span v-if="isTruncated" class="more">...afficher plus</span>
@@ -61,11 +61,11 @@
           <img src="@/assets/icons/comment.svg" alt="views" class="icon-svg" />
           <span class="icon-number">{{ commentsCount }}</span>
         </span>
-        <!-- Suppression de l'heure ici -->
+        
       </div>
-    </div>    <!-- MODALE -->
+    </div>    
     <div v-if="showModal" class="modal-overlay" @click="closeModal">
-      <div :class="['modal-card', paid ? 'card-paid' : 'card-orange']" @click.stop>        <!-- Bouton de fermeture mobile -->
+      <div :class="['modal-card', paid ? 'card-paid' : 'card-orange']" @click.stop>        
         <button class="mobile-close-btn" @click="closeModal" aria-label="Fermer">
           <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
             <path d="M19 12H5M12 19L5 12L12 5" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
@@ -78,7 +78,7 @@
             <div class="address" @click.stop="handleAddressClick" style="cursor:pointer;text-decoration:underline;">{{ truncatedAddress }}</div>
           </div>
           <div class="header-actions">
-            <div class="rate" :class="paid ? 'rate-paid' : ''" v-if="rate">{{ rate }}</div>            <!-- Actions pour le propriétaire du post -->
+            <div class="rate" :class="paid ? 'rate-paid' : ''" v-if="rate">{{ rate }}</div>            
             <div v-if="isOwnPost" class="post-actions">
               <button class="post-action-btn" @click.stop.prevent="startInlineEdit" title="Modifier">
                 <img src="@/assets/icons/edit.svg" alt="Modifier" class="action-icon-small" />
@@ -107,9 +107,9 @@
             <img src="@/assets/icons/comment.svg" alt="views" class="icon-svg" />
             <span class="icon-number">{{ commentsCount }}</span>
           </span>
-        </div>        <!-- Section Commentaires -->
+        </div>        
         <div class="modal-comments">
-          <!-- Zone de scroll pour les commentaires -->
+          
           <div class="comments-scroll-area">
             <div v-if="comments.length === 0" class="no-comments">Aucun commentaire pour l'instant.</div>
             <ul v-else class="comments-list">
@@ -139,7 +139,7 @@
                     </div>
                   </div>
                 </div>
-                <!-- Réponses -->
+                
                 <ul v-if="comment.replies && comment.replies.length" class="replies-list">
                   <li v-for="(reply, rIdx) in comment.replies" :key="rIdx" class="reply-item" :id="`comment-${reply.id}`">
                     <img class="comment-avatar" :src="reply.avatar || avatar" alt="avatar" />
@@ -148,13 +148,13 @@
                         <span class="comment-author">{{ reply.author }}</span>
                         <span class="comment-time">• {{ reply.time || 'il y a 1 min' }}</span>
                       </div>
-                      <!-- Interface d'édition pour les réponses -->
+                      
                       <div v-if="editingComment === reply.id" class="comment-edit">
                         <input v-model="editCommentText" type="text" @keyup.enter="saveCommentEdit(reply.id)" />
                         <button @click="saveCommentEdit(reply.id)">Sauvegarder</button>
                         <button @click="cancelCommentEdit">Annuler</button>
                       </div>
-                      <div v-else class="comment-text">{{ reply.text }}</div>                      <!-- Actions pour les réponses -->
+                      <div v-else class="comment-text">{{ reply.text }}</div>                      
                       <div class="comment-actions" v-if="isOwnComment(reply)">
                         <button class="comment-action-icon" @click="startEditComment(reply)" title="Modifier">
                           <img src="@/assets/icons/edit.svg" alt="Modifier" class="comment-icon" />
@@ -166,7 +166,7 @@
                     </div>
                   </li>
                 </ul>
-                <!-- Champ de réponse -->
+                
                 <div v-if="replyingTo === idx" class="add-reply">
                   <input v-model="replyText" type="text" placeholder="Votre réponse..." @keyup.enter="sendReply(idx)" />
                   <button @click="sendReply(idx)">Envoyer</button>
@@ -174,7 +174,7 @@
               </li>
             </ul>
           </div>
-            <!-- Footer fixe pour l'ajout de commentaire -->
+            
           <div class="comments-footer">
             <div class="add-comment">
               <input v-model="newComment" type="text" placeholder="Écrire un commentaire..." @keyup.enter="addComment" :disabled="loadingComments" />
@@ -184,7 +184,7 @@
       </div>
     </div>
 
-    <!-- DIALOGUE DE CONFIRMATION -->
+    
     <div v-if="confirmDialog.show" class="modal-overlay confirmation-overlay" @click="cancelConfirmation">
       <div class="confirmation-dialog" @click.stop>
         <div class="confirmation-content">
@@ -206,7 +206,10 @@ import NotificationService from '../services/notificationService'
 import socketService from '../services/socket'
 
 export default {
-  name: 'PostCard',  props: {
+  name: 'PostCard',
+  inject: ['matomo'], // Injecter le service Matomo
+  
+  props: {
     name: { type: String, required: true },
     address: { type: String, required: true },
     avatar: { type: String, required: true },
@@ -221,7 +224,9 @@ export default {
     commentsCount: { type: Number, default: 0 },
     profileToken: { type: String, default: '' },
     userId: { type: Number, required: true }
-  },data() {
+  },
+  
+  data() {
     return {
       showModal: false,
       charLimit: 270,
@@ -233,13 +238,13 @@ export default {
       editCommentText: '',
       editPostDescription: '',
       isEditingInline: false,
-      // Système de confirmation
+
       confirmDialog: {
         show: false,
         message: '',
         confirmCallback: null
       },
-      // Système d'utilisateurs en ligne
+
       onlineUsers: new Set()
     }
   },
@@ -262,9 +267,9 @@ export default {
       return this.address;
     },
     postTimeAgo() {
-      // Affiche "41 min" ou "2 h" ou "3 j" (style Twitter)
-      // Ajout debug pour voir la valeur de createdAt
-      // eslint-disable-next-line no-console
+
+
+
       console.log('createdAt:', this.createdAt);
       if (!this.createdAt) return '';
       const postDate = new Date(this.createdAt);
@@ -277,7 +282,7 @@ export default {
       return `${Math.floor(diff/86400)} j`;
     },
     postDateTime() {
-      // Format dynamique façon Twitter : "16:38 · 24 mai 2025"
+
       if (!this.createdAt) return '';
       const date = new Date(this.createdAt);
       if (isNaN(date.getTime())) return '';
@@ -291,11 +296,10 @@ export default {
       const moisStr = mois[date.getMonth()];
       const annee = date.getFullYear();      return `${heures}:${minutes} · ${jours} ${moisStr} ${annee}`;
     },    isOwnPost() {
-      // Vérifie si l'utilisateur connecté est le propriétaire du post
+
       return this.loggedInUser && this.loggedInUser.id === this.userId;
     },
 
-    // Vérifier si un utilisateur est en ligne
     isUserOnline() {
       return this.onlineUsers.has(this.userId);
     }
@@ -317,7 +321,7 @@ export default {
       this.errorComments = '';
       try {
         const res = await api.get(`/skills/${this.postId}/comments`);
-        // On sépare commentaires racine et réponses
+
         const all = res.data.map(c => ({
           id: c.id,
           author: c.User?.username || 'Utilisateur',
@@ -326,7 +330,7 @@ export default {
           text: c.content,
           parentId: c.parentId || null,
         }));
-        // Regroupement : commentaires racine + réponses imbriquées
+
         const comments = all.filter(c => !c.parentId).map(parent => ({
           ...parent,
           replies: all.filter(r => r.parentId === parent.id)
@@ -344,7 +348,7 @@ export default {
         this.successComment = '';
         try {
           const response = await api.post(`/skills/${this.postId}/comments`, { content: this.newComment });
-            // Afficher le toast avec le message du serveur
+
           if (response.data.message) {
             toast.success(response.data.message);
           }
@@ -353,11 +357,9 @@ export default {
           this.newComment = '';
           await this.fetchComments();
           this.$emit('comment-posted'); // Ajout : notifie le parent
-          
-          // Déclencher une vérification des notifications
+
           NotificationService.triggerNotificationCheck();
-          
-          // Scroll vers le nouveau commentaire après un petit délai
+
           this.$nextTick(() => {
             setTimeout(() => {
               this.scrollToNewComment(response.data.id);
@@ -378,25 +380,22 @@ export default {
       this.replyingTo = idx;
       this.replyText = '';
     },    async sendReply(idx) {
-      // Envoi la réponse au back (parentId = id du commentaire parent)
+
       if (this.replyText.trim() !== '') {
         this.errorComments = '';
         try {
           const parentId = this.comments[idx].id;
           const response = await api.post(`/skills/${this.postId}/comments`, { content: this.replyText, parentId });
-          
-          // Afficher le toast avec le message du serveur
+
           if (response.data.message) {
             toast.success(response.data.message);
           }
             this.replyText = '';
           this.replyingTo = null;
           await this.fetchComments();
-          
-          // Déclencher une vérification des notifications
+
           NotificationService.triggerNotificationCheck();
-          
-          // Scroll vers la nouvelle réponse après un petit délai
+
           this.$nextTick(() => {
             setTimeout(() => {
               this.scrollToNewComment(response.data.id);
@@ -421,29 +420,27 @@ export default {
       }    },
     
     handleProfileClick() {
-      // Navigation vers la page de profil de l'utilisateur
+
       if (this.profileToken) {
         this.$router.push(`/profile/${this.profileToken}`);
       }
     },
       handleAddressClick() {
-      // Émet un événement pour centrer la carte sur cette adresse (si on est sur la page Carte)
+
       this.$emit('addressClicked', this.address);
-      
-      // Navigation vers la page carte avec l'adresse
+
       this.$router.push(`/carte?address=${encodeURIComponent(this.address)}`);
     },
-    
-    // === MÉTHODES POUR LA GESTION DES POSTS ===
+
     startInlineEdit() {
       console.log('startInlineEdit appelé');
       this.editPostDescription = this.description;
       this.isEditingInline = true;
-      // Focus sur le textarea après que le DOM soit mis à jour
+
       this.$nextTick(() => {
         if (this.$refs.inlineTextarea) {
           this.$refs.inlineTextarea.focus();
-          // Sélectionner tout le texte
+
           this.$refs.inlineTextarea.select();
         }
       });
@@ -454,8 +451,7 @@ export default {
         await api.patch(`/skills/${this.postId}`, {
           description: this.editPostDescription
         });
-        
-        // Émettre un événement pour que le composant parent mette à jour la liste
+
         this.$emit('post-updated', {
           postId: this.postId,
           description: this.editPostDescription
@@ -475,8 +471,7 @@ export default {
       this.showConfirmation('Êtes-vous sûr de vouloir supprimer ce post ?', async () => {
         try {
           await api.delete(`/skills/${this.postId}`);
-          
-          // Émettre un événement pour que le composant parent supprime le post de la liste
+
           this.$emit('post-deleted', this.postId);
             this.closeModal();
           toast.success('Post supprimé avec succès !');
@@ -485,8 +480,7 @@ export default {
         }
       });
     },
-    
-    // === MÉTHODES POUR LA GESTION DES COMMENTAIRES ===
+
     isOwnComment(comment) {
       return this.loggedInUser && comment.author === this.loggedInUser.username;
     },
@@ -525,7 +519,7 @@ export default {
         }
       });
     },
-      // === MÉTHODE POUR CHARGER L'UTILISATEUR CONNECTÉ ===
+
     async loadLoggedInUser() {
       try {
         const token = localStorage.getItem('token');
@@ -536,7 +530,7 @@ export default {
         console.error('Erreur lors du chargement de l\'utilisateur:', e);
       }
     },
-      // === MÉTHODE POUR SCROLL VERS UN COMMENTAIRE ===
+
     scrollToNewComment(commentId) {
       const commentElement = document.getElementById(`comment-${commentId}`);
       if (commentElement) {
@@ -544,7 +538,7 @@ export default {
           behavior: 'smooth', 
           block: 'center' 
         });
-        // Ajouter un effet de surbrillance temporaire
+
         commentElement.style.backgroundColor = '#fff4e3';
         commentElement.style.transition = 'background-color 0.3s ease';
         setTimeout(() => {
@@ -552,7 +546,6 @@ export default {
         }, 2000);
       }    },
 
-    // === SYSTÈME DE CONFIRMATION ===
     showConfirmation(message, confirmCallback) {
       this.confirmDialog.message = message;
       this.confirmDialog.confirmCallback = confirmCallback;
@@ -570,7 +563,6 @@ export default {
       this.confirmDialog.confirmCallback = null;
     },
 
-    // === MÉTHODES POUR LE STATUT EN LIGNE ===
     setupSocketListeners() {
       if (socketService.isConnected()) {
         socketService.onOnlineUsers(this.handleOnlineUsers);
@@ -594,16 +586,14 @@ export default {
       if (!token) return;
 
       try {
-        // Si pas encore connecté, se connecter
+
         if (!socketService.isConnected()) {
           await socketService.connect(token);
         }
-        
-        // Toujours configurer les écouteurs (même si déjà connecté)
+
         this.setupSocketListeners();
-        
-        // Demander la liste actuelle des utilisateurs en ligne
-        // Utiliser un petit délai pour s'assurer que la connexion est stable
+
+
         setTimeout(() => {
           if (socketService.isConnected()) {
             socketService.getOnlineUsers();
@@ -619,8 +609,8 @@ export default {
     this.initializeSocketConnection();
   },
   beforeUnmount() {
-    // Note: Les écouteurs WebSocket sont partagés globalement, 
-    // donc on ne les supprime pas ici pour éviter d'affecter d'autres composants
+
+
   }
 }
 </script>
@@ -641,7 +631,7 @@ export default {
   transition: box-shadow 0.18s;
 }
 
-/* Classe spéciale pour la page carte */
+
 .carte-page .card {
   width: 100%;
 }
@@ -787,7 +777,7 @@ export default {
   font-size: 1rem;
   margin-left: 4px;
 }
-/* MODALE */
+
 .modal-overlay {
   position: fixed;
   z-index: 9999;
@@ -817,12 +807,12 @@ export default {
   background: #fff !important;
 }
 
-/* Cacher le bouton de fermeture sur desktop */
+
 .mobile-close-btn {
   display: none;
 }
 
-/* Reset pour forcer le fullscreen sur mobile */
+
 @media (max-width: 600px) {
   html, body {
     overflow-x: hidden !important;
@@ -832,7 +822,7 @@ export default {
     overflow: hidden !important;
   }
 }
-/* Espaces verticaux dans la modale */
+
 .modal-card .card-header {
   margin-bottom: 18px;
 }
@@ -860,7 +850,7 @@ export default {
   max-height: 50vh;
 }
 
-/* Zone de scroll pour les commentaires */
+
 .comments-scroll-area {
   flex: 1;
   overflow-y: auto;
@@ -886,7 +876,7 @@ export default {
   background: #bbb;
 }
 
-/* Footer fixe pour l'ajout de commentaire */
+
 .comments-footer {
   background: white;
   border-top: 1px solid #eee;
@@ -1148,7 +1138,7 @@ export default {
   white-space: nowrap;
 }
 
-/* Nouvelle structure pour séparer le nom et la date */
+
 .user-info-row {
   display: flex;
   align-items: center;
@@ -1227,7 +1217,7 @@ export default {
     left: 0 !important;
     right: 0 !important;
     bottom: 0 !important;
-  }  /* Bouton de fermeture mobile */
+  }  
   .mobile-close-btn {
     display: flex;
     position: fixed;
@@ -1253,7 +1243,7 @@ export default {
     height: 24px;
   }
   
-  /* Ajustements pour le contenu de la modale mobile */
+  
   .modal-card .card-header {
     margin-bottom: 15px;
   }
@@ -1285,12 +1275,12 @@ export default {
   }
   .card-header,
   .modal-card .card-header {
-    flex-direction: row !important;    /* Toujours en row */
+    flex-direction: row !important;    
     align-items: center;
     gap: 10px;
   }
   .avatar {
-    width: 56px;        /* Plus grosse photo */
+    width: 56px;        
     height: 56px;
   }
   .name {
@@ -1305,7 +1295,7 @@ export default {
   .rate-paid {
     padding: 4px 10px;
     border-radius: 6px;
-    margin-left: auto;        /* Toujours aligné à droite */
+    margin-left: auto;        
     margin-top: 0;
     font-size: 1rem !important;
   }
@@ -1371,7 +1361,7 @@ export default {
   color: #fff !important;
 }
 
-/* === STYLES POUR L'ÉDITION INLINE === */
+
 .inline-edit-container {
   background: #f8f9fa;
   border: 2px solid #f59c1a;
@@ -1474,7 +1464,7 @@ export default {
   }
 }
 
-/* Action icon styles */
+
 .action-icon-small {
   width: 14px;
   height: 14px;
@@ -1494,9 +1484,9 @@ export default {
   filter: brightness(0) saturate(100%) invert(14%) sepia(93%) saturate(7495%) hue-rotate(4deg) brightness(98%) contrast(118%);
 }
 
-/* Status dot colors updated */
 
-/* === STYLES POUR LE DIALOGUE DE CONFIRMATION === */
+
+
 .confirmation-overlay {
   z-index: 1001;
 }

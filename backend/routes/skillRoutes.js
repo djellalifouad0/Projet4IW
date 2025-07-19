@@ -1,4 +1,4 @@
-const express = require('express');
+﻿const express = require('express');
 const router = express.Router();
 const skillController = require('../controllers//skillController')
 const { addComment, getComments, updateComment, deleteComment } = require('../controllers/commentController');
@@ -13,15 +13,12 @@ router.post('/', authenticate, skillController.createSkill);
 router.patch('/:id', authenticate, skillController.updateSkill);
 router.delete('/:id', authenticate, skillController.deleteSkill);
 
-// Ajout des routes commentaires sur /skills/:id/comments
 router.post('/:id/comments', authenticate, addComment);
 router.get('/:id/comments', getComments);
 
-// Routes pour modifier et supprimer les commentaires
 router.patch('/comments/:id', authenticate, updateComment);
 router.delete('/comments/:id', authenticate, deleteComment);
 
-// Routes pour like/unlike
 router.post('/:id/like', authenticate, likeSkill);
 router.delete('/:id/unlike', authenticate, unlikeSkill);
 

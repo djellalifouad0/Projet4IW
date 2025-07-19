@@ -1,4 +1,4 @@
-<template>
+﻿<template>
   <div class="search-bar">
     <form @submit.prevent="handleSearch" class="search-input-wrapper">
       <img src="@/assets/icons/search.svg" alt="search" class="search-icon" />
@@ -48,14 +48,16 @@ export default {
   methods: {
     handleSearch() {
       if (!this.searchQuery.trim()) return
-      
-      // Rediriger vers la home avec le paramètre de recherche
+
+      if (this.$matomo) {
+        this.$matomo.trackSearchExecuted(this.searchQuery.trim())
+      }
+
       this.$router.push({
         path: '/',
         query: { search: this.searchQuery.trim() }
       })
-      
-      // Émettre l'événement pour les composants parents
+
       this.$emit('search', this.searchQuery.trim())
     }
   }
@@ -126,7 +128,7 @@ export default {
   cursor: not-allowed;
 }
 
-/* Styles pour le mode nuit */
+
 .dark-theme .search-input-wrapper input {
   background: #2d3748 !important;
   color: #e2e8f0 !important;
@@ -197,3 +199,4 @@ export default {
   }
 }
 </style>
+

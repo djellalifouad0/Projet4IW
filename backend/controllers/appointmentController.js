@@ -1,4 +1,4 @@
-const { Appointment, User, Conversation } = require('../models/associations');
+﻿const { Appointment, User, Conversation } = require('../models/associations');
 const { Op } = require('sequelize');
 const NotificationService = require('../services/notificationService');
 
@@ -41,6 +41,7 @@ const NotificationService = require('../services/notificationService');
 
 const Stripe = require('stripe');
 const stripe = Stripe(process.env.STRIPE_SECRET_KEY);
+
 exports.createAppointment = async (req, res) => {
   try {
     const { receiverId, conversationId, title, description, appointmentDate, location, price } = req.body;
@@ -83,18 +84,8 @@ exports.createAppointment = async (req, res) => {
   }
 };
 
-/**
- * @swagger
- * /api/appointments:
- *   get:
- *     summary: Récupérer tous les rendez-vous de l'utilisateur
- *     tags: [Appointments]
- *     security:
- *       - bearerAuth: []
- *     responses:
- *       200:
- *         description: Liste des rendez-vous
- */
+
+
 exports.getUserAppointments = async (req, res) => {
   try {
     const userId = req.user.id;
@@ -120,36 +111,8 @@ exports.getUserAppointments = async (req, res) => {
   }
 };
 
-/**
- * @swagger
- * /api/appointments/{id}/status:
- *   patch:
- *     summary: Mettre à jour le statut d'un rendez-vous
- *     tags: [Appointments]
- *     security:
- *       - bearerAuth: []
- *     parameters:
- *       - in: path
- *         name: id
- *         required: true
- *         schema:
- *           type: integer
- *     requestBody:
- *       required: true
- *       content:
- *         application/json:
- *           schema:
- *             type: object
- *             required:
- *               - status
- *             properties:
- *               status:
- *                 type: string
- *                 enum: [accepted, declined, cancelled]
- *     responses:
- *       200:
- *         description: Statut mis à jour
- */
+
+
 exports.updateAppointmentStatus = async (req, res) => {
   try {
     const { id } = req.params;
@@ -162,7 +125,6 @@ exports.updateAppointmentStatus = async (req, res) => {
       return res.status(404).json({ error: 'Rendez-vous non trouvé' });
     }
 
-    // Vérifier que l'utilisateur peut modifier ce rendez-vous
     const canUpdate = appointment.receiverId === userId || 
                      (appointment.requesterId === userId && status === 'cancelled');    if (!canUpdate) {
       return res.status(403).json({ error: 'Vous n\'êtes pas autorisé à modifier ce rendez-vous' });
@@ -177,19 +139,20 @@ exports.updateAppointmentStatus = async (req, res) => {
       ]
     });
 
-    // Créer une notification pour informer du changement de statut
     try {
       let notificationRecipientId;
       let notificationSenderName;
       let notificationType;
 
       if (status === 'accepted' || status === 'declined') {
-        // Le receveur a accepté/refusé, notifier le demandeur
+
+
         notificationRecipientId = appointment.requesterId;
         notificationSenderName = updatedAppointment.receiver.username;
         notificationType = status === 'accepted' ? 'accepted' : 'rejected';
       } else if (status === 'cancelled') {
-        // Le demandeur a annulé, notifier le receveur
+
+
         notificationRecipientId = appointment.receiverId;
         notificationSenderName = updatedAppointment.requester.username;
         notificationType = 'rejected'; // On utilise 'rejected' pour l'annulation
@@ -214,24 +177,8 @@ exports.updateAppointmentStatus = async (req, res) => {
   }
 };
 
-/**
- * @swagger
- * /api/appointments/{id}:
- *   delete:
- *     summary: Supprimer un rendez-vous
- *     tags: [Appointments]
- *     security:
- *       - bearerAuth: []
- *     parameters:
- *       - in: path
- *         name: id
- *         required: true
- *         schema:
- *           type: integer
- *     responses:
- *       200:
- *         description: Rendez-vous supprimé
- */
+
+
 exports.deleteAppointment = async (req, res) => {
   try {
     const { id } = req.params;
@@ -243,7 +190,6 @@ exports.deleteAppointment = async (req, res) => {
       return res.status(404).json({ error: 'Rendez-vous non trouvé' });
     }
 
-    // Seul le créateur peut supprimer le rendez-vous
     if (appointment.requesterId !== userId) {
       return res.status(403).json({ error: 'Vous n\'êtes pas autorisé à supprimer ce rendez-vous' });
     }
@@ -256,30 +202,13 @@ exports.deleteAppointment = async (req, res) => {
   }
 };
 
-/**
- * @swagger
- * /api/appointments/conversation/{conversationId}:
- *   get:
- *     summary: Récupérer les rendez-vous d'une conversation
- *     tags: [Appointments]
- *     security:
- *       - bearerAuth: []
- *     parameters:
- *       - in: path
- *         name: conversationId
- *         required: true
- *         schema:
- *           type: integer
- *     responses:
- *       200:
- *         description: Liste des rendez-vous de la conversation
- */
+
+
 exports.getAppointmentsByConversation = async (req, res) => {
   try {
     const { conversationId } = req.params;
     const userId = req.user.id;
 
-    // Vérifier que l'utilisateur fait partie de cette conversation
     const conversation = await Conversation.findOne({
       where: {
         id: conversationId,
@@ -315,3 +244,5 @@ exports.getAppointmentsByConversation = async (req, res) => {
     res.status(500).json({ error: 'Erreur serveur lors de la récupération des rendez-vous' });
   }
 };
+
+

@@ -1,4 +1,4 @@
-const express = require('express');
+﻿const express = require('express');
 const router = express.Router();
 const { authenticate } = require('../middlewares/authMiddleware');
 const {
@@ -11,7 +11,6 @@ const {
   deleteConversation
 } = require('../controllers/conversationController');
 
-// Routes protégées par authentification
 router.get('/', authenticate, getConversations);
 router.get('/unread-count', authenticate, getUnreadMessagesCount);
 router.post('/', authenticate, createConversation);
@@ -21,3 +20,4 @@ router.patch('/:id/mark-read', authenticate, markConversationAsRead);
 router.delete('/:id', authenticate, deleteConversation);
 
 module.exports = router;
+

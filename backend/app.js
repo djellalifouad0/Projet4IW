@@ -1,4 +1,6 @@
 const express = require('express');
+const express = require('express');
+const cors = require('cors');
 const path = require('path');
 const cors = require('cors');
 const session = require('express-session');
@@ -6,6 +8,20 @@ const session = require('express-session');
 const app = express();
 
 // 🌐 CORS
+const authRoutes = require('./routes/authRoutes');
+const userRoutes = require('./routes/userRoutes');
+const skillRoutes = require('./routes/skillRoutes');
+const notificationRoutes = require('./routes/notificationRoutes');
+const likeRoutes = require('./routes/likeRoutes');
+const conversationRoutes = require('./routes/conversationRoutes');
+const appointmentRoutes = require('./routes/appointmentRoutes');
+const ratingRoutes = require('./routes/ratingRoutes');
+const analyticsRoutes = require('./routes/analyticsRoutes');
+const analyticsRoutes = require('./routes/analyticsRoutes');
+
+const setupSwagger = require('./swagger/swagger');
+
+
 app.use(cors());
 
 // 📄 Swagger
@@ -14,6 +30,22 @@ const { profile } = require('console');
 setupSwagger(app);
 
 // 🧩 Servir le frontend
+app.use('/api/auth', authRoutes);
+app.use('/api', userRoutes);
+app.use('/api/skills', skillRoutes);
+app.use('/api/notifications', notificationRoutes);
+app.use('/api/likes', likeRoutes);
+app.use('/api/conversations', conversationRoutes);
+app.use('/api/appointments', appointmentRoutes);
+app.use('/api/ratings', ratingRoutes);
+app.use('/api/analytics', analyticsRoutes);
+
+
+app.use('/api/analytics', analyticsRoutes);
+
+
+setupSwagger(app);
+
 app.use(express.static(path.join(__dirname, 'frontend-build')));
 
 (async () => {
@@ -123,3 +155,5 @@ app.use('/api/ratings', require('./routes/ratingRoutes'));
 // Frontend fallback
 
 module.exports = app;
+
+

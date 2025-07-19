@@ -1,4 +1,4 @@
-module.exports = {
+﻿module.exports = {
   async up(queryInterface, Sequelize) {
     await queryInterface.addColumn('Users', 'notificationSettings', {
       type: Sequelize.TEXT,
@@ -11,3 +11,4 @@ module.exports = {
     await queryInterface.removeColumn('Users', 'notificationSettings');
   }
 };
+

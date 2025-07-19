@@ -1,4 +1,4 @@
-<template>
+﻿<template>
   <div class="home-content">    <div class="filters-bar">
       <div class="filter-dropdown-wrapper">
         <button class="filter-btn" @click="toggleFilterMenu">Filtrer par <span>▼</span></button>
@@ -12,12 +12,12 @@
           <button @click="setSort('moinsCher')">Moins cher</button>
         </div>
       </div>
-      <button class="publish-btn" @click="showForm = true">+ Publier</button>
+      <button class="publish-btn" @click="handlePublishClick">+ Publier</button>
     </div>
 
     <div v-if="likeError" class="error-message" style="margin-bottom: 10px;">{{ likeError }}</div>
 
-    <!-- Indicateur de recherche -->
+    
     <div v-if="searchQuery" class="search-indicator">
       <div class="search-info">
         <span class="search-text">Résultats pour : "<strong>{{ searchQuery }}</strong>"</span>
@@ -57,7 +57,7 @@
       />
     </div>
 
-    <!-- Formulaire de création de post -->
+    
     <div v-if="showForm" class="modal-overlay" @click.self="showForm = false">
       <div class="modal-card" @click.stop>        <div class="modal-header">
           <img src="../assets/icons/edit.svg" class="modal-icon-svg" alt="Edit">
@@ -103,7 +103,10 @@ import socketService from '../services/socket'
 
 export default {
   name: 'Home',
-  components: { PostCard },  data() {
+  components: { PostCard },
+  inject: ['matomo'], // Injecter le service Matomo
+  
+  data() {
     return {
       posts: [],
       allPosts: [], // Tous les posts pour la recherche
@@ -121,12 +124,19 @@ export default {
       showFilterMenu: false,
       sortBy: 'recent',
       userPosition: null,
-      searchQuery: '' // Terme de recherche actuel
-    }  },async mounted() {
-    // Initialiser la connexion WebSocket pour les statuts en ligne
+      searchQuery: '', // Terme de recherche actuel
+      pageStartTime: null // Pour tracker le temps passé sur la page
+    }
+  },
+  
+  async mounted() {
+
+    this.pageStartTime = Date.now();
+    this.matomo.trackPageView('Homepage');
+    this.matomo.startPageTimer();
+
     await this.initializeSocketConnection();
-    
-    // Vérifier si il y a un paramètre de recherche dans l'URL
+
     this.searchQuery = this.$route.query.search || '';
     
     navigator.geolocation.getCurrentPosition((pos) => {
@@ -139,7 +149,6 @@ export default {
       this.fetchPosts();
     });
 
-    // Ajout du listener pour fermer le menu de filtres
     document.addEventListener('click', this.handleClickOutside);
   },
 
@@ -155,8 +164,15 @@ export default {
   },
   
   beforeDestroy() {
+
+    if (this.pageStartTime) {
+      const timeSpent = Date.now() - this.pageStartTime;
+      this.matomo.trackEvent('Homepage', 'Time Spent', 'Session Duration', Math.round(timeSpent / 1000));
+    }
+    this.matomo.endPageTimer('Homepage');
     document.removeEventListener('click', this.handleClickOutside);
   },
+  
   methods: {
     toggleFilterMenu() {
       this.showFilterMenu = !this.showFilterMenu;
@@ -164,27 +180,27 @@ export default {
     setSort(type) {
       this.sortBy = type;
       this.showFilterMenu = false;
+
+      this.matomo.trackFilterClick('Sort', type);
       this.sortPosts();
     },    async fetchPosts() {
       try {
         const res = await api.get('/skills');
-        // Pour chaque post, on va chercher le nombre de commentaires (y compris réponses)
+
         const postsWithComments = await Promise.all(res.data.map(async post => {
-          // On récupère tous les commentaires de ce post
+
           try {
             const commentsRes = await api.get(`/skills/${post.id}/comments`);
-            // Compte total = tous les commentaires (racine + réponses)
+
             const commentsCount = Array.isArray(commentsRes.data) ? commentsRes.data.length : 0;
             return { ...post, commentsCount };
           } catch {
             return { ...post, commentsCount: 0 };
           }
         }));
-        
-        // Stocker tous les posts
+
         this.allPosts = postsWithComments;
-        
-        // Appliquer la recherche si nécessaire
+
         this.applySearch();
         
         await this.sortPosts();
@@ -194,14 +210,13 @@ export default {
     },
     applySearch() {
       if (!this.searchQuery.trim()) {
-        // Si pas de recherche, afficher tous les posts
+
         this.posts = [...this.allPosts];
         return;
       }
 
       const query = this.searchQuery.toLowerCase().trim();
-      
-      // Filtrer les posts selon la recherche
+
       this.posts = this.allPosts.filter(post => {
         const description = (post.description || '').toLowerCase();
         const location = (post.location || '').toLowerCase();
@@ -274,8 +289,7 @@ export default {
         if (response.data.message) {
           toast.success(response.data.message);
         }
-        
-        // Déclencher une vérification des notifications
+
         NotificationService.triggerNotificationCheck();
         
         await this.fetchPosts();
@@ -295,8 +309,7 @@ export default {
         if (response.data.message) {
           toast.success(response.data.message);
         }
-        
-        // Déclencher une vérification des notifications
+
         NotificationService.triggerNotificationCheck();
         
         await this.fetchPosts();
@@ -331,26 +344,24 @@ export default {
     },
     
     handleAddressClick(address) {
-      // Navigation vers la page carte avec l'adresse sélectionnée
+
       this.$router.push(`/carte?address=${encodeURIComponent(address)}`);
     },
-    
-    // === GESTION DES MISES À JOUR DE POSTS ===
+
     handlePostUpdated(updatedPost) {
-      // Mise à jour instantanée du post dans la liste
+
       const postIndex = this.posts.findIndex(p => p.id === updatedPost.postId);
       if (postIndex !== -1) {
         this.posts[postIndex].description = updatedPost.description;
-        // Forcer la réactivité
+
         this.$forceUpdate();
       }
     },
       handlePostDeleted(postId) {
-      // Suppression instantanée du post de la liste
+
       this.posts = this.posts.filter(p => p.id !== postId);
     },
-    
-    // Méthode pour fermer le menu de filtres quand on clique en dehors
+
     handleClickOutside(event) {
       const filterWrapper = this.$el?.querySelector('.filter-dropdown-wrapper');
       if (filterWrapper && !filterWrapper.contains(event.target)) {
@@ -358,7 +369,6 @@ export default {
       }
     },
 
-    // === MÉTHODES POUR LA CONNEXION WEBSOCKET ===
     async initializeSocketConnection() {
       const token = localStorage.getItem('token');
       if (!token) return;
@@ -367,9 +377,8 @@ export default {
         if (!socketService.isConnected()) {
           await socketService.connect(token);
         }
-        
-        // Les PostCard vont automatiquement récupérer les utilisateurs en ligne
-        // via leurs propres écouteurs, mais on peut déclencher la récupération ici
+
+
         setTimeout(() => {
           socketService.getOnlineUsers();
         }, 1000); // Délai pour s'assurer que tout est connecté
@@ -379,8 +388,15 @@ export default {
       }
     },
     clearSearch() {
-      // Supprimer le paramètre de recherche de l'URL
+
+      this.matomo.trackClearSearchClick();
+
       this.$router.push({ path: '/', query: {} });
+    },
+
+    handlePublishClick() {
+      this.matomo.trackPostPublishClick();
+      this.showForm = true;
     },
   }
 }
@@ -394,11 +410,11 @@ export default {
   align-items: center;
   padding: 1.2rem 1rem 2.2rem 1rem;
   background: #FEFCF6;
-  overflow-x: hidden; /* Empêche le scroll horizontal */
-  max-width: 100vw; /* Limite la largeur à 100% de la vue */
-  min-height: 100vh; /* Assure une hauteur minimale pour éviter les problèmes de scroll */
+  overflow-x: hidden; 
+  max-width: 100vw; 
+  min-height: 100vh; 
 }
-/* Filters bar + boutons */
+
 .filters-bar {
   display: flex;
   justify-content: space-between;
@@ -435,7 +451,7 @@ export default {
   box-shadow: 0 2px 8px #0001;
   transition: background 0.18s;
 }
-/* Cards grid */
+
 .cards {
   display: flex;
   flex-direction: column;
@@ -444,7 +460,7 @@ export default {
   width: 100%;
   max-width: 700px;
   box-sizing: border-box;
-  overflow-x: hidden; /* Ajouté pour éviter tout débordement */
+  overflow-x: hidden; 
 }
 @media (max-width: 900px) {
   .filters-bar,
@@ -484,7 +500,7 @@ export default {
   .cards {
     gap: 12px;
   }
-    /* Ajustements pour le dropdown sur mobile */
+    
   .filter-dropdown-overlay {
     display: block;
     animation: overlayFadeIn 0.2s ease-out;
@@ -722,12 +738,12 @@ export default {
     font-size: 1rem;
   }
 }
-/* Empêche tout débordement horizontal sur la page, même si un enfant déborde */
+
 :global(body) {
   overflow-x: hidden;
 }
 
-/* Indicateur de recherche */
+
 .search-indicator {
   display: flex;
   align-items: center;
@@ -864,7 +880,7 @@ export default {
   color: #fff;
 }
 
-/* Modal icon styling */
+
 .modal-icon-svg {
   width: 20px;
   height: 20px;
@@ -875,7 +891,7 @@ export default {
 </style>
 
 <style>
-/* Styles globaux pour le mode nuit de l'indicateur de recherche */
+
 .dark-theme .search-indicator {
   background: linear-gradient(135deg, #2d3748 0%, #1a202c 100%) !important;
   border-color: #ECBC76 !important;

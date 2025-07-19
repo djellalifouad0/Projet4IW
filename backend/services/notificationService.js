@@ -1,20 +1,17 @@
-const { createNotification, NOTIFICATION_TYPES } = require('../controllers/notificationController');
+﻿const { createNotification, NOTIFICATION_TYPES } = require('../controllers/notificationController');
 const Notification = require('../models/notification');
 const User = require('../models/user');
 const { Op } = require('sequelize');
 
 class NotificationService {
-    /**
-   * Vérifier si l'utilisateur a activé un type de notification
-   */
+    
   static async isNotificationEnabled(userId, notificationType) {
     try {
       const user = await User.findByPk(userId);
       if (!user || !user.notificationSettings) return true; // Par défaut activé
       
       const settings = JSON.parse(user.notificationSettings);
-      
-      // Mapping des types de notifications
+
       const typeMapping = {
         [NOTIFICATION_TYPES.NEW_MESSAGE]: 'messages',
         [NOTIFICATION_TYPES.NEW_LIKE]: 'likes', 
@@ -35,9 +32,7 @@ class NotificationService {
     }
   }
 
-    /**
-   * Créer une notification de bienvenue
-   */
+    
   static async createWelcomeNotification(userId, io = null) {
     if (!(await this.isNotificationEnabled(userId, NOTIFICATION_TYPES.WELCOME))) {
       return null;
@@ -55,9 +50,7 @@ class NotificationService {
     
     return notification;
   }
-  /**
-   * Créer une notification pour un nouveau commentaire
-   */
+  
   static async createNewCommentNotification(userId, commenterName, skillTitle, io = null) {
     if (!(await this.isNotificationEnabled(userId, NOTIFICATION_TYPES.NEW_COMMENT))) {
       return null;
@@ -75,17 +68,14 @@ class NotificationService {
     }
     
     return notification;
-  }  /**
-   * Créer une notification pour un nouveau like
-   */
+  }  
   static async createNewLikeNotification(userId, likerName, skillTitle, likerId = null, io = null) {
     if (!(await this.isNotificationEnabled(userId, NOTIFICATION_TYPES.NEW_LIKE))) {
       return null;
     }
-    
-    // Supprimer toutes les anciennes notifications de like de ce même utilisateur pour cette compétence
+
     if (likerId) {
-      // D'abord, récupérer toutes les notifications de like pour cet utilisateur
+
       const existingNotifications = await Notification.findAll({
         where: {
           userId: userId,
@@ -93,7 +83,6 @@ class NotificationService {
         }
       });
 
-      // Filtrer et supprimer celles qui correspondent au même likeur et à la même compétence
       const notificationsToDelete = [];
       for (const notification of existingNotifications) {
         if (notification.data) {
@@ -112,7 +101,6 @@ class NotificationService {
         }
       }
 
-      // Supprimer les notifications correspondantes
       if (notificationsToDelete.length > 0) {
         await Notification.destroy({
           where: {
@@ -136,9 +124,7 @@ class NotificationService {
     }
 
     return notification;
-  }  /**
-   * Créer une notification pour un nouveau rendez-vous
-   */
+  }  
   static async createAppointmentNotification(userId, type, otherUserName, appointmentTitle, io = null) {
     if (!(await this.isNotificationEnabled(userId, NOTIFICATION_TYPES.APPOINTMENT_CREATED))) {
       return null;
@@ -173,9 +159,7 @@ class NotificationService {
     
     return notification;
   }
-  /**
-   * Créer une notification pour une nouvelle évaluation
-   */
+  
   static async createNewRatingNotification(userId, raterName, skillTitle, rating, io = null) {
     if (!(await this.isNotificationEnabled(userId, NOTIFICATION_TYPES.NEW_RATING))) {
       return null;
@@ -195,9 +179,7 @@ class NotificationService {
     return notification;
   }
 
-  /**
-   * Créer une notification pour un nouveau message
-   */
+  
   static async createNewMessageNotification(userId, senderName, io = null) {
     if (!(await this.isNotificationEnabled(userId, NOTIFICATION_TYPES.NEW_MESSAGE))) {
       return null;
@@ -217,9 +199,7 @@ class NotificationService {
     return notification;
   }
 
-  /**
-   * Créer une notification pour mise à jour de profil
-   */
+  
   static async createProfileUpdateNotification(userId, io = null) {
     if (!(await this.isNotificationEnabled(userId, NOTIFICATION_TYPES.PROFILE_UPDATE))) {
       return null;
@@ -237,9 +217,7 @@ class NotificationService {
     
     return notification;
   }
-  /**
-   * Obtenir le nombre de notifications non lues pour un utilisateur
-   */
+  
   static async getUnreadNotificationCount(userId) {
     try {
       const count = await Notification.count({
@@ -255,22 +233,19 @@ class NotificationService {
     }
   }
 
-  /**
-   * Notifier en temps réel un utilisateur via WebSocket (si connecté)
-   */
+  
   static async notifyUserRealTime(userId, notificationData, io) {
     if (!io) return;
     
     try {
-      // Obtenir le socket de l'utilisateur s'il est connecté
+
       const sockets = await io.fetchSockets();
       const userSocket = sockets.find(socket => socket.userId === userId);
       
       if (userSocket) {
-        // Envoyer la nouvelle notification
+
         userSocket.emit('new-notification', notificationData);
-        
-        // Mettre à jour le compteur de notifications non lues
+
         const unreadCount = await this.getUnreadNotificationCount(userId);
         userSocket.emit('notification-count-update', unreadCount);
         
@@ -285,3 +260,4 @@ class NotificationService {
 }
 
 module.exports = NotificationService;
+

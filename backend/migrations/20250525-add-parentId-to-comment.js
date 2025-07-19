@@ -1,4 +1,4 @@
-// Migration pour ajouter le champ parentId à Comment
+﻿
 module.exports = {
   up: async (queryInterface, Sequelize) => {
     const tableDescription = await queryInterface.describeTable('Comments');
@@ -18,3 +18,4 @@ module.exports = {
     await queryInterface.removeColumn('Comments', 'parentId');
   }
 };
+

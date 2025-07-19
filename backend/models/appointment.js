@@ -1,55 +1,4 @@
-/**
- * @swagger
- * components:
- *   schemas:
- *     Appointment:
- *       type: object
- *       required:
- *         - requesterId
- *         - receiverId
- *         - appointmentDate
- *         - title
- *       properties:
- *         id:
- *           type: integer
- *           description: ID du rendez-vous
- *         requesterId:
- *           type: integer
- *           description: ID de l'utilisateur qui demande le rendez-vous
- *         receiverId:
- *           type: integer
- *           description: ID de l'utilisateur qui reçoit la demande
- *         conversationId:
- *           type: integer
- *           description: ID de la conversation associée
- *         title:
- *           type: string
- *           description: Titre du rendez-vous
- *         description:
- *           type: string
- *           description: Description optionnelle du rendez-vous
- *         appointmentDate:
- *           type: string
- *           format: date-time
- *           description: Date et heure du rendez-vous
- *         status:
- *           type: string
- *           enum: [pending, accepted, declined, cancelled]
- *           description: Statut du rendez-vous
- *         location:
- *           type: string
- *           description: Lieu du rendez-vous (optionnel)
- *       example:
- *         id: 1
- *         requesterId: 1
- *         receiverId: 2
- *         conversationId: 1
- *         title: "Échange de compétences"
- *         description: "Discussion sur le développement web"
- *         appointmentDate: "2025-05-26T14:00:00.000Z"
- *         status: "pending"
- *         location: "En ligne"
- */
+﻿
 
 const { DataTypes } = require('sequelize');
 const sequelize = require('../config/db');
@@ -121,3 +70,4 @@ paymentStatus: {
 });
 
 module.exports = Appointment;
+

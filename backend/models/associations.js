@@ -1,4 +1,4 @@
-const User = require('./user');
+﻿const User = require('./user');
 const Conversation = require('./conversation');
 const Message = require('./message');
 const Appointment = require('./appointment');
@@ -60,7 +60,6 @@ Conversation.hasMany(Message, {
     }
   });
 
-  // Associations pour les rendez-vous
   Appointment.belongsTo(User, {
     as: 'requester',
     foreignKey: {
@@ -110,7 +109,6 @@ Conversation.hasMany(Message, {
     }
   });
 
-  // Associations pour les avis/notes
   Rating.belongsTo(User, {
     as: 'rater',
     foreignKey: {
@@ -145,7 +143,6 @@ Conversation.hasMany(Message, {
     }
   });
 
-  // Associations pour les compétences/skills
   Skill.belongsTo(User, {
     foreignKey: {
       name: 'userId',
@@ -162,7 +159,6 @@ Conversation.hasMany(Message, {
     }
   });
 
-  // Associations pour les commentaires
   Skill.hasMany(Comment, {
     foreignKey: {
       name: 'skillId',
@@ -194,7 +190,6 @@ Conversation.hasMany(Message, {
     constraints: false
   });
 
-  // Association pour les réponses imbriquées
   Comment.hasMany(Comment, {
     as: 'replies',
     foreignKey: {
@@ -212,7 +207,6 @@ Conversation.hasMany(Message, {
     constraints: false
   });
 
-  // Associations pour les likes
   Skill.hasMany(Like, {
     foreignKey: {
       name: 'skillId',
@@ -256,3 +250,4 @@ module.exports = {
   Like,
   setupAssociations
 };
+

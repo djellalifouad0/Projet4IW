@@ -1,4 +1,4 @@
-<template>
+﻿<template>
   <div class="settings-page">
     <div class="settings-container">
       <div class="settings-header">
@@ -9,7 +9,7 @@
         <p class="settings-subtitle">Gérez vos préférences et paramètres de compte</p>
       </div>
 
-      <!-- Section Compte -->
+      
       <div class="settings-section">
         <h2 class="section-title">
           <img src="@/assets/icons/user.svg" alt="Compte" class="section-icon" />
@@ -17,7 +17,7 @@
         </h2>
         <p class="section-description">Gérez les informations de votre compte</p>
         
-        <!-- Changement de mot de passe -->
+        
         <div class="settings-card">
           <div class="card-header">
             <h3>Modifier le mot de passe</h3>
@@ -61,7 +61,7 @@
           </form>
         </div>
 
-        <!-- Changement d'email -->
+        
         <div class="settings-card">
           <div class="card-header">
             <h3>Modifier l'adresse email</h3>
@@ -114,7 +114,7 @@
         </div>
       </div>
 
-      <!-- Section Apparence -->
+      
       <div class="settings-section">
         <h2 class="section-title">
           <img src="@/assets/icons/banner_change.svg" alt="Apparence" class="section-icon" />
@@ -135,7 +135,7 @@
         </div>
       </div>
 
-      <!-- Section Notifications -->
+      
       <div class="settings-section">
         <h2 class="section-title">
           <img src="@/assets/icons/notification.svg" alt="Notifications" class="section-icon" />
@@ -293,7 +293,7 @@
         </div>
       </div>
 
-      <!-- Section Sécurité -->
+      
       <div class="settings-section">
         <h2 class="section-title">
           <img src="@/assets/icons/check.svg" alt="Sécurité" class="section-icon" />
@@ -327,7 +327,7 @@ export default {
   },
   data() {
     return {
-      // Formulaires
+
       passwordForm: {
         current: '',
         new: '',
@@ -337,15 +337,12 @@ export default {
         new: '',
         password: ''
       },
-      
-      // États de chargement
+
       isUpdatingPassword: false,
       isUpdatingEmail: false,
-      
-      // Données utilisateur
+
       currentEmail: '',
-      
-      // Paramètres de notifications
+
       notificationSettings: {
         messages: true,
         likes: true,
@@ -399,12 +396,12 @@ export default {
         }
       } catch (error) {
         console.error('Erreur lors du chargement des paramètres de notifications:', error)
-        // Si l'endpoint n'existe pas encore, on garde les valeurs par défaut
+
       }
     },
     
     async changePassword() {
-      // Validation
+
       if (this.passwordForm.new !== this.passwordForm.confirm) {
         toast.error('Les mots de passe ne correspondent pas')
         return
@@ -424,8 +421,7 @@ export default {
         })
         
         toast.success('Mot de passe modifié avec succès !')
-        
-        // Réinitialiser le formulaire
+
         this.passwordForm = {
           current: '',
           new: '',
@@ -444,16 +440,14 @@ export default {
     },
     
     async changeEmail() {
-      // Validation des champs requis
+
       if (!this.emailForm.new || !this.emailForm.password) {
         toast.error('Veuillez remplir tous les champs')
         return
       }
-      
-      // Nettoyer l'email (supprimer les espaces)
+
       const cleanEmail = this.emailForm.new.trim()
-      
-      // Validation email plus robuste
+
       const emailRegex = /^[a-zA-Z0-9.!#$%&'*+/=?^_`{|}~-]+@[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?(?:\.[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?)*$/
       if (!emailRegex.test(cleanEmail)) {
         toast.error('Adresse email invalide')
@@ -474,11 +468,9 @@ export default {
         })
         
         toast.success('Email modifié avec succès !')
-        
-        // Mettre à jour l'email actuel
+
         this.currentEmail = cleanEmail
-        
-        // Réinitialiser le formulaire
+
         this.emailForm = {
           new: '',
           password: ''
@@ -513,8 +505,7 @@ export default {
       try {
         await api.post('/auth/logout-all')
         toast.success('Déconnecté de tous les appareils')
-        
-        // Rediriger vers la page de connexion
+
         localStorage.removeItem('token')
         this.$router.push('/login')
       } catch (error) {
@@ -713,7 +704,7 @@ export default {
   color: #C6553B;
 }
 
-/* Section Apparence */
+
 .setting-item {
   display: flex;
   justify-content: space-between;
@@ -734,7 +725,7 @@ export default {
   font-size: 0.9rem;
 }
 
-/* Section Notifications */
+
 .notifications-list {
   display: flex;
   flex-direction: column;
@@ -790,7 +781,7 @@ export default {
   font-size: 0.9rem;
 }
 
-/* Toggle Switch */
+
 .toggle-switch {
   position: relative;
   display: inline-block;
@@ -838,7 +829,7 @@ export default {
   background-color: #C6553B;
 }
 
-/* Section Sécurité */
+
 .security-info {
   text-align: center;
 }
@@ -856,7 +847,7 @@ export default {
   font-size: 0.95rem;
 }
 
-/* Responsive Design */
+
 @media (max-width: 768px) {
   .settings-container {
     padding: 0 15px;
@@ -916,3 +907,4 @@ export default {
   }
 }
 </style>
+

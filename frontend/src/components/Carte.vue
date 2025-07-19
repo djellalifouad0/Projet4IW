@@ -1,4 +1,4 @@
-<template>
+﻿<template>
   <div class="carte-page">    <div class="carte-header-fixed">
       <div class="carte-header-inner">
         <div class="carte-logo-bar" @click="$router.push('/')" style="cursor:pointer">
@@ -11,7 +11,7 @@
         </div>
         <SearchBar class="carte-search" />
         
-        <!-- Bouton toggle mobile dans le header -->
+        
         <button 
           class="mobile-toggle-btn-header" 
           @click="toggleMobileList"
@@ -80,17 +80,16 @@ export default {
       showMobileList: false
     }
   },  async mounted() {
-    // Initialiser la connexion WebSocket pour les statuts en ligne
+
     await this.initializeSocketConnection();
-    
-    // Si une adresse est passée en query, centrer la carte dessus
+
     const address = this.$route?.query?.address;
     if (address) {
       this.centerMapOnAddress(address);
     }
     try {
       const res = await api.get('/skills')
-      // Adapter les données pour PostCard
+
       const postsWithComments = await Promise.all(res.data.map(async skill => {        try {
           const commentsRes = await api.get(`/skills/${skill.id}/comments`);            const commentsCount = Array.isArray(commentsRes.data) ? commentsRes.data.length : 0;
           return {
@@ -131,7 +130,7 @@ export default {
       }))
       this.posts = postsWithComments
     } catch (e) {
-      // Optionnel : gestion d'erreur
+
       this.posts = []
     }
   },
@@ -146,15 +145,13 @@ export default {
         if (response.data.message) {
           toast.success(response.data.message);
         }
-        
-        // Déclencher une vérification des notifications
+
         NotificationService.triggerNotificationCheck();
-        
-        // Optionnel : rafraîchir les posts pour synchro
-        // await this.fetchPosts()
+
+
       } catch (e) {
         toast.error('Erreur lors du like');
-        // Optionnel : gestion d'erreur
+
       }
     },    async dislikePost(postId) {
       try {
@@ -167,15 +164,13 @@ export default {
         if (response.data.message) {
           toast.success(response.data.message);
         }
-        
-        // Déclencher une vérification des notifications
+
         NotificationService.triggerNotificationCheck();
-        
-        // Optionnel : rafraîchir les posts pour synchro
-        // await this.fetchPosts()
+
+
       } catch (e) {
         toast.error('Erreur lors du dislike');
-        // Optionnel : gestion d'erreur
+
       }
     },
     async refreshPosts() {
@@ -225,16 +220,16 @@ export default {
       }
     },
     centerMapOnAddress(address) {
-      // Utilise l'API de géocodage pour trouver la position de la ville/adresse
+
       fetch(`https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(address)}`)
         .then(res => res.json())
         .then(data => {
           if (data && data.length > 0) {
             const { lat, lon } = data[0];
-            // Correction : s'assurer que lon et lat sont bien des nombres
+
             const latNum = parseFloat(lat);
             const lonNum = parseFloat(lon);
-            // Correction du calcul du bbox (évite NaN)
+
             const bbox = `${lonNum-0.01}%2C${latNum-0.01}%2C${lonNum+0.01}%2C${latNum+0.01}`;
             this.mapUrl = `https://www.openstreetmap.org/export/embed.html?bbox=${bbox}&layer=mapnik&marker=${latNum},${lonNum}`;
           }
@@ -242,28 +237,25 @@ export default {
         .catch(() => {          // En cas d'erreur, ne change rien
         });
     },
-    
-    // === GESTION DES MISES À JOUR DE POSTS ===
+
     handlePostUpdated(updatedPost) {
-      // Mise à jour instantanée du post dans la liste
+
       const postIndex = this.posts.findIndex(p => p.postId === updatedPost.postId);
       if (postIndex !== -1) {
         this.posts[postIndex].description = updatedPost.description;
-        // Forcer la réactivité
+
         this.$forceUpdate();
       }
     },
       handlePostDeleted(postId) {
-      // Suppression instantanée du post de la liste
+
       this.posts = this.posts.filter(p => p.postId !== postId);
     },
-    
-    // === GESTION DU TOGGLE MOBILE ===
+
     toggleMobileList() {
       this.showMobileList = !this.showMobileList;
     },
 
-    // === MÉTHODES POUR LA CONNEXION WEBSOCKET ===
     async initializeSocketConnection() {
       const token = localStorage.getItem('token');
       if (!token) return;
@@ -272,8 +264,7 @@ export default {
         if (!socketService.isConnected()) {
           await socketService.connect(token);
         }
-        
-        // Déclencher la récupération des utilisateurs en ligne
+
         setTimeout(() => {
           socketService.getOnlineUsers();
         }, 1000);
@@ -367,7 +358,7 @@ export default {
   padding: 0;
 }
 
-/* === BOUTON TOGGLE MOBILE DANS LE HEADER === */
+
 .mobile-toggle-btn-header {
   display: none;
   align-items: center;
@@ -399,7 +390,7 @@ export default {
   font-weight: bold;
 }
 
-/* Ancien bouton mobile - maintenant caché */
+
 .mobile-toggle-btn {
   display: none !important;
 }
@@ -423,11 +414,11 @@ export default {
   color: #fff;
 }
 
-/* === RESPONSIVE DESIGN === */
 
-/* Large screens et desktop (1200px+) - Default styles above */
 
-/* Tablets et écrans moyens (768px - 1199px) */
+
+
+
 @media (max-width: 1199px) {
   .carte-header-inner {
     width: 100%;
@@ -440,7 +431,7 @@ export default {
   }
 }
 
-/* Tablettes en portrait et petits écrans (768px - 1023px) */
+
 @media (max-width: 1023px) {
   * {
     box-sizing: border-box;
@@ -505,7 +496,7 @@ export default {
   }
 }
 
-/* Smartphones en paysage et petites tablettes (576px - 767px) */
+
 @media (max-width: 767px) {
   * {
     box-sizing: border-box;
@@ -620,7 +611,7 @@ export default {
   }
 }
 
-/* Smartphones en portrait (jusqu'à 575px) */
+
 @media (max-width: 575px) {
   * {
     box-sizing: border-box;
@@ -737,7 +728,7 @@ export default {
   }
 }
 
-/* Très petits écrans (jusqu'à 400px) */
+
 @media (max-width: 400px) {
   * {
     box-sizing: border-box;
@@ -845,3 +836,4 @@ export default {
   }
 }
 </style>
+

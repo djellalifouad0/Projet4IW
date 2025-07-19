@@ -1,26 +1,9 @@
-const { User, Conversation, Message } = require('../models/associations');
+﻿const { User, Conversation, Message } = require('../models/associations');
 const { Op } = require('sequelize');
 const NotificationService = require('../services/notificationService');
 
-/**
- * @swagger
- * tags:
- *   name: Conversations
- *   description: API de gestion des conversations
- */
 
-/**
- * @swagger
- * /conversations:
- *   get:
- *     summary: Récupère toutes les conversations de l'utilisateur
- *     tags: [Conversations]
- *     security:
- *       - bearerAuth: []
- *     responses:
- *       200:
- *         description: Liste des conversations
- */
+
 exports.getConversations = async (req, res) => {
   try {
     const userId = req.user.id;
@@ -47,7 +30,6 @@ exports.getConversations = async (req, res) => {
       order: [['lastMessageAt', 'DESC']]
     });
 
-    // Récupérer le dernier message pour chaque conversation
     const conversationsWithLastMessage = await Promise.all(
       conversations.map(async (conv) => {
         const lastMessage = await Message.findOne({
@@ -62,7 +44,6 @@ exports.getConversations = async (req, res) => {
           ]
         });
 
-        // Déterminer qui est l'autre utilisateur
         const otherUser = conv.user1Id === userId ? conv.user2 : conv.user1;
 
         return {
@@ -89,35 +70,13 @@ exports.getConversations = async (req, res) => {
   }
 };
 
-/**
- * @swagger
- * /conversations:
- *   post:
- *     summary: Crée une nouvelle conversation
- *     tags: [Conversations]
- *     security:
- *       - bearerAuth: []
- *     requestBody:
- *       required: true
- *       content:
- *         application/json:
- *           schema:
- *             type: object
- *             properties:
- *               profileToken:
- *                 type: string
- *               initialMessage:
- *                 type: string
- *     responses:
- *       201:
- *         description: Conversation créée
- */
+
+
 exports.createConversation = async (req, res) => {
   try {
     const { profileToken, initialMessage } = req.body;
     const userId = req.user.id;
 
-    // Trouver l'utilisateur avec ce profileToken
     const otherUser = await User.findOne({ where: { profileToken } });
     if (!otherUser) {
       return res.status(404).json({ error: 'Utilisateur introuvable' });
@@ -127,7 +86,6 @@ exports.createConversation = async (req, res) => {
       return res.status(400).json({ error: 'Vous ne pouvez pas créer une conversation avec vous-même' });
     }
 
-    // Vérifier si une conversation existe déjà
     const existingConversation = await Conversation.findOne({
       where: {
         [Op.or]: [
@@ -142,7 +100,8 @@ exports.createConversation = async (req, res) => {
     if (existingConversation) {
       conversation = existingConversation;
     } else {
-      // Créer une nouvelle conversation
+
+
       conversation = await Conversation.create({
         user1Id: Math.min(userId, otherUser.id), // Pour maintenir l'ordre
         user2Id: Math.max(userId, otherUser.id),
@@ -150,7 +109,6 @@ exports.createConversation = async (req, res) => {
       });
     }
 
-    // Créer le message initial s'il est fourni
     if (initialMessage && initialMessage.trim()) {
       const message = await Message.create({
         content: initialMessage.trim(),
@@ -158,7 +116,6 @@ exports.createConversation = async (req, res) => {
         conversationId: conversation.id
       });
 
-      // Mettre à jour la conversation avec le dernier message
       await conversation.update({
         lastMessageId: message.id,
         lastMessageAt: new Date()
@@ -179,30 +136,13 @@ exports.createConversation = async (req, res) => {
   }
 };
 
-/**
- * @swagger
- * /conversations/{id}/messages:
- *   get:
- *     summary: Récupère les messages d'une conversation
- *     tags: [Conversations]
- *     security:
- *       - bearerAuth: []
- *     parameters:
- *       - in: path
- *         name: id
- *         schema:
- *           type: integer
- *         required: true
- *     responses:
- *       200:
- *         description: Liste des messages
- */
+
+
 exports.getMessages = async (req, res) => {
   try {
     const conversationId = req.params.id;
     const userId = req.user.id;
 
-    // Vérifier que l'utilisateur fait partie de cette conversation
     const conversation = await Conversation.findOne({
       where: {
         id: conversationId,
@@ -240,15 +180,16 @@ exports.getMessages = async (req, res) => {
       }
     }));
 
-    // Envoyer les statuts "read" via WebSocket pour les messages de l'autre utilisateur
     try {
       const io = req.app.get('socketio');
       if (io) {
-        // Trouver les messages de l'autre utilisateur qui viennent d'être consultés
+
+
         const otherUserMessages = messages.filter(msg => msg.senderId !== userId);
         
         otherUserMessages.forEach(msg => {
-          // Envoyer le statut "read" à l'expéditeur original
+
+
           io.to(`conversation-${conversationId}`).emit('message-status', {
             messageId: msg.id,
             status: 'read',
@@ -328,7 +269,6 @@ exports.sendMessage = async (req, res) => {
       return res.status(404).json({ error: 'Conversation introuvable' });
     }
 
-    // Créer le message
     const message = await Message.create({
       content: content.trim(),
       senderId: userId,
@@ -347,7 +287,6 @@ exports.sendMessage = async (req, res) => {
       console.error('Erreur création notification message:', notifError);
     }
 
-    // Récupérer le message avec les informations de l'expéditeur
     const messageWithSender = await Message.findByPk(message.id, {
       include: [
         {
@@ -358,7 +297,6 @@ exports.sendMessage = async (req, res) => {
       ]
     });
 
-    // Émettre le message via WebSocket à tous les participants de la conversation
     const io = req.app.get('socketio');
     if (io) {
       io.to(`conversation-${conversationId}`).emit('new-message', {
@@ -389,18 +327,6 @@ exports.sendMessage = async (req, res) => {
   }
 };
 
-/**
- * @swagger
- * /conversations/unread-count:
- *   get:
- *     summary: Récupère le nombre de messages non lus
- *     tags: [Conversations]
- *     security:
- *       - bearerAuth: []
- *     responses:
- *       200:
- *         description: Nombre de messages non lus
- */
 
 exports.getUnreadMessagesCount = async (req, res) => {
   try {
@@ -432,30 +358,13 @@ exports.getUnreadMessagesCount = async (req, res) => {
   }
 };
 
-/**
- * @swagger
- * /conversations/{id}/mark-read:
- *   patch:
- *     summary: Marque tous les messages d'une conversation comme lus
- *     tags: [Conversations]
- *     security:
- *       - bearerAuth: []
- *     parameters:
- *       - in: path
- *         name: id
- *         schema:
- *           type: integer
- *         required: true
- *     responses:
- *       200:
- *         description: Messages marqués comme lus
- */
+
+
 exports.markConversationAsRead = async (req, res) => {
   try {
     const conversationId = req.params.id;
     const userId = req.user.id;
 
-    // Vérifier que l'utilisateur fait partie de cette conversation
     const conversation = await Conversation.findOne({
       where: {
         id: conversationId,
@@ -470,7 +379,6 @@ exports.markConversationAsRead = async (req, res) => {
       return res.status(404).json({ error: 'Conversation introuvable' });
     }
 
-    // Marquer tous les messages non lus de cette conversation comme lus
     await Message.update(
       { readAt: new Date() },
       {
@@ -487,35 +395,13 @@ exports.markConversationAsRead = async (req, res) => {
   }
 };
 
-/**
- * @swagger
- * /conversations/{id}:
- *   delete:
- *     summary: Supprimer une conversation
- *     tags: [Conversations]
- *     security:
- *       - bearerAuth: []
- *     parameters:
- *       - in: path
- *         name: id
- *         required: true
- *         schema:
- *           type: integer
- *         description: ID de la conversation
- *     responses:
- *       200:
- *         description: Conversation supprimée avec succès
- *       403:
- *         description: Accès refusé
- *       404:
- *         description: Conversation non trouvée
- */
+
+
 exports.deleteConversation = async (req, res) => {
   try {
     const conversationId = req.params.id;
     const userId = req.user.id;
 
-    // Vérifier que la conversation existe et que l'utilisateur y participe
     const conversation = await Conversation.findOne({
       where: {
         id: conversationId,
@@ -530,12 +416,10 @@ exports.deleteConversation = async (req, res) => {
       return res.status(404).json({ error: 'Conversation non trouvée' });
     }
 
-    // Supprimer tous les messages de la conversation
     await Message.destroy({
       where: { conversationId: conversationId }
     });
 
-    // Supprimer la conversation
     await conversation.destroy();
 
     res.json({ success: true, message: 'Conversation supprimée avec succès' });
@@ -544,3 +428,5 @@ exports.deleteConversation = async (req, res) => {
     res.status(500).json({ error: 'Erreur lors de la suppression de la conversation' });
   }
 };
+
+

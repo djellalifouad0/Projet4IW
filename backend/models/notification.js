@@ -1,4 +1,4 @@
-const { DataTypes } = require('sequelize');
+﻿const { DataTypes } = require('sequelize');
 const sequelize = require('../config/db');
 const User = require('./user');
 
@@ -50,3 +50,4 @@ Notification.belongsTo(User, { foreignKey: 'userId' ,
 });
 
 module.exports = Notification;
+

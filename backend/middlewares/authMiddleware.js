@@ -1,11 +1,7 @@
-const jwt = require('jsonwebtoken');
+﻿const jwt = require('jsonwebtoken');
 const JWT_SECRET = 'votre_clé_secrète'; // à stocker dans un fichier .env sécurisé
 
-/**
- * Middleware d'authentification :
- * - Vérifie le token dans le header Authorization
- * - Décode le token et attache l'objet `user` à la requête
- */
+
 exports.authenticate = (req, res, next) => {
   const authHeader = req.headers.authorization;
 
@@ -22,10 +18,7 @@ exports.authenticate = (req, res, next) => {
   }
 };
 
-/**
- * Middleware d'autorisation :
- * - Vérifie que le rôle de l'utilisateur est "admin"
- */
+
 exports.authorizeAdmin = (req, res, next) => {
   if (req.user.role !== 'admin') {
     return res.status(403).json({ error: 'Accès réservé aux administrateurs' });
@@ -33,11 +26,7 @@ exports.authorizeAdmin = (req, res, next) => {
   next();
 };
 
-/**
- * Middleware d'authentification optionnel :
- * - Vérifie le token s'il est présent
- * - N'échoue pas si le token est absent
- */
+
 exports.optionalAuthenticate = (req, res, next) => {
   const authHeader = req.headers.authorization;
 
@@ -56,3 +45,4 @@ exports.optionalAuthenticate = (req, res, next) => {
     next();
   }
 };
+

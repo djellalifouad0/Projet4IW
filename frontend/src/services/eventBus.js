@@ -1,10 +1,9 @@
-// Service d'événements global simple
+﻿
 class EventBus {
   constructor() {
     this.events = {}
   }
 
-  // Écouter un événement
   on(event, callback) {
     if (!this.events[event]) {
       this.events[event] = []
@@ -12,14 +11,12 @@ class EventBus {
     this.events[event].push(callback)
   }
 
-  // Supprimer un écouteur d'événement
   off(event, callback) {
     if (!this.events[event]) return
     
     this.events[event] = this.events[event].filter(cb => cb !== callback)
   }
 
-  // Émettre un événement
   emit(event, data) {
     if (!this.events[event]) return
     
@@ -32,16 +29,13 @@ class EventBus {
     })
   }
 
-  // Nettoyer tous les événements
   clear() {
     this.events = {}
   }
 }
 
-// Instance globale
 const eventBus = new EventBus()
 
-// Événements spécifiques aux notifications
 export const NotificationEvents = {
   UNREAD_COUNT_CHANGED: 'notification:unread-count-changed',
   NOTIFICATION_READ: 'notification:read',
@@ -49,7 +43,6 @@ export const NotificationEvents = {
   NEW_NOTIFICATION: 'notification:new'
 }
 
-// Événements spécifiques au profil utilisateur
 export const ProfileEvents = {
   PROFILE_UPDATED: 'profile:updated',
   AVATAR_CHANGED: 'profile:avatar-changed',
@@ -57,3 +50,4 @@ export const ProfileEvents = {
 }
 
 export default eventBus
+

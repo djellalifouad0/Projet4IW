@@ -1,10 +1,7 @@
-import api from './api';
+﻿import api from './api';
 
 const dashboardService = {
-  /**
-   * Récupère les statistiques du tableau de bord
-   * @returns {Promise} Promesse contenant les statistiques utilisateur
-   */
+  
   async getUserStats() {
     try {
       const response = await api.get('/dashboard/stats');
@@ -17,3 +14,4 @@ const dashboardService = {
 };
 
 export default dashboardService;
+

@@ -1,7 +1,7 @@
-<template>
+﻿<template>
   <div v-if="show" class="cropper-overlay" @click="$emit('cancel')">
     <div class="cropper-modal" @click.stop>
-      <!-- Header -->
+      
       <div class="cropper-header">
         <button class="cropper-btn-cancel" @click="$emit('cancel')">
           Annuler
@@ -14,7 +14,7 @@
         </button>
       </div>
 
-      <!-- Crop Area -->
+      
       <div class="cropper-container">
         <div class="cropper-canvas-container" ref="canvasContainer">
           <canvas 
@@ -27,15 +27,15 @@
             @wheel="handleZoom"
           ></canvas>
           
-          <!-- Crop Overlay -->
+          
           <div class="cropper-overlay-mask" :class="{ 'circular': cropType === 'avatar' }">
             <div class="cropper-selection" :class="{ 'circular': cropType === 'avatar' }"></div>
           </div>
         </div>
 
-        <!-- Controls -->
+        
         <div class="cropper-controls">
-          <!-- Zoom Control -->
+          
           <div class="control-group">
             <label class="control-label">Zoom</label>
             <div class="zoom-control">
@@ -53,7 +53,7 @@
             </div>
           </div>
 
-          <!-- Rotation Control (Avatar only) -->
+          
           <div v-if="cropType === 'avatar'" class="control-group">
             <label class="control-label">Rotation</label>
             <div class="rotation-control">
@@ -79,7 +79,7 @@
             </div>
           </div>
 
-          <!-- Reset Button -->
+          
           <div class="control-group">
             <button @click="resetTransform" class="reset-btn">
               Réinitialiser
@@ -111,24 +111,21 @@ export default {
   },
   data() {
     return {
-      // Canvas and image
+
       canvas: null,
       ctx: null,
       image: null,
       imageLoaded: false,
-      
-      // Transform properties
+
       zoom: 1,
       rotation: 0,
       offsetX: 0,
       offsetY: 0,
-      
-      // Drag state
+
       isDragging: false,
       lastMouseX: 0,
       lastMouseY: 0,
-      
-      // Crop dimensions
+
       cropWidth: 300,
       cropHeight: 300
     }
@@ -163,8 +160,7 @@ export default {
     initCanvas() {
       this.canvas = this.$refs.canvas;
       this.ctx = this.canvas.getContext('2d');
-      
-      // Set canvas size based on crop type
+
       if (this.cropType === 'avatar') {
         this.canvas.width = 400;
         this.canvas.height = 400;
@@ -202,22 +198,17 @@ export default {
     
     updateCanvas() {
       if (!this.canvas || !this.ctx || !this.image || !this.imageLoaded) return;
-      
-      // Clear canvas
+
       this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
-      
-      // Save context
+
       this.ctx.save();
-      
-      // Move to center
+
       this.ctx.translate(this.canvas.width / 2, this.canvas.height / 2);
-      
-      // Apply transforms
+
       this.ctx.rotate((this.rotation * Math.PI) / 180);
       this.ctx.scale(this.zoom, this.zoom);
       this.ctx.translate(this.offsetX, this.offsetY);
-      
-      // Draw image centered
+
       const imageWidth = this.image.width;
       const imageHeight = this.image.height;
       this.ctx.drawImage(
@@ -227,8 +218,7 @@ export default {
         imageWidth,
         imageHeight
       );
-      
-      // Restore context
+
       this.ctx.restore();
     },
     
@@ -277,27 +267,22 @@ export default {
     
     applyCrop() {
       if (!this.canvas || !this.ctx || !this.image || !this.imageLoaded) return;
-      
-      // Create crop canvas
+
       const cropCanvas = document.createElement('canvas');
       const cropCtx = cropCanvas.getContext('2d');
-      
-      // Set crop canvas size
+
       cropCanvas.width = this.cropWidth;
       cropCanvas.height = this.cropHeight;
-      
-      // Calculate crop area (center of main canvas)
+
       const cropX = (this.canvas.width - this.cropWidth) / 2;
       const cropY = (this.canvas.height - this.cropHeight) / 2;
-      
-      // Copy cropped area to crop canvas
+
       cropCtx.drawImage(
         this.canvas,
         cropX, cropY, this.cropWidth, this.cropHeight,
         0, 0, this.cropWidth, this.cropHeight
       );
-      
-      // Convert to blob and emit
+
       cropCanvas.toBlob((blob) => {
         const reader = new FileReader();
         reader.onload = (e) => {
@@ -549,7 +534,7 @@ export default {
   color: var(--title-color);
 }
 
-/* Responsive */
+
 @media (max-width: 768px) {
   .cropper-modal {
     width: 95vw;
@@ -574,3 +559,4 @@ export default {
   }
 }
 </style>
+
