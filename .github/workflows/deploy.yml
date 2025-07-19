@@ -42,41 +42,35 @@ jobs:
           password: ${{ secrets.VPS_PASSWORD }}
           envs: MATOMO_TOKEN,STRIPE_SECRET_KEY,OPENAI_API_KEY,MAILGUN_KEY,MAILGUN_DOMAIN
           script: |
-            echo "🚀 Déploiement sur VPS…"
+            echo "Déploiement sur VPS…"
             mkdir -p /opt/app
             cd /opt/app
 
             if [ ! -d ".git" ]; then
-              echo "🆕 Clonage du dépôt…"
+              echo "Clonage du dépôt…"
               git clone https://github.com/djellalifouad0/Projet4IW.git .
             else
-              echo "🔄 Mise à jour du dépôt…"
+              echo "Mise à jour du dépôt…"
               git fetch origin main
               git reset --hard origin/main
             fi
 
-            echo "🐳 Reconstruction et redémarrage des containers…"
+            echo "Export des variables d'environnement…"
+            export MATOMO_TOKEN="${MATOMO_TOKEN}"
+            export STRIPE_SECRET_KEY="${STRIPE_SECRET_KEY}"
+            export OPENAI_API_KEY="${OPENAI_API_KEY}"
+            export MAILGUN_KEY="${MAILGUN_KEY}"
+            export MAILGUN_DOMAIN="${MAILGUN_DOMAIN}"
+
+            echo "Reconstruction et redémarrage des containers…"
             docker-compose down
-            MATOMO_TOKEN="$MATOMO_TOKEN" \
-            STRIPE_SECRET_KEY="$STRIPE_SECRET_KEY" \
-            OPENAI_API_KEY="$OPENAI_API_KEY" \
-            MAILGUN_KEY="$MAILGUN_KEY" \
-            MAILGUN_DOMAIN="$MAILGUN_DOMAIN" \
+            docker-compose up -d --build
 
-                        cat > .env_temp <<EOF
-            MATOMO_TOKEN=${MATOMO_TOKEN}
-            STRIPE_SECRET_KEY=${STRIPE_SECRET_KEY}
-            OPENAI_API_KEY=${OPENAI_API_KEY}
-            MAILGUN_KEY=${MAILGUN_KEY}
-            MAILGUN_DOMAIN=${MAILGUN_DOMAIN}
-            EOF
-            docker-compose --env-file .env_temp up -d --build
-
-            echo "📋 État des containers :"
+            echo "État des containers :"
             docker ps -a
 
-            echo "📄 Logs backend :"
+            echo "Logs backend :"
             docker-compose logs -t --tail=20 app
 
-            echo "📄 Logs Matomo :"
+            echo "Logs Matomo :"
             docker-compose logs -t --tail=20 matomo
