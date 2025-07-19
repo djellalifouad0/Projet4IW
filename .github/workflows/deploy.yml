@@ -55,15 +55,21 @@ jobs:
               git reset --hard origin/main
             fi
 
-            echo "🐳 Reconstruction et redémarrage des containers…"
-            docker-compose down
+            echo "📝 Création d'un .env temporaire…"
+                        cat > .env.temp <<EOF
+            MATOMO_TOKEN=${MATOMO_TOKEN}
+            STRIPE_SECRET_KEY=${STRIPE_SECRET_KEY}
+            OPENAI_API_KEY=${OPENAI_API_KEY}
+            MAILGUN_KEY=${MAILGUN_KEY}
+            MAILGUN_DOMAIN=${MAILGUN_DOMAIN}
+            EOF
 
-            MATOMO_TOKEN="$MATOMO_TOKEN" \
-            STRIPE_SECRET_KEY="$STRIPE_SECRET_KEY" \
-            OPENAI_API_KEY="$OPENAI_API_KEY" \
-            MAILGUN_KEY="$MAILGUN_KEY" \
-            MAILGUN_DOMAIN="$MAILGUN_DOMAIN" \
-            docker-compose up -d --build
+            echo "🐳 Reconstruction et redémarrage des containers…"
+            docker-compose --env-file .env.temp down
+            docker-compose --env-file .env.temp up -d --build
+
+            echo "🧹 Suppression du .env temporaire…"
+            rm -f .env.temp
 
             echo "📋 État des containers :"
             docker ps -a
