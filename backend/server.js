@@ -137,7 +137,7 @@ const { setupAssociations } = require('./models/associations.js');
     logger.info('Connexion à la base de données OK');
     setupAssociations();
 
-    await sequelize.sync({ alter: false, logging: console.log });
+    await sequelize.sync({alter: true, logging: console.log });
 
 
     server.listen(PORT, () => {

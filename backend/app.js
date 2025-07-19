@@ -7,7 +7,6 @@ const session = require('express-session');
 
 const app = express();
 
-// 🌐 CORS
 const authRoutes = require('./routes/authRoutes');
 const userRoutes = require('./routes/userRoutes');
 const skillRoutes = require('./routes/skillRoutes');
@@ -23,13 +22,15 @@ const setupSwagger = require('./swagger/swagger');
 
 
 app.use(cors());
+app.use(express.json({ limit: '10mb' }));
+app.use(express.urlencoded({ limit: '10mb', extended: true }));
 
-// 📄 Swagger
+//  Swagger
 
 const { profile } = require('console');
 setupSwagger(app);
 
-// 🧩 Servir le frontend
+//  Servir le frontend
 app.use('/api/auth', authRoutes);
 app.use('/api', userRoutes);
 app.use('/api/skills', skillRoutes);

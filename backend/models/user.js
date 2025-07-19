@@ -43,11 +43,20 @@ const User = sequelize.define('User', {
     allowNull: true,
     description: 'URL of the user cover image'
   },
+    validationToken: { type: DataTypes.STRING, allowNull: true },
   profileToken: {
     type: DataTypes.STRING,
     allowNull: false,
     unique: true
   },
+  resetToken: {
+  type: DataTypes.STRING,
+  allowNull: true
+},
+resetTokenExpires: {
+  type: DataTypes.DATE,
+  allowNull: true
+},
   notificationSettings: {
     type: DataTypes.TEXT,
     allowNull: true,

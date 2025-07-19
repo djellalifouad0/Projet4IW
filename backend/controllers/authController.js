@@ -4,38 +4,84 @@ const crypto = require('crypto');
 const User = require('../models/user');
 const NotificationService = require('../services/notificationService');
 const e = require('express');
-
+const { Op } = require('sequelize');
 const JWT_SECRET = 'votre_clé_secrète'; // Remplace avec un .env sécurisé
-
+const MailService = require('../services/emailService');
 exports.register = async (req, res) => {
   try {
     const { username, email, password, role } = req.body;
 
     const existingUser = await User.findOne({ where: { email } });
-    if (existingUser) return res.status(400).json({ error: 'Utilisateur déjà existant' });
+    if (existingUser) {
+      return res.status(400).json({ error: 'Utilisateur déjà existant' });
+    }
 
     const hashedPassword = await bcrypt.hash(password, 10);
     const profileToken = crypto.randomBytes(16).toString('hex');
+    const validationToken = crypto.randomBytes(24).toString('hex');
+
     const user = await User.create({
       username,
       email,
       password: hashedPassword,
       role: role || 'user',
-      profileToken
-    });    // Créer une notification de bienvenue
-    try {
-      const io = req.app.get('socketio'); // Récupérer l'instance WebSocket
-      await NotificationService.createWelcomeNotification(user.id, io);
-    } catch (notifError) {
-      console.error('Erreur création notification bienvenue:', notifError);
-    }
+      profileToken,
+      isActive: false,
+      validationToken
+    });
 
-    res.status(201).json({ message: 'Compte créé', user });
+    const validationLink = `${req.protocol}://${req.get('host')}/api/auth/validate/${validationToken}`;
+    await MailService.sendAccountValidationEmail(email, username, validationLink);
+
+    res.status(201).json({
+      message: 'Compte créé. Vérifiez votre email pour activer votre compte.'
+    });
   } catch (error) {
+    console.error(error);
     res.status(500).json({ error: 'Erreur création compte', details: error.message });
   }
 };
 
+exports.validateAccount = async (req, res) => {
+  try {
+    const { token } = req.params;
+
+    const user = await User.findOne({ where: { validationToken: token } });
+    if (!user) {
+      return res
+        .status(400)
+        .send(`
+        <div style="font-family: Arial, sans-serif; max-width: 600px; margin: auto; padding: 20px; background-color: #fff3f3; border: 1px solid #f5c2c7; border-radius: 8px; color: #842029;">
+          <h2>Lien invalide ou expiré</h2>
+          <p>Le lien de validation est invalide ou a déjà été utilisé.</p>
+        </div>
+        `);
+    }
+
+    user.isActive = true;
+    user.validationToken = null;
+    await user.save();
+
+    res.send(`
+      <div style="font-family: Arial, sans-serif; max-width: 600px; margin: auto; padding: 20px; background-color: #e7f9f0; border: 1px solid #badbcc; border-radius: 8px; color: #0f5132;">
+        <h2>Compte activé !</h2>
+        <p>Bonjour <strong>${user.username}</strong>, votre compte a été activé avec succès.</p>
+        <p>Vous pouvez maintenant vous connecter à votre compte.</p>
+        <a href="/" style="display: inline-block; margin-top: 20px; padding: 10px 20px; background-color: #4CAF50; color: white; text-decoration: none; border-radius: 4px;">Retour à l'accueil</a>
+      </div>
+    `);
+  } catch (error) {
+    console.error(error);
+    res
+      .status(500)
+      .send(`
+      <div style="font-family: Arial, sans-serif; max-width: 600px; margin: auto; padding: 20px; background-color: #fff3f3; border: 1px solid #f5c2c7; border-radius: 8px; color: #842029;">
+        <h2>Erreur</h2>
+        <p>Une erreur est survenue lors de la validation du compte. Veuillez réessayer plus tard.</p>
+      </div>
+      `);
+  }
+};
 exports.login = async (req, res) => {
   try {
     const { email, password, otp } = req.body;
@@ -68,7 +114,7 @@ exports.login = async (req, res) => {
 };
 const { OAuth2Client } = require('google-auth-library');
 const client = new OAuth2Client('211678426929-22c5s4tksctlud2p36qt3q9p10jdnpf4.apps.googleusercontent.com'); 
-// ➕ Connexion via Google (OAuth simulée ici)
+
 
 exports.googleAuthCallback = async (req, res) => {
   try {
@@ -227,5 +273,103 @@ exports.logoutAll = async (req, res) => {
     res.status(500).json({ error: 'Erreur lors de la déconnexion', details: error.message });
   }
 };
+
+exports.forgotPassword = async (req, res) => {
+  try {
+    const { email } = req.body;
+
+    const user = await User.findOne({ where: { email, isActive: true } });
+    if (!user) {
+      return res.status(400).json({ error: 'Aucun compte actif trouvé avec cet email' });
+    }
+
+    const resetToken = crypto.randomBytes(24).toString('hex');
+    user.resetToken = resetToken;
+    user.resetTokenExpires = Date.now() + 3600000; // valide 1h
+    await user.save();
+
+    const resetLink = `${req.protocol}://${req.get('host')}/api/auth/reset-password/${resetToken}`;
+
+    await MailService.sendResetPasswordEmail(email, user.username, resetLink);
+
+    res.json({ message: 'Email de réinitialisation envoyé' });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ error: 'Erreur forget password', details: error.message });
+  }
+};
+exports.resetPassword = async (req, res) => {
+  try {
+    const { token } = req.params;
+    const { newPassword } = req.body;
+
+    const user = await User.findOne({
+      where: {
+        resetToken: token,
+        resetTokenExpires: { [Op.gt]: Date.now() }
+      }
+    });
+
+    if (!user) {
+      return res.status(400).json({ error: 'Lien invalide ou expiré' });
+    }
+
+    const hashedPassword = await bcrypt.hash(newPassword, 10);
+    user.password = hashedPassword;
+    user.resetToken = null;
+    user.resetTokenExpires = null;
+    await user.save();
+
+    res.json({ message: 'Mot de passe réinitialisé avec succès' });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ error: 'Erreur reset password', details: error.message });
+  }
+};
+exports.showResetPasswordForm = async (req, res) => {
+  try {
+    const { token } = req.params;
+
+    const user = await User.findOne({
+      where: {
+        resetToken: token,
+        resetTokenExpires: { [Op.gt]: Date.now() }
+      }
+    });
+
+    if (!user) {
+      return res
+        .status(400)
+        .send(`
+        <div style="font-family: Arial, sans-serif; max-width: 600px; margin: auto; padding: 20px; background-color: #fff3f3; border: 1px solid #f5c2c7; border-radius: 8px; color: #842029;">
+          <h2>Lien invalide ou expiré</h2>
+          <p>Le lien de réinitialisation est invalide ou a expiré.</p>
+        </div>
+        `);
+    }
+
+    res.send(`
+      <div style="font-family: Arial, sans-serif; max-width: 400px; margin: auto; padding: 20px; background-color: #f9f9f9; border-radius: 8px; border: 1px solid #ddd;">
+        <h2 style="color: #333;">Réinitialiser votre mot de passe</h2>
+        <form method="POST" action="/api/auth/reset-password/${token}">
+          <label for="newPassword">Nouveau mot de passe :</label><br>
+          <input type="password" id="newPassword" name="newPassword" required style="width:100%;padding:8px;margin:10px 0;"><br>
+          <button type="submit" style="background-color:#4CAF50;color:white;padding:10px 20px;border:none;border-radius:4px;">Valider</button>
+        </form>
+      </div>
+    `);
+  } catch (error) {
+    console.error(error);
+    res
+      .status(500)
+      .send(`
+      <div style="font-family: Arial, sans-serif; max-width: 600px; margin: auto; padding: 20px; background-color: #fff3f3; border: 1px solid #f5c2c7; border-radius: 8px; color: #842029;">
+        <h2>Erreur</h2>
+        <p>Une erreur est survenue. Veuillez réessayer plus tard.</p>
+      </div>
+      `);
+  }
+};
+
 
 

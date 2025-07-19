@@ -1,24 +1,18 @@
 ﻿const Notification = require('../models/notification');
 const User = require('../models/user');
-
-
 exports.getNotifications = async (req, res) => {
   try {
     const page = parseInt(req.query.page) || 1;
     const limit = parseInt(req.query.limit) || 10;
     const offset = (page - 1) * limit;
-
     const { count, rows: notifications } = await Notification.findAndCountAll({ 
       where: { userId: req.user.id },
       order: [['createdAt', 'DESC']],
       limit,
       offset
     });
-
     const enrichedNotifications = await enrichNotificationsWithUserData(notifications);
-
     const groupedNotifications = groupNotificationsByDate(enrichedNotifications);
-
     res.json({
       notifications: groupedNotifications,
       pagination: {
@@ -242,7 +236,6 @@ exports.updateNotificationSettings = async (req, res) => {
     res.status(500).json({ error: 'Erreur mise à jour paramètres notifications' });
   }
 };
-
 
 exports.NOTIFICATION_TYPES = {
   WELCOME: 'welcome',
