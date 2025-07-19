@@ -94,6 +94,7 @@ app.use(express.static(path.join(__dirname, 'frontend-build')));
     saveUninitialized: false,
     cookie: { secure: false }, // true si HTTPS
   }));
+app.use(express.static(path.join(__dirname, 'frontend-build')));
 
   // 📝 AuthProvider
   const authProvider = new DefaultAuthProvider({
@@ -139,7 +140,10 @@ app.use(express.static(path.join(__dirname, 'frontend-build')));
 
   app.use(express.json({ limit: '10mb' }));
   app.use(express.urlencoded({ limit: '10mb', extended: true }));
-
+// Si aucune route API ne correspond, retourne index.html
+app.get('*', (req, res) => {
+  res.sendFile(path.join(__dirname, 'frontend-build', 'index.html'));
+});
   console.log(`✅ AdminJS disponible sur http://localhost:3000${adminJs.options.rootPath}`);
 })();
 
