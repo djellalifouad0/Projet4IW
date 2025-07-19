@@ -8,12 +8,30 @@ const api = axios.create({
 })
 
 api.interceptors.request.use((config) => {
-  const token = localStorage.getItem('token')
-  if (token) {
-    config.headers.Authorization = `Bearer ${token}`
+  // Endpoints qui ne nécessitent pas d'authentification
+  const publicEndpoints = [
+    '/auth/login',
+    '/auth/register', 
+    '/auth/forgot-password',
+    '/auth/reset-password',
+    '/auth/validate'
+  ];
+  
+  // Vérifier si l'URL correspond à un endpoint public
+  const isPublicEndpoint = publicEndpoints.some(endpoint => 
+    config.url && config.url.includes(endpoint)
+  );
+  
+  // Ajouter le token seulement si ce n'est pas un endpoint public
+  if (!isPublicEndpoint) {
+    const token = localStorage.getItem('token');
+    if (token) {
+      config.headers.Authorization = `Bearer ${token}`;
+    }
   }
-  return config
-})
+  
+  return config;
+});
 
 export default api
 

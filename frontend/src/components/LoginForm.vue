@@ -121,3 +121,18 @@ export default {
 };
 </script>
 
+<style scoped>
+.forgot {
+  display: block;
+  text-align: right;
+  color: #667eea;
+  text-decoration: none;
+  font-size: 14px;
+  margin: 8px 0 16px 0;
+}
+
+.forgot:hover {
+  text-decoration: underline;
+}
+</style>
+

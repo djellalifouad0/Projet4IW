@@ -139,6 +139,12 @@
                 <img src="@/assets/icons/carte.svg" alt="Lieu" class="detail-icon" />
                 {{ appointment.location }}
               </div>
+              <div v-if="appointment.price" class="appointment-price">
+                
+                {{ appointment.totalPrice?.toFixed(2) }}€
+                <span v-if="appointment.paymentStatus === 'paid'" class="payment-status paid">✓ Payé</span>
+                <span v-else class="payment-status unpaid">En attente de paiement</span>
+              </div>
               <div v-if="appointment.description" class="appointment-description">
                 {{ appointment.description }}
               </div>            </div>
@@ -168,14 +174,29 @@
             
             <!-- Actions pour les rendez-vous acceptés -->
             <div v-else-if="appointment.status === 'accepted'" class="appointment-actions">
-              <button 
-                @click="updateAppointmentStatus(appointment.id, 'cancelled')"
-                class="appointment-btn cancel"
-              >
-                Annuler
-              </button>
-              <div class="appointment-status-confirmed">
-                Rendez-vous confirmé
+              <!-- Si l'utilisateur est le receveur et que le paiement n'est pas fait -->
+              <div v-if="appointment.receiverId === loggedInUser?.id && appointment.paymentStatus !== 'paid'" class="payment-required">
+                <button 
+                  @click="goToPayment(appointment.id)"
+                  class="appointment-btn pay"
+                >
+                  Payer maintenant
+                </button>
+                <div class="payment-status">
+                  Paiement requis
+                </div>
+              </div>
+              <!-- Si le paiement est fait ou si c'est le demandeur -->
+              <div v-else>
+                <button 
+                  @click="updateAppointmentStatus(appointment.id, 'cancelled')"
+                  class="appointment-btn cancel"
+                >
+                  Annuler
+                </button>
+                <div class="appointment-status-confirmed">
+                  {{ appointment.paymentStatus === 'paid' ? 'Rendez-vous confirmé et payé' : 'Rendez-vous confirmé' }}
+                </div>
               </div>
             </div>
             
@@ -782,15 +803,43 @@ export default {
       }
     },    async updateAppointmentStatus(appointmentId, status) {
       try {
-        await api.patch(`/appointments/${appointmentId}/status`, { status });
+        console.log('=== updateAppointmentStatus called (frontend) ===');
+        console.log(`Appointment ID: ${appointmentId}, Status: ${status}`);
+        
+        const response = await api.patch(`/appointments/${appointmentId}/status`, { status });
+        console.log('Response received:', response.data);
+        
+        // Si le statut est "accepted" et que la réponse indique qu'un paiement est requis
+        if (status === 'accepted' && response.data.requiresPayment) {
+          console.log('Payment required');
+          console.log('Response data for payment:', response.data);
+          
+          // Si l'utilisateur connecté est le receveur, le rediriger vers le paiement
+          if (response.data.receiverId === this.loggedInUser?.id) {
+            this.$router.push(`/appointments/payment/${appointmentId}`);
+          } else {
+            // Sinon (c'est le demandeur), afficher un message
+            alert('Rendez-vous accepté ! Le prestataire va effectuer le paiement pour confirmer.');
+            await this.loadAppointments();
+          }
+          return;
+        }
+        
+        console.log('Standard status update - reloading appointments');
         // Recharger les rendez-vous après mise à jour
         await this.loadAppointments();
         // Déclencher la vérification des notifications après mise à jour du statut
         NotificationService.triggerNotificationCheck();
       } catch (error) {
         console.error('Error updating appointment status:', error);
+        console.error('Error details:', error.response?.data || error.message);
       }
     },
+    
+    goToPayment(appointmentId) {
+      this.$router.push(`/appointments/payment/${appointmentId}`);
+    },
+    
     getStatusText(status) {
       const statusTexts = {
         pending: 'En attente',
@@ -1671,6 +1720,31 @@ export default {
   border-radius: 8px;
 }
 
+.appointment-price {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-weight: 600;
+  color: #28303F;
+}
+
+.payment-status {
+  font-size: 0.8rem;
+  padding: 2px 8px;
+  border-radius: 12px;
+  font-weight: 500;
+}
+
+.payment-status.paid {
+  background: #e8f5e8;
+  color: #4caf50;
+}
+
+.payment-status.unpaid {
+  background: #fff3e0;
+  color: #ff9800;
+}
+
 .appointment-actions {
   display: flex;
   gap: 8px;
@@ -1712,6 +1786,30 @@ export default {
 
 .appointment-btn.cancel:hover {
   background: #e68900;
+}
+
+.appointment-btn.pay {
+  background-color: #635bff;
+  color: white;
+  font-weight: 600;
+}
+
+.appointment-btn.pay:hover {
+  background-color: #5a54d9;
+  transform: translateY(-1px);
+}
+
+.payment-required {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  align-items: center;
+}
+
+.payment-status {
+  font-size: 0.8rem;
+  color: #dc3545;
+  font-weight: 500;
 }
 
 .appointment-status-confirmed {

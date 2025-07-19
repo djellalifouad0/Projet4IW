@@ -18,10 +18,14 @@ const routes = [
       { path: 'discussions', component: () => import('../components/Discussions.vue') },
       { path: 'notifications', component: () => import('../components/Notifications.vue') },
       { path: 'parametres', component: () => import('../components/Settings.vue') },
+      { path: 'appointments/payment/:appointmentId', component: () => import('../pages/PaymentPage.vue') },
+      { path: 'appointments/payment-success', component: () => import('../components/PaymentSuccess.vue') },
     ]
   },
   { path: '/login', component: LoginForm },
   { path: '/register', component: RegisterForm },
+  { path: '/forgot-password', component: () => import('../components/ForgotPasswordForm.vue') },
+  { path: '/reset-password/:token', component: () => import('../components/ResetPasswordForm.vue') },
   { path: '/:pathMatch(.*)*', redirect: '/' } // Redirection 404 vers l'accueil
 ]
 
