@@ -6,21 +6,22 @@ on:
       - main
 
 jobs:
-  build:
+  ci-cd:
     runs-on: ubuntu-latest
 
     steps:
-      - uses: actions/checkout@v4
+      - name: Checkout code
+        uses: actions/checkout@v4
 
-      - name: Set up Docker Buildx
+      - name: Set up Docker
         uses: docker/setup-buildx-action@v2
 
-      - name: Install docker-compose & MySQL client
+      - name: Install docker-compose
         run: |
           sudo apt-get update
           sudo apt-get install -y docker-compose default-mysql-client
 
-      - name: Build & run tests (CI)
+      - name: Build & start containers (CI)
         env:
           MATOMO_TOKEN: ${{ secrets.MATOMO_TOKEN }}
           STRIPE_SECRET_KEY: ${{ secrets.STRIPE_SECRET_KEY }}
@@ -29,9 +30,12 @@ jobs:
           MAILGUN_DOMAIN: ${{ secrets.MAILGUN_DOMAIN }}
         run: |
           docker-compose up -d --build
-          docker ps -a
-          docker-compose logs app
-          docker-compose logs matomo
+
+      - name: Show containers
+        run: docker ps -a
+
+      - name: Backend logs
+        run: docker-compose logs app
 
       - name: Deploy to VPS
         if: github.ref == 'refs/heads/main'
@@ -41,28 +45,15 @@ jobs:
           username: ${{ secrets.VPS_USER }}
           password: ${{ secrets.VPS_PASSWORD }}
           script: |
-            echo "🚀 Déploiement sur VPS…"
+            # Créer le dossier si absent
             mkdir -p /opt/app
             cd /opt/app
-
+            # Cloner si c'est la première fois
             if [ ! -d ".git" ]; then
-              echo "🆕 Clonage du dépôt…"
               git clone https://github.com/djellalifouad0/Projet4IW.git .
             else
-              echo "🔄 Mise à jour du dépôt…"
-              git fetch origin main
-              git reset --hard origin/main
+              git pull origin main
             fi
-
-            echo "🐳 Reconstruction et redémarrage des containers…"
-            docker compose down
-            docker compose up -d --build
-
-            echo "📋 État des containers :"
-            docker ps -a
-
-            echo "📄 Logs backend :"
-            docker compose logs -t --tail=20 app
-
-            echo "📄 Logs Matomo :"
-            docker compose logs -t --tail=20 matomo
+            # Build & restart
+            docker-compose down
+            docker-compose up -d --build
