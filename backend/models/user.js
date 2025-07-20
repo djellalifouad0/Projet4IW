@@ -39,7 +39,7 @@ const User = sequelize.define('User', {
   allowNull: true,
 }, 
   cover: {
-    type: DataTypes.STRING,
+    type: DataTypes.TEXT,
     allowNull: true,
     description: 'URL of the user cover image'
   },
