@@ -25,7 +25,7 @@ const routes = [
   { path: '/login', component: LoginForm },
   { path: '/register', component: RegisterForm },
   { path: '/forgot-password', component: () => import('../components/ForgotPasswordForm.vue') },
-  { path: '/reset-password/:token', component: () => import('../components/ResetPasswordForm.vue') },
+  // { path: '/reset-password/:token', component: () => import('../components/ResetPasswordForm.vue') },
   { path: '/:pathMatch(.*)*', redirect: '/' } // Redirection 404 vers l'accueil
 ]
 
