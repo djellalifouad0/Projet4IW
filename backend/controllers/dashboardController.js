@@ -1,142 +1,115 @@
-﻿const { User, Skill, Comment, Like, Rating, Appointment } = require('../models/associations');
-const { Sequelize } = require('sequelize');
+﻿const { User, Conversation, Message, Notification, Comment, Rating, Appointment, Skill, Like, Sequelize } = require('../models')
+const { Op } = Sequelize
 
-exports.getUserStats = async (req, res) => {
+exports.getDashboardStats = async (req, res) => {
   try {
-    const userId = req.user.id;
+    const now = new Date()
+    const last30Days = new Date()
+    last30Days.setDate(now.getDate() - 30)
 
-    const appointmentsStats = await Appointment.findAll({
-      where: {
-        [Sequelize.Op.or]: [
-          { requesterId: userId },
-          { receiverId: userId }
-        ]
-      },
-      attributes: [
-        'status',
-        [Sequelize.fn('COUNT', Sequelize.col('id')), 'count']
-      ],
-      group: ['status']
-    });
+    const [monthlySignups, userRoles, dailyConversations, dailyMessages, notificationTypes, dailyComments, ratingsDistribution, appointmentsByStatus, topSkills, dailyLikes] =
+      await Promise.all([
+        // 1. Inscriptions par mois
+        User.findAll({
+          attributes: [
+            [Sequelize.fn('DATE_FORMAT', Sequelize.col('createdAt'), '%Y-%m'), 'month'],
+            [Sequelize.fn('COUNT', '*'), 'count']
+          ],
+          group: 'month',
+          order: [['month', 'ASC']]
+        }),
 
-    let appointmentsCount = 0;
-    let appointmentsAccepted = 0;
+        // 2. Répartition des rôles
+        User.findAll({
+          attributes: ['role', [Sequelize.fn('COUNT', '*'), 'count']],
+          group: 'role'
+        }),
 
-    appointmentsStats.forEach(stat => {
-      const count = parseInt(stat.dataValues.count);
-      appointmentsCount += count;
-      if (stat.status === 'accepted') {
-        appointmentsAccepted += count;
-      }
-    });
+        // 3. Conversations par jour
+        Conversation.findAll({
+          attributes: [
+            [Sequelize.fn('DATE', Sequelize.col('createdAt')), 'date'],
+            [Sequelize.fn('COUNT', '*'), 'count']
+          ],
+          where: { createdAt: { [Op.gte]: last30Days } },
+          group: 'date',
+          order: [['date', 'ASC']]
+        }),
 
-    const ratingSummary = await Rating.findOne({
-      where: { ratedUserId: userId },
-      attributes: [
-        [Sequelize.fn('AVG', Sequelize.col('rating')), 'average'],
-        [Sequelize.fn('COUNT', Sequelize.col('id')), 'total']
-      ]
-    });
+        // 4. Messages par jour
+        Message.findAll({
+          attributes: [
+            [Sequelize.fn('DATE', Sequelize.col('createdAt')), 'date'],
+            [Sequelize.fn('COUNT', '*'), 'count']
+          ],
+          where: { createdAt: { [Op.gte]: last30Days } },
+          group: 'date',
+          order: [['date', 'ASC']]
+        }),
 
-    const averageRating = parseFloat(ratingSummary?.dataValues?.average) || 0;
-    const totalRatings = parseInt(ratingSummary?.dataValues?.total) || 0;
+        // 5. Notifications par type
+        Notification.findAll({
+          attributes: ['type', [Sequelize.fn('COUNT', '*'), 'count']],
+          group: 'type'
+        }),
 
-    const skillsCount = await Skill.count({
-      where: { userId }
-    });
+        // 6. Commentaires par jour
+        Comment.findAll({
+          attributes: [
+            [Sequelize.fn('DATE', Sequelize.col('createdAt')), 'date'],
+            [Sequelize.fn('COUNT', '*'), 'count']
+          ],
+          where: { createdAt: { [Op.gte]: last30Days } },
+          group: 'date',
+          order: [['date', 'ASC']]
+        }),
 
-    const likesReceived = await Like.count({
-      include: [{
-        model: Skill,
-        where: { userId }
-      }]
-    });
+        // 7. Ratings distribution
+        Rating.findAll({
+          attributes: ['score', [Sequelize.fn('COUNT', '*'), 'count']],
+          group: 'score'
+        }),
 
-    const commentsReceived = await Comment.count({
-      include: [{
-        model: Skill,
-        where: { userId }
-      }]
-    });
+        // 8. Appointments par statut
+        Appointment.findAll({
+          attributes: ['status', [Sequelize.fn('COUNT', '*'), 'count']],
+          group: 'status'
+        }),
 
-    const sixMonthsAgo = new Date();
-    sixMonthsAgo.setMonth(sixMonthsAgo.getMonth() - 6);
+        // 9. Top skills
+        Skill.findAll({
+          attributes: ['name', [Sequelize.fn('COUNT', '*'), 'count']],
+          group: 'name',
+          order: [[Sequelize.fn('COUNT', '*'), 'DESC']],
+          limit: 10
+        }),
 
-    const monthlyAppointments = await Appointment.findAll({
-      where: {
-        [Sequelize.Op.or]: [
-          { requesterId: userId },
-          { receiverId: userId }
-        ],
-        createdAt: {
-          [Sequelize.Op.gte]: sixMonthsAgo
-        }
-      },
-      attributes: [
-        [Sequelize.fn('strftime', '%m/%Y', Sequelize.col('createdAt')), 'month'],
-        [Sequelize.fn('COUNT', Sequelize.col('id')), 'count']
-      ],
-      group: [Sequelize.fn('strftime', '%m/%Y', Sequelize.col('createdAt'))],
-      order: [[Sequelize.fn('strftime', '%Y-%m', Sequelize.col('createdAt')), 'ASC']]
-    });
-
-    const monthlyRatings = await Rating.findAll({
-      where: {
-        ratedUserId: userId,
-        createdAt: {
-          [Sequelize.Op.gte]: sixMonthsAgo
-        }
-      },
-      attributes: [
-        [Sequelize.fn('strftime', '%m/%Y', Sequelize.col('createdAt')), 'month'],
-        [Sequelize.fn('COUNT', Sequelize.col('id')), 'count']
-      ],
-      group: [Sequelize.fn('strftime', '%m/%Y', Sequelize.col('createdAt'))],
-      order: [[Sequelize.fn('strftime', '%Y-%m', Sequelize.col('createdAt')), 'ASC']]
-    });
-
-    const monthlyData = new Map();
-
-    for (let i = 5; i >= 0; i--) {
-      const date = new Date();
-      date.setMonth(date.getMonth() - i);
-      const monthKey = date.toLocaleDateString('fr-FR', { month: '2-digit', year: 'numeric' });
-      monthlyData.set(monthKey, { appointments: 0, ratings: 0 });
-    }
-
-    monthlyAppointments.forEach(item => {
-      const month = item.dataValues.month;
-      if (monthlyData.has(month)) {
-        monthlyData.get(month).appointments = parseInt(item.dataValues.count);
-      }
-    });
-
-    monthlyRatings.forEach(item => {
-      const month = item.dataValues.month;
-      if (monthlyData.has(month)) {
-        monthlyData.get(month).ratings = parseInt(item.dataValues.count);
-      }
-    });
-
-    const monthlyActivity = Array.from(monthlyData.entries()).map(([month, data]) => ({
-      month,
-      appointments: data.appointments,
-      ratings: data.ratings
-    }));
+        // 10. Likes par jour
+        Like.findAll({
+          attributes: [
+            [Sequelize.fn('DATE', Sequelize.col('createdAt')), 'date'],
+            [Sequelize.fn('COUNT', '*'), 'count']
+          ],
+          where: { createdAt: { [Op.gte]: last30Days } },
+          group: 'date',
+          order: [['date', 'ASC']]
+        }),
+      ])
 
     res.json({
-      appointmentsCount,
-      appointmentsAccepted,
-      averageRating: Math.round(averageRating * 10) / 10,
-      totalRatings,
-      skillsCount,
-      likesReceived,
-      commentsReceived,
-      monthlyActivity
-    });
-
-  } catch (error) {
-    console.error('Erreur lors de la récupération des statistiques:', error);
-    res.status(500).json({ error: 'Erreur serveur' });
+      monthlySignups,
+      userRoles,
+      dailyConversations,
+      dailyMessages,
+      notificationTypes,
+      dailyComments,
+      ratingsDistribution,
+      appointmentsByStatus,
+      topSkills,
+      dailyLikes,
+    })
+  } catch (err) {
+    console.error(err)
+    res.status(500).json({ error: 'Erreur serveur' })
   }
-};
+}

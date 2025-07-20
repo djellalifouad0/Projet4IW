@@ -6,7 +6,8 @@ const cors = require('cors');
 const session = require('express-session');
 
 const app = express();
-
+app.use(express.json({ limit: '10mb' }));
+app.use(express.urlencoded({ limit: '10mb', extended: true }));
 const authRoutes = require('./routes/authRoutes');
 const userRoutes = require('./routes/userRoutes');
 const skillRoutes = require('./routes/skillRoutes');
@@ -22,10 +23,7 @@ const setupSwagger = require('./swagger/swagger');
 
 
 app.use(cors());
-app.use(express.json({ limit: '10mb' }));
-app.use(express.urlencoded({ limit: '10mb', extended: true }));
 
-//  Swagger
 
 const { profile } = require('console');
 setupSwagger(app);
@@ -74,50 +72,95 @@ app.use(express.static(path.join(__dirname, 'frontend-build')));
       isActive: true,
       profileToken: ""
     });
-    console.log('✅ Admin par défaut créé : admin@example.com / admin123');
+    console.log('Admin par défaut créé : / admin123');
   } else {
-    console.log(`ℹ️ Admin déjà existant : ${existingAdmin.email}`);
+    console.log(`ℹAdmin déjà existant : ${existingAdmin.email}`);
   }
+  
+  
+  const {  Notification, Skill, Like, Conversation, Appointment, Rating } = require('./models');
+const { ComponentLoader } = require('adminjs')
+const componentLoader = new ComponentLoader()
+const path = require('path');
+const getDashboardStats = require('./services/getDashboardStats')
 
+const Components = {
+    Dashboard:path.join(__dirname, 'components', 'Dashboard.jsx')
+  // autres composants ici
+}
+
+const customDashboard = componentLoader.add(
+  'CustomDashboard', 
+  path.join(__dirname, 'components/Dashboard.jsx')
+);
   const adminJs = new AdminJS({
-    databases: [sequelize],
+    dashboard: { 
+      
+      handler: async () => {
+       const stats = await getDashboardStats()
+    return stats
+      }
+    
+    
+    },
+     component: customDashboard,
+  
+  componentLoader,
+      resources: [
+    { resource: User },
+    { resource: Notification },
+    { resource: Skill },
+    { resource: Like },
+    { resource: Conversation },
+    { resource: Appointment },
+    { resource: Rating },
+  ],
+pages: {
+    customPage: {
+      label: 'Page Custom',
+      component: customDashboard,
+    
+       
+    },
+  },
     rootPath: '/admin',
     branding: {
-      companyName: 'MySQL Admin Dashboard',
+      companyName: 'SkillsSwap',
     },
-  });
+   componentLoader,
 
-  // 📝 Session
+  });
+  
+  adminJs.watch()
+
   app.use(session({
     secret: 'adminjs-secret-key',
     resave: false,
     saveUninitialized: false,
     cookie: { secure: false }, // true si HTTPS
   }));
-app.use(express.static(path.join(__dirname, 'frontend-build')));
 
-  // 📝 AuthProvider
   const authProvider = new DefaultAuthProvider({
     authenticate: async ({ email, password }) => {
-      console.log(`🟢 authenticate() appelé avec ${email}`);
+      console.log(`authenticate() appelé avec ${email}`);
       const user = await User.findOne({ where: { email } });
       if (!user) {
-        console.log(`🚨 Utilisateur ${email} non trouvé`);
+        console.log(`Utilisateur ${email} non trouvé`);
         return null;
       }
 
       const passwordMatch = await bcrypt.compare(password, user.password);
       if (!passwordMatch) {
-        console.log(`🚨 Mot de passe invalide pour ${email}`);
+        console.log(`Mot de passe invalide pour ${email}`);
         return null;
       }
 
       if (user.role !== 'admin') {
-        console.log(`🚨 Rôle invalide pour ${email}`);
+        console.log(`Rôle invalide pour ${email}`);
         return null;
       }
 
-      console.log(`✅ Utilisateur ${email} authentifié`);
+      console.log(`Utilisateur ${email} authentifié`);
       return { email: user.email, role: user.role };
     },
   });
@@ -135,16 +178,16 @@ app.use(express.static(path.join(__dirname, 'frontend-build')));
       saveUninitialized: false,
     }
   );
-
   app.use(adminJs.options.rootPath, adminRouter);
-
   app.use(express.json({ limit: '10mb' }));
   app.use(express.urlencoded({ limit: '10mb', extended: true }));
-// Si aucune route API ne correspond, retourne index.html
-app.get('*', (req, res) => {
-  res.sendFile(path.join(__dirname, 'frontend-build', 'index.html'));
-});
-  console.log(`✅ AdminJS disponible sur http://localhost:3000${adminJs.options.rootPath}`);
+  app.use(express.static(path.join(__dirname, 'frontend-build')));
+
+  app.get('*', (req, res) => {
+    res.sendFile(path.join(__dirname, 'frontend-build', 'index.html'));
+  }); 
+
+  console.log(`AdminJS disponible sur http://localhost:3000${adminJs.options.rootPath}`);
 })();
 
 // Routes API
@@ -156,7 +199,8 @@ app.use('/api/likes', require('./routes/likeRoutes'));
 app.use('/api/conversations', require('./routes/conversationRoutes'));
 app.use('/api/appointments', require('./routes/appointmentRoutes'));
 app.use('/api/ratings', require('./routes/ratingRoutes'));
-
+  app.use(express.json({ limit: '10mb' }));
+  app.use(express.urlencoded({ limit: '10mb', extended: true }));
 // Frontend fallback
 
 module.exports = app;
