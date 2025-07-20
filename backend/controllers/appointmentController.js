@@ -89,6 +89,7 @@ exports.createAppointment = async (req, res) => {
 exports.getUserAppointments = async (req, res) => {
   try {
     const userId = req.user.id;
+    console.log(`Récupération des rendez-vous pour l'utilisateur ID: ${userId}`);
 
     const appointments = await Appointment.findAll({
       where: {
@@ -358,6 +359,87 @@ exports.getAppointmentsByConversation = async (req, res) => {
  *       200:
  *         description: Session de paiement créée avec succès
  */
+
+exports.renderPaymentResult = async (req, res) => {
+  const { status, appointment_id, session_id } = req.query;
+
+  try {
+    const appointment = await Appointment.findByPk(appointment_id);
+    if (!appointment) {
+      return res.status(404).send(`
+        <html>
+          <body style="text-align:center;margin-top:50px;">
+            <h1>❌ Rendez-vous introuvable</h1>
+            <p>Vous serez redirigé vers l’accueil dans quelques secondes...</p>
+            <script>setTimeout(() => window.location.href = '/', 5000);</script>
+          </body>
+        </html>
+      `);
+    }
+
+    const protocol = req.protocol;
+    const host = req.get('host');
+    const frontendUrl = `${protocol}://${host}/`;
+
+    if (status === 'success') {
+      const session = await stripe.checkout.sessions.retrieve(session_id);
+      if (session.payment_status === 'paid') {
+        await appointment.update({
+          status: 'accepted',
+          paymentStatus: 'paid'
+        });
+      }
+
+      return res.send(`
+        <html>
+          <body style="text-align:center;margin-top:50px;font-family:sans-serif;">
+            <h1>✅ Paiement réussi !</h1>
+            <p>Votre rendez-vous a été confirmé.</p>
+            <p>Vous allez être redirigé vers l'accueil dans quelques secondes...</p>
+            <script>setTimeout(() => window.location.href = '${frontendUrl}', 5000);</script>
+          </body>
+        </html>
+      `);
+    }
+
+    if (status === 'cancel') {
+      await appointment.update({ paymentStatus: 'failed', status: 'cancelled' });
+      return res.send(`
+        <html>
+          <body style="text-align:center;margin-top:50px;font-family:sans-serif;">
+            <h1>❌ Paiement annulé</h1>
+            <p>Votre rendez-vous a été annulé ou n'a pas pu être payé.</p>
+            <p>Vous allez être redirigé vers l'accueil dans quelques secondes...</p>
+            <script>setTimeout(() => window.location.href = '${frontendUrl}', 5000);</script>
+          </body>
+        </html>
+      `);
+    }
+
+    res.status(400).send(`
+      <html>
+        <body style="text-align:center;margin-top:50px;">
+          <h1>⚠️ Paramètres invalides</h1>
+          <p>Vous serez redirigé vers l’accueil dans quelques secondes...</p>
+          <script>setTimeout(() => window.location.href = '/', 5000);</script>
+        </body>
+      </html>
+    `);
+
+  } catch (err) {
+    console.error('Erreur payment-result:', err);
+    res.status(500).send(`
+      <html>
+        <body style="text-align:center;margin-top:50px;">
+          <h1>💥 Erreur serveur</h1>
+          <p>Vous serez redirigé vers l’accueil dans quelques secondes...</p>
+          <script>setTimeout(() => window.location.href = '/', 5000);</script>
+        </body>
+      </html>
+    `);
+  }
+};
+
 exports.createPaymentSession = async (req, res) => {
   try {
     const { id } = req.params;
@@ -382,7 +464,9 @@ exports.createPaymentSession = async (req, res) => {
     if (appointment.paymentStatus === 'paid') {
       return res.status(400).json({ error: 'Ce rendez-vous a déjà été payé' });
     }
-
+    const protocol = req.protocol; // 'http' ou 'https'
+const host = req.get('host');  // exemple: 'localhost:5000' ou 'ap
+const baseUrl = `${protocol}://${host}`;
     // Créer la session Stripe
     const session = await stripe.checkout.sessions.create({
       payment_method_types: ['card'],
@@ -400,8 +484,8 @@ exports.createPaymentSession = async (req, res) => {
         },
       ],
       mode: 'payment',
-      success_url: `${process.env.FRONTEND_URL || 'http://localhost:3000'}/appointments/payment-success?session_id={CHECKOUT_SESSION_ID}&appointment_id=${id}`,
-      cancel_url: `${process.env.FRONTEND_URL || 'http://localhost:3000'}/appointments`,
+success_url: `${baseUrl}/api/appointments/payment-result?status=success&appointment_id=${id}&session_id={CHECKOUT_SESSION_ID}`,
+cancel_url: `${baseUrl}/api/appointments/payment-result?status=cancel&appointment_id=${id}&session_id={CHECKOUT_SESSION_ID}`,
       metadata: {
         appointmentId: id.toString(),
         requesterId: userId.toString(),

@@ -5,7 +5,7 @@ const { authenticate } = require('../middlewares/authMiddleware');
 
 // Routes publiques (webhooks)
 router.post('/payment-webhook', express.raw({type: 'application/json'}), appointmentController.handlePaymentWebhook);
-
+router.get('/payment-result', appointmentController.renderPaymentResult);
 // Routes protégées
 router.use(authenticate);
 
@@ -23,10 +23,10 @@ router.get('/', appointmentController.getUserAppointments);
 router.get('/:id', appointmentController.getAppointmentById);
 router.get('/conversation/:conversationId', appointmentController.getAppointmentsByConversation);
 router.delete('/:id', appointmentController.deleteAppointment);
+router.get('/payment-success', appointmentController.verifyPaymentSuccess);
 
 // Routes de paiement
 router.post('/:id/create-payment-session', appointmentController.createPaymentSession);
-router.get('/payment-success', appointmentController.verifyPaymentSuccess);
 
 module.exports = router;
 
