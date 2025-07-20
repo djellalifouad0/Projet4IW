@@ -5,8 +5,7 @@
     "main": "server.js",
     "scripts": {
         "start": "node server.js",
-        "dev": "nodemon server.js",
-        "db:sync": "node -e \"const sequelize = require('./config/db'); const User = require('./models/user'); sequelize.sync({ alter: true }).then(() => { console.log('Database synchronized successfully!'); process.exit(0); }).catch(err => { console.error('Sync error:', err); process.exit(1); })\""
+        "dev": "nodemon server.js"
     },
     "keywords": [],
     "author": "TonNomIci",
