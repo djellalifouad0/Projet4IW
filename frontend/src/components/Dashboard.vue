@@ -582,5 +582,122 @@ export default {
     height: 100px;
   }
 }
+
+/* Styles pour le mode sombre */
+.dark-theme .dashboard-content {
+  background: #1e1e1e;
+  color: #ffffff;
+}
+
+.dark-theme .dashboard-title {
+  color: #ffffff;
+}
+
+.dark-theme .dashboard-welcome {
+  background: #2d2d2d;
+  color: #e0e0e0;
+  border-color: #E48700;
+}
+
+.dark-theme .section-title {
+  color: #ffffff;
+}
+
+.dark-theme .stat-card {
+  background: #2d2d2d;
+  border-color: #E48700;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+}
+
+.dark-theme .stat-card:hover {
+  box-shadow: 0 8px 30px rgba(228, 135, 0, 0.4);
+}
+
+.dark-theme .stat-number {
+  color: #E48700;
+}
+
+.dark-theme .stat-label {
+  color: #e0e0e0;
+}
+
+.dark-theme .stat-detail {
+  color: #b0b0b0;
+}
+
+.dark-theme .activity-chart {
+  background: #2d2d2d;
+  border-color: #E48700;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+}
+
+.dark-theme .chart-bars {
+  background: transparent;
+}
+
+.dark-theme .chart-bar.appointments {
+  background: #E48700;
+}
+
+.dark-theme .chart-bar.ratings {
+  background: #ffffff;
+}
+
+.dark-theme .legend-item {
+  background: #2d2d2d;
+  color: #e0e0e0;
+  border-color: #E48700;
+}
+
+.dark-theme .legend-item:hover {
+  background: #3d3d3d;
+}
+
+.dark-theme .legend-color.appointments {
+  background: #E48700;
+}
+
+.dark-theme .legend-color.ratings {
+  background: #ffffff;
+}
+
+.dark-theme .loading-container {
+  color: #b0b0b0;
+}
+
+.dark-theme .loading-spinner {
+  border-color: #3d3d3d;
+  border-top-color: #E48700;
+}
+
+.dark-theme .error-container {
+  background: #2d1f1f;
+  color: #ffb3b3;
+  border-color: #d32f2f;
+}
+
+.dark-theme .loading-spinner {
+  border-color: #3d3d3d;
+  border-top-color: #E48700;
+}
+
+.dark-theme .error-container {
+  background: #2d1f1f;
+  color: #ffb3b3;
+  border-color: #d32f2f;
+}
+
+/* Styles supplémentaires pour tous les textes et éléments */
+.dark-theme .chart-container {
+  color: #ffffff;
+}
+
+.dark-theme .chart-bar-group {
+  color: #ffffff;
+}
+
+.dark-theme * {
+  border-color: inherit;
+}
 </style>
 

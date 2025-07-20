@@ -10,7 +10,7 @@
 
       <div class="switch-link">
         <span>Pas de compte ?</span> <br />
-        <router-link to="/register">Inscrivez-vous</router-link>
+        <router-link to="/register">Inscrivez-vou</router-link>
       </div>
 
       <h1>Connectez-vous</h1>

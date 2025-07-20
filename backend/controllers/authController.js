@@ -277,6 +277,7 @@ exports.logoutAll = async (req, res) => {
 exports.forgotPassword = async (req, res) => {
   try {
     const { email } = req.body;
+    console.log(`Demande de réinitialisation de mot de passe pour l'email: ${email}`);
 
     const user = await User.findOne({ where: { email, isActive: true } });
     if (!user) {

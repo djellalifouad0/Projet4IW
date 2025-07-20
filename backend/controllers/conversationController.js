@@ -248,6 +248,7 @@ exports.sendMessage = async (req, res) => {
       return res.status(400).json({ error: 'Le contenu du message est requis' });
     }
     const hasContacts = await chatgptCheckContacts(content);
+    console.log('has contacts', hasContacts);
 
     if (hasContacts) {
       return res.status(400).json({ error: 'envoyer des coordonnées personnelles n\'est pas autorisé' });
