@@ -77,7 +77,7 @@ exports.updateUserProfile = async (req, res) => {
 
     res.json({ message: 'Profil mis à jour avec succès', user });
   } catch (error) {
-    res.status(500).json({ error: 'Erreur mise à jour du profil' });
+    res.status(500).json({ error: 'Erreur mise à jour du profil',message: error.message });
   }
 };
 
