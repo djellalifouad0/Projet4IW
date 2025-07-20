@@ -30,7 +30,7 @@ const User = sequelize.define('User', {
     defaultValue: true
   },
   avatar: {
-    type: DataTypes.STRING,
+    type: DataTypes.TEXT,
     allowNull: true,
     description: 'URL of the user avatar image'
   },
