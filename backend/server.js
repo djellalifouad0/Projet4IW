@@ -25,7 +25,15 @@ const server = http.createServer(app);
 
 const io = socketIo(server, {
   cors: {
-    origin: ["http://localhost:3000", "http://localhost:5173", "http://localhost:8080"],
+    origin: [
+      "http://localhost:3000", 
+      "http://localhost:5173", 
+      "http://localhost:8080",
+      "http://srv908931.hstgr.cloud:3000",
+      "http://srv908931.hstgr.cloud:5173",
+      "http://srv908931.hstgr.cloud:8080",
+      "http://srv908931.hstgr.cloud"
+    ],
     methods: ["GET", "POST"]
   }
 });
@@ -134,49 +142,49 @@ const { setupAssociations } = require('./models/associations.js');
 (async () => {
   try {
     await sequelize.authenticate();
-
     logger.info('Connexion à la base de données OK');
+    
     setupAssociations();
 
-    await sequelize.sync({alter: true, logging: console.log });
-const bcrypt = require('bcryptjs');
+    // Use force: false to avoid dropping tables, and alter: true to update schema
+    await sequelize.sync({ alter: true });
+    
+    const bcrypt = require('bcryptjs');
     const hashedPassword = await bcrypt.hash('password123', 10);
+    const User = require('./models/user');
 
-const User = require('./models/user');
+    await User.findOrCreate({
+      where: { email: 'testuser1@example.com' },
+      defaults: {
+        username: 'testuser1',
+        email: 'testuser1@example.com',
+        password: hashedPassword,
+        role: 'user',
+        profileToken: 'test1token',
+        isActive: true,
+        validationToken: 'test1validationtoken'
+      }
+    });
 
-
-await User.findOrCreate({
-  where: { email: 'testuser1@example.com' },
-  defaults: {
-    username: 'testuser1',
-    email: 'testuser1@example.com',
-    password: hashedPassword,
-    role: 'user',
-    profileToken: 'test1token',
-    isActive: true,
-    validationToken: 'test1validationtoken'
-  }
-});
-
-await User.findOrCreate({
-  where: { email: 'testuser2@example.com' },
-  defaults: {
-    username: 'testuser2',
-    email: 'testuser2@example.com',
-    password: hashedPassword,
-    role: 'user',
-    profileToken: 'test2token',
-    isActive: true,
-    validationToken: 'test2validationtoken'
-  }
-});
-server.listen(PORT, () => {
+    await User.findOrCreate({
+      where: { email: 'testuser2@example.com' },
+      defaults: {
+        username: 'testuser2',
+        email: 'testuser2@example.com',
+        password: hashedPassword,
+        role: 'user',
+        profileToken: 'test2token',
+        isActive: true,
+        validationToken: 'test2validationtoken'
+      }
+    });
+    
+    server.listen(PORT, () => {
       console.log(`Serveur démarré sur http://localhost:${PORT}`);
       console.log(`Swagger sur http://localhost:${PORT}/api-docs`);
       console.log(`WebSocket activé`);
     });
   } catch (err) {
-    console
     logger.error('Échec de démarrage', err);
     process.exit(1);
   }

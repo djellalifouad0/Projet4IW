@@ -68,13 +68,9 @@ resetTokenExpires: {
       if (user.changed('profileToken')) {
         throw new Error('profileToken cannot be updated');
       }
-    }  }
-,
-},
-
-
-{
-   tableName: 'User',
+    }
+  },
+  tableName: 'User',
   freezeTableName: true
 });
 

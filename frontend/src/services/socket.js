@@ -18,7 +18,7 @@ class SocketService {
 
     console.log('🔌 Tentative de connexion WebSocket avec token...');
     
-    this.socket = io('http://localhost:5000', {
+    this.socket = io('http://srv908931.hstgr.cloud:5000/', {
       auth: {
         token: token
       },
