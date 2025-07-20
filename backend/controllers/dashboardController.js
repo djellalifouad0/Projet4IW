@@ -73,11 +73,10 @@ exports.getUserStats = async (req, res) => {
         }
       },
       attributes: [
-        [Sequelize.fn('strftime', '%m/%Y', Sequelize.col('createdAt')), 'month'],
+        [Sequelize.fn('DATE_FORMAT', Sequelize.col('createdAt'), '%m/%Y'), 'month'],
         [Sequelize.fn('COUNT', Sequelize.col('id')), 'count']
       ],
-      group: [Sequelize.fn('strftime', '%m/%Y', Sequelize.col('createdAt'))],
-      order: [[Sequelize.fn('strftime', '%Y-%m', Sequelize.col('createdAt')), 'ASC']]
+      group: [Sequelize.fn('DATE_FORMAT', Sequelize.col('createdAt'), '%m/%Y')]
     });
 
     const monthlyRatings = await Rating.findAll({
@@ -88,22 +87,23 @@ exports.getUserStats = async (req, res) => {
         }
       },
       attributes: [
-        [Sequelize.fn('strftime', '%m/%Y', Sequelize.col('createdAt')), 'month'],
+        [Sequelize.fn('DATE_FORMAT', Sequelize.col('createdAt'), '%m/%Y'), 'month'],
         [Sequelize.fn('COUNT', Sequelize.col('id')), 'count']
       ],
-      group: [Sequelize.fn('strftime', '%m/%Y', Sequelize.col('createdAt'))],
-      order: [[Sequelize.fn('strftime', '%Y-%m', Sequelize.col('createdAt')), 'ASC']]
+      group: [Sequelize.fn('DATE_FORMAT', Sequelize.col('createdAt'), '%m/%Y')]
     });
 
     const monthlyData = new Map();
 
+    // Initialiser les 6 derniers mois
     for (let i = 5; i >= 0; i--) {
       const date = new Date();
       date.setMonth(date.getMonth() - i);
-      const monthKey = date.toLocaleDateString('fr-FR', { month: '2-digit', year: 'numeric' });
+      const monthKey = String(date.getMonth() + 1).padStart(2, '0') + '/' + date.getFullYear();
       monthlyData.set(monthKey, { appointments: 0, ratings: 0 });
     }
 
+    // Traiter les données d'appointments
     monthlyAppointments.forEach(item => {
       const month = item.dataValues.month;
       if (monthlyData.has(month)) {
@@ -111,6 +111,7 @@ exports.getUserStats = async (req, res) => {
       }
     });
 
+    // Traiter les données de ratings
     monthlyRatings.forEach(item => {
       const month = item.dataValues.month;
       if (monthlyData.has(month)) {
@@ -118,6 +119,7 @@ exports.getUserStats = async (req, res) => {
       }
     });
 
+    // Convertir en tableau ordonné
     const monthlyActivity = Array.from(monthlyData.entries()).map(([month, data]) => ({
       month,
       appointments: data.appointments,
