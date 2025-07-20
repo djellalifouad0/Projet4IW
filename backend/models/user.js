@@ -30,18 +30,18 @@ const User = sequelize.define('User', {
     defaultValue: true
   },
   avatar: {
-    type: DataTypes.STRING,
+    type: DataTypes.TEXT,
     allowNull: true,
-    description: 'URL of the user avatar image'
+    comment: 'URL or base64 data of the user avatar image'
   },
   totpSecret: {
   type: DataTypes.STRING,
   allowNull: true,
 }, 
   cover: {
-    type: DataTypes.STRING,
+    type: DataTypes.TEXT,
     allowNull: true,
-    description: 'URL of the user cover image'
+    comment: 'URL or base64 data of the user cover image'
   },
     validationToken: { type: DataTypes.STRING, allowNull: true },
   profileToken: {

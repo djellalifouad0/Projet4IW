@@ -721,6 +721,18 @@ export default {
       this.cropperType = ''
       this.pendingImageFile = null
     },    saveProfile() {
+      const MAX_SIZE = 2 * 1024 * 1024; 
+      
+      if (this.edit.avatar && this.edit.avatar.length > MAX_SIZE) {
+        toast.error('L\'image d\'avatar est trop volumineuse (max 2MB)');
+        return;
+      }
+      
+      if (this.edit.cover && this.edit.cover.length > MAX_SIZE) {
+        toast.error('L\'image de bannière est trop volumineuse (max 2MB)');
+        return;
+      }
+
       const updatedProfile = {
         username: this.edit.username,
         bio: this.edit.bio,
@@ -729,19 +741,31 @@ export default {
         cover: this.edit.cover
       };
 
+      console.log('Données du profil à envoyer:', {
+        ...updatedProfile,
+        avatar: updatedProfile.avatar ? 'Image présente (taille: ' + updatedProfile.avatar.length + ' caractères)' : 'Pas d\'image',
+        cover: updatedProfile.cover ? 'Image présente (taille: ' + updatedProfile.cover.length + ' caractères)' : 'Pas d\'image'
+      });
+
+      const testProfile = {
+        username: this.edit.username,
+        bio: this.edit.bio,
+        address: this.edit.address
+      };
+
+      console.log('Test sans images:', testProfile);
+
       const oldUsername = this.user.username;
       const oldAvatar = this.user.avatar;
 
-      api.put('/profile', updatedProfile)
+      api.put('/profile', testProfile)
         .then(() => {
-          // Mettre à jour les données locales
           this.user.username = this.edit.username;
           this.user.bio = this.edit.bio;
           this.user.address = this.edit.address;
           this.user.avatar = this.edit.avatar;
           this.user.cover = this.edit.cover;
           
-          // Émettre les événements de mise à jour du profil
           eventBus.emit(ProfileEvents.PROFILE_UPDATED, {
             username: this.edit.username,
             avatar: this.edit.avatar,
@@ -750,7 +774,6 @@ export default {
             address: this.edit.address
           });
 
-          // Émettre des événements spécifiques si le nom d'utilisateur ou l'avatar ont changé
           if (oldUsername !== this.edit.username) {
             eventBus.emit(ProfileEvents.USERNAME_CHANGED, this.edit.username);
           }
@@ -759,7 +782,6 @@ export default {
             eventBus.emit(ProfileEvents.AVATAR_CHANGED, this.edit.avatar);
           }
 
-          // Déclencher la vérification des notifications (pour la notification de mise à jour du profil)
           NotificationService.triggerNotificationCheck();
           
           this.showEditModal = false;
@@ -771,16 +793,13 @@ export default {
         });
     },async startConversation() {
       try {
-        // Créer une conversation avec l'utilisateur visité
         const response = await api.post('/conversations', {
           profileToken: this.user.profileToken,
           initialMessage: `Bonjour ${this.user.username} !`
         });
         
-        // Rediriger vers la page des discussions avec un délai pour s'assurer que la conversation est bien créée
         this.$router.push('/discussions');
         
-        // Optionnel : afficher un message de succès
         console.log('Conversation créée avec succès !');
       } catch (error) {
         console.error('Error creating conversation:', error);

@@ -56,28 +56,70 @@ exports.deleteUser = async (req, res) => {
 exports.updateUserProfile = async (req, res) => {
   try {
     const { username, bio, address, avatar, cover } = req.body;
-    const userId = req.user.id; // Supposons que l'ID utilisateur est disponible dans req.user
+    const userId = req.user.id;
+
+    console.log('=== DÉBUT MISE À JOUR PROFIL ===');
+    console.log('User ID:', userId);
+    console.log('Username:', username);
+    console.log('Bio:', bio);
+    console.log('Address:', address);
+    console.log('Avatar présent:', !!avatar);
+    console.log('Cover présent:', !!cover);
+    if (avatar) console.log('Taille avatar:', avatar.length);
+    if (cover) console.log('Taille cover:', cover.length);
 
     const user = await User.findByPk(userId);
     if (!user) {
+      console.log('Utilisateur non trouvé:', userId);
       return res.status(404).json({ error: 'Utilisateur introuvable' });
     }
 
-    user.username = username || user.username;
-    user.bio = bio || user.bio;
-    user.address = address || user.address;
-    user.avatar = avatar || user.avatar;
-    user.cover = cover || user.cover;    await user.save();    // Créer une notification de mise à jour de profil
-    try {
-      const io = req.app.get('socketio'); // Récupérer l'instance WebSocket
-      await NotificationService.createProfileUpdateNotification(userId, io);
-    } catch (notifError) {
-      console.error('Erreur création notification profil:', notifError);
-    }
+    console.log('Utilisateur trouvé:', user.username);
 
-    res.json({ message: 'Profil mis à jour avec succès', user });
+    // Mise à jour progressive pour identifier le problème
+    if (username !== undefined) user.username = username;
+    if (bio !== undefined) user.bio = bio;
+    if (address !== undefined) user.address = address;
+    
+    console.log('Avant mise à jour des images');
+    
+    if (avatar !== undefined) {
+      console.log('Mise à jour avatar...');
+      user.avatar = avatar;
+    }
+    if (cover !== undefined) {
+      console.log('Mise à jour cover...');
+      user.cover = cover;
+    }
+    
+    console.log('Avant sauvegarde...');
+    await user.save();
+    console.log('Sauvegarde réussie');
+
+    // Skip notification pour l'instant
+    console.log('=== FIN MISE À JOUR PROFIL ===');
+
+    res.json({ 
+      message: 'Profil mis à jour avec succès', 
+      user: {
+        id: user.id,
+        username: user.username,
+        bio: user.bio,
+        address: user.address,
+        avatar: user.avatar ? 'présent' : null,
+        cover: user.cover ? 'présent' : null
+      }
+    });
   } catch (error) {
-    res.status(500).json({ error: 'Erreur mise à jour du profil' });
+    console.error('=== ERREUR MISE À JOUR PROFIL ===');
+    console.error('Message:', error.message);
+    console.error('Stack:', error.stack);
+    console.error('=== FIN ERREUR ===');
+    res.status(500).json({ 
+      error: 'Erreur mise à jour du profil', 
+      details: error.message,
+      stack: process.env.NODE_ENV === 'development' ? error.stack : undefined
+    });
   }
 };
 
