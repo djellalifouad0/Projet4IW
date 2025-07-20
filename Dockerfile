@@ -3,12 +3,14 @@
 # ===================
 FROM node:18 AS frontend-build
 
+# Dossier de travail pour le frontend
 WORKDIR /frontend
 
-COPY frontend/package*.json ./
-RUN npm install
+# Copier TOUT le frontend d'un coup pour éviter les pièges de cache
+COPY frontend/ ./
 
-COPY frontend/ .
+# Installer les dépendances et builder
+RUN npm install
 RUN npm run build
 
 
@@ -17,15 +19,20 @@ RUN npm run build
 # ===================
 FROM node:18
 
+# Dossier de travail pour le backend
 WORKDIR /app
 
-COPY backend/package*.json ./
+# Copier TOUT le backend d'un coup
+COPY backend/ ./
+
+# Installer les dépendances backend
 RUN npm install
 
-COPY backend/ .
-
+# Copier le build du frontend
 COPY --from=frontend-build /frontend/dist ./frontend-build
 
+# Exposer le port du serveur backend
 EXPOSE 5000
 
+# Commande pour démarrer l'app
 CMD ["npm", "start"]
