@@ -56,27 +56,51 @@ exports.deleteUser = async (req, res) => {
 exports.updateUserProfile = async (req, res) => {
   try {
     const { username, bio, address, avatar, cover } = req.body;
-    const userId = req.user.id; // Supposons que l'ID utilisateur est disponible dans req.user
+    const userId = req.user.id;
 
     const user = await User.findByPk(userId);
     if (!user) {
       return res.status(404).json({ error: 'Utilisateur introuvable' });
     }
 
-    user.username = username || user.username;
-    user.bio = bio || user.bio;
-    user.address = address || user.address;
-    user.avatar = avatar || user.avatar;
-    user.cover = cover || user.cover;    await user.save();    // Créer une notification de mise à jour de profil
+    // Mise à jour des champs
+    if (username !== undefined) user.username = username;
+    if (bio !== undefined) user.bio = bio;
+    if (address !== undefined) user.address = address;
+    if (avatar !== undefined) user.avatar = avatar;
+    if (cover !== undefined) user.cover = cover;
+
+    await user.save();
+
+    // Créer une notification de mise à jour de profil
     try {
-      const io = req.app.get('socketio'); // Récupérer l'instance WebSocket
+      const io = req.app.get('socketio');
       await NotificationService.createProfileUpdateNotification(userId, io);
     } catch (notifError) {
       console.error('Erreur création notification profil:', notifError);
     }
 
-    res.json({ message: 'Profil mis à jour avec succès', user });
+    res.json({ 
+      message: 'Profil mis à jour avec succès', 
+      user: await User.findByPk(userId, { attributes: { exclude: ['password'] } })
+    });
   } catch (error) {
+    console.error('Erreur mise à jour profil:', error);
+    
+    // Gestion des erreurs spécifiques
+    if (error.name === 'SequelizeValidationError') {
+      return res.status(400).json({ 
+        error: 'Erreur de validation', 
+        details: error.errors.map(e => e.message)
+      });
+    }
+    
+    if (error.name === 'SequelizeUniqueConstraintError') {
+      return res.status(409).json({ 
+        error: 'Ce nom d\'utilisateur est déjà utilisé' 
+      });
+    }
+    
     res.status(500).json({ error: 'Erreur mise à jour du profil' });
   }
 };
