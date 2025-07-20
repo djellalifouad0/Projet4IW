@@ -49,13 +49,7 @@ jobs:
             # Créer le dossier si absent
             mkdir -p /opt/app
             cd /opt/app
-            # Cloner si c'est la première fois
-            if [ ! -d ".git" ]; then
-              git clone https://github.com/djellalifouad0/Projet4IW.git .
-            else
-              git pull origin main
-            fi
-            # Build & restart
+            git clone https://github.com/djellalifouad0/Projet4IW.git .
             docker-compose down
             docker-compose build --no-cache
             docker-compose up -d
