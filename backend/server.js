@@ -12,14 +12,15 @@ const sequelize = require('./config/db');
 const PORT = process.env.PORT || 5000;
 
 process.on('uncaughtException', (err) => {
-  logger.error(`❌ Uncaught Exception: ${err}`);
+  Sentry.captureException(err);
+  logger.error(`Uncaught Exception: ${err}`);
   process.exit(1);
 });
 
 process.on('unhandledRejection', (reason) => {
-  logger.error(`❌ Unhandled Rejection: ${reason}`);
+  Sentry.captureException(reason instanceof Error ? reason : new Error(String(reason)));
+  logger.error(`Unhandled Rejection: ${reason}`);
 });
-
 const server = http.createServer(app);
 
 const io = socketIo(server, {
@@ -118,7 +119,7 @@ io.on('connection', (socket) => {
   });
 
   socket.on('disconnect', () => {
-    logger.info(`🔌 Utilisateur déconnecté: ${socket.userId}`);
+    logger.info(`Utilisateur déconnecté: ${socket.userId}`);
     connectedUsers.delete(socket.userId);
     userConversations.delete(socket.userId);
     socket.broadcast.emit('user-disconnected', {
@@ -172,7 +173,7 @@ await User.findOrCreate({
 server.listen(PORT, () => {
       console.log(`Serveur démarré sur http://localhost:${PORT}`);
       console.log(`Swagger sur http://localhost:${PORT}/api-docs`);
-      console.log(`🔌 WebSocket activé`);
+      console.log(`WebSocket activé`);
     });
   } catch (err) {
     console
