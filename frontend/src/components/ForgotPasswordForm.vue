@@ -32,7 +32,7 @@
 
       <div v-else class="success-message">
         <div class="success-content">
-          <h3>✅ Email envoyé !</h3>
+          <h3>Email envoyé !</h3>
           <p>
             Un lien de réinitialisation a été envoyé à <strong>{{ email }}</strong>.
             Vérifiez votre boîte mail et suivez les instructions.
@@ -105,7 +105,7 @@ export default {
 }
 
 .success-content h3 {
-  color: #10b981;
+  color: #E48700;
   margin-bottom: 1rem;
   font-size: 1.5rem;
 }
@@ -130,8 +130,8 @@ export default {
 
 .success-actions .secondary {
   background: transparent;
-  color: #6366f1;
-  border: 1px solid #6366f1;
+  color: #E48700;
+  border: 1px solid #E48700;
   padding: 0.75rem 1.5rem;
   border-radius: 8px;
   cursor: pointer;
@@ -140,23 +140,24 @@ export default {
 }
 
 .success-actions .secondary:hover {
-  background: #6366f1;
+  background: #E48700;
   color: white;
 }
 
 .success-actions .primary {
-  background: #6366f1;
+  background: #E48700;
   color: white;
   text-decoration: none;
   padding: 0.75rem 1.5rem;
   border-radius: 8px;
-  border: 1px solid #6366f1;
+  border: 1px solid #E48700;
   transition: all 0.2s;
 }
 
 .success-actions .primary:hover {
-  background: #4f46e5;
-  border-color: #4f46e5;
+  background: #ECBC76;
+  border-color: #ECBC76;
+  color: #333;
 }
 
 .error {
