@@ -1,7 +1,7 @@
 
 const { Resend } = require('resend');
-
-const resend = new Resend(process.env.MAIL_KEY);
+MAIL_KEY
+const resend = new Resend("re_Tb8DkVmD_Bo6s5oz43jNMCa8nwbKiMvYf");
 
 exports.sendAccountValidationEmail = async (to, username, link) => {
   const { error } = await resend.emails.send({
