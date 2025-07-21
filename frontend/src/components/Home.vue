@@ -132,8 +132,10 @@ export default {
   async mounted() {
 
     this.pageStartTime = Date.now();
-    this.matomo.trackPageView('Homepage');
-    this.matomo.startPageTimer();
+    if (window._paq) {
+      window._paq.push(['trackPageView', 'Homepage']);
+    }
+   // this.matomo.startPageTimer();
 
     await this.initializeSocketConnection();
 

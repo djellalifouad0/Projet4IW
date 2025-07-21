@@ -63,7 +63,7 @@ app.use(express.static(path.join(__dirname, 'frontend-build')));
       isActive: true,
       profileToken: '',
     });
-    console.log('✅ Admin par défaut créé : admin@example.com / admin123');
+    console.log('Admin par défaut créé : admin@example.com / admin123');
   }
 
   const { ComponentLoader } = require('adminjs');
@@ -161,7 +161,7 @@ app.use(express.static(path.join(__dirname, 'frontend-build')));
     res.sendFile(path.join(__dirname, 'frontend-build', 'index.html'));
   });
 
-  console.log(`✅ AdminJS disponible sur http://localhost:3000${adminJs.options.rootPath}`);
+  console.log(`AdminJS disponible sur http://localhost:3000${adminJs.options.rootPath}`);
 })();
 
 

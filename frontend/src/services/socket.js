@@ -7,18 +7,18 @@ class SocketService {
   }  // Connexion au serveur WebSocket
   connect(token) {
     if (!token) {
-      console.error('❌ Token requis pour la connexion WebSocket');
+      console.error(' Token requis pour la connexion WebSocket');
       return Promise.reject(new Error('Token manquant'));
     }
 
     if (this.socket && this.connected) {
-      console.log('🔄 Déjà connecté, fermeture de la connexion existante');
+      console.log(' Déjà connecté, fermeture de la connexion existante');
       this.disconnect();
     }
 
-    console.log('🔌 Tentative de connexion WebSocket avec token...');
+    console.log(' Tentative de connexion WebSocket avec token...');
     
-    this.socket = io('http://srv908931.hstgr.cloud:5000/', {
+    this.socket = io('https://srv908931.hstgr.cloud/', {
       auth: {
         token: token
       },
@@ -28,23 +28,23 @@ class SocketService {
 
     return new Promise((resolve, reject) => {
       this.socket.on('connect', () => {
-        console.log('✅ Connecté au serveur WebSocket avec succès');
+        console.log(' Connecté au serveur WebSocket avec succès');
         this.connected = true;
         resolve(this.socket);
       });
 
       this.socket.on('disconnect', () => {
-        console.log('❌ Déconnecté du serveur WebSocket');
+        console.log(' Déconnecté du serveur WebSocket');
         this.connected = false;
       });
 
       this.socket.on('reconnect', () => {
-        console.log('🔄 Reconnecté au serveur WebSocket');
+        console.log(' Reconnecté au serveur WebSocket');
         this.connected = true;
       });
 
       this.socket.on('connect_error', (error) => {
-        console.error('❌ Erreur de connexion WebSocket:', error.message);
+        console.error(' Erreur de connexion WebSocket:', error.message);
         this.connected = false;
         reject(error);
       });
@@ -68,14 +68,14 @@ class SocketService {
   joinConversation(conversationId) {
     if (this.socket && this.connected) {
       this.socket.emit('join-conversation', conversationId);
-      console.log(`👥 Rejoint la conversation ${conversationId}`);
+      console.log(` Rejoint la conversation ${conversationId}`);
     }
   }
 
   leaveConversation(conversationId) {
     if (this.socket && this.connected) {
       this.socket.emit('leave-conversation', conversationId);
-      console.log(`👋 Quitté la conversation ${conversationId}`);
+      console.log(` Quitté la conversation ${conversationId}`);
     }
   }
 

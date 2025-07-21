@@ -3,18 +3,17 @@ import VueMatomo from 'vue-matomo'
 export default {
   install(app) {
     app.use(VueMatomo, {
-      // 🔷 Configure ton Matomo ici
-      host: 'https://srv908931.hstgr.cloud/matomo/', // <-- ton instance Matomo
-      siteId: 2, // <-- ton ID de site
-      trackerFileName: 'matomo', // facultatif, par défaut déjà correct
+      host: 'https://srv908931.hstgr.cloud/matomo/', // ton instance
+      siteId: 2, // idSite correct
+      trackerFileName: 'matomo', // optionnel
       enableLinkTracking: true,
       requireConsent: false,
-      trackInitialView: true, // pour la première page
+      trackInitialView: true,
       enableHeartBeatTimer: true,
       heartBeatTimerInterval: 15,
     })
 
-    // 🔷 Optionnel : déclenche un pageview explicite
+    // Si tu veux forcer un pageview supplémentaire à l'install
     if (window._paq) {
       window._paq.push(['trackPageView'])
     }
