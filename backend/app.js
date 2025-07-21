@@ -26,6 +26,18 @@ setupSwagger(app);
 app.use(express.static(path.join(__dirname, 'frontend-build')));
 
 (async () => {
+
+  app.use('/api/auth', authRoutes);
+  app.use('/api', userRoutes);
+  app.use('/api/skills', skillRoutes);
+  app.use('/api/notifications', notificationRoutes);
+  app.use('/api/likes', likeRoutes);
+  app.use('/api/conversations', conversationRoutes);
+  app.use('/api/appointments', appointmentRoutes);
+  app.use('/api/ratings', ratingRoutes);
+  app.use('/api/dashboard', dashboardRoutes);
+  app.use('/api/analytics', analyticsRoutes);
+
   const AdminJS = (await import('adminjs')).default;
   const { DefaultAuthProvider } = await import('adminjs');
   const AdminJSExpress = (await import('@adminjs/express')).default;
@@ -173,16 +185,6 @@ app.use(express.static(path.join(__dirname, 'frontend-build')));
   app.use(express.urlencoded({ limit: '10mb', extended: true }));
 
   // Tes routes API
-  app.use('/api/auth', authRoutes);
-  app.use('/api', userRoutes);
-  app.use('/api/skills', skillRoutes);
-  app.use('/api/notifications', notificationRoutes);
-  app.use('/api/likes', likeRoutes);
-  app.use('/api/conversations', conversationRoutes);
-  app.use('/api/appointments', appointmentRoutes);
-  app.use('/api/ratings', ratingRoutes);
-  app.use('/api/dashboard', dashboardRoutes);
-  app.use('/api/analytics', analyticsRoutes);
 
   // fallback frontend SPA
   app.get('*', (req, res) => {
