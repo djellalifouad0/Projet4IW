@@ -33,6 +33,7 @@ const io = socketIo(server, {
       "http://srv908931.hstgr.cloud:5173",
       "http://srv908931.hstgr.cloud:8080",
       "http://srv908931.hstgr.cloud"
+      
     ],
     methods: ["GET", "POST"]
   }
@@ -147,7 +148,7 @@ const { setupAssociations } = require('./models/associations.js');
     setupAssociations();
 
     // Use force: false to avoid dropping tables, and alter: true to update schema
-    await sequelize.sync({ alter: true});
+    await sequelize.sync({ alter: false});
     
     const bcrypt = require('bcryptjs');
     const hashedPassword = await bcrypt.hash('password123', 10);

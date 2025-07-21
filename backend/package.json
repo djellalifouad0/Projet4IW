@@ -13,6 +13,7 @@
     "dependencies": {
         "@adminjs/express": "^6.0.0",
         "@adminjs/sequelize": "^4.1.1",
+        "@amcharts/amcharts5": "^5.13.3",
         "@sentry/node": "^9.40.0",
         "adminjs": "^7.8.16",
         "bcrypt": "^6.0.0",
@@ -25,6 +26,7 @@
         "google-auth-library": "^10.1.0",
         "jsonwebtoken": "^9.0.2",
         "mysql2": "^3.14.2",
+        "node-fetch": "^3.3.2",
         "nodemailer": "^7.0.5",
         "nodemailer-mailgun-transport": "^2.1.5",
         "pg": "^8.16.0",
