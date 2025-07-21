@@ -1,10 +1,16 @@
+
+require("./instrument.js");
+
 const express = require('express');
 const path = require('path');
 const cors = require('cors');
 const session = require('express-session');
+const Sentry = require('@sentry/node');
 
 const app = express();
+Sentry.setupExpressErrorHandler(app);
 
+// Routes
 const authRoutes = require('./routes/authRoutes');
 const userRoutes = require('./routes/userRoutes');
 const skillRoutes = require('./routes/skillRoutes');
@@ -18,11 +24,19 @@ const dashboardRoutes = require('./routes/dashboardRoutes');
 
 const setupSwagger = require('./swagger/swagger');
 
-// CORS + Swagger
+// 🟥 Sentry Init
+Sentry.init({
+  dsn: 'https://8ce71b849b0d16de52bb28f94a241f3e@o4509668567482368.ingest.de.sentry.io/4509668569841744',
+  tracesSampleRate: 1.0,
+  attachStacktrace: true,
+  sendDefaultPii: true,
+});
+
+
+// Middlewares globaux
 app.use(cors());
 setupSwagger(app);
 
-// Servir le frontend build (sera fallback plus bas aussi)
 app.use(express.static(path.join(__dirname, 'frontend-build')));
 
 (async () => {
@@ -31,40 +45,37 @@ app.use(express.static(path.join(__dirname, 'frontend-build')));
   const AdminJSExpress = (await import('@adminjs/express')).default;
   const AdminJSSequelize = (await import('@adminjs/sequelize')).default;
 
-  const { sequelize, User } = require('./models');
+  const { sequelize, User, Notification, Skill, Like, Conversation, Appointment, Rating } = require('./models');
   const bcrypt = require('bcrypt');
 
   AdminJS.registerAdapter(AdminJSSequelize);
 
   await sequelize.sync();
 
-  const existingAdmin = await User.findOne({ where: { role: 'admin' } });
-  if (!existingAdmin) {
-    const hashedPassword = await bcrypt.hash('admin123', 10);
+  const adminExists = await User.findOne({ where: { role: 'admin' } });
+  if (!adminExists) {
+    const hashed = await bcrypt.hash('admin123', 10);
     await User.create({
       email: 'admin@example.com',
-      password: hashedPassword,
+      password: hashed,
       username: 'Default Admin',
       role: 'admin',
       isActive: true,
-      profileToken: ""
+      profileToken: '',
     });
     console.log('✅ Admin par défaut créé : admin@example.com / admin123');
-  } else {
-    console.log(`ℹ️ Admin déjà existant : ${existingAdmin.email}`);
   }
 
-  const { Notification, Skill, Like, Conversation, Appointment, Rating } = require('./models');
   const { ComponentLoader } = require('adminjs');
-  const componentLoader = new ComponentLoader();
   const getDashboardStats = require('./services/getDashboardStats');
   const getStripeStats = require('./services/getStripeStats');
 
+  const componentLoader = new ComponentLoader();
   const customDashboard = componentLoader.add(
     'CustomDashboard',
     path.join(__dirname, 'components/Dashboard.jsx')
   );
-    const customDashboard2 = componentLoader.add(
+  const customDashboard2 = componentLoader.add(
     'CustomDashboard2',
     path.join(__dirname, 'components/DashboardStats.jsx')
   );
@@ -74,60 +85,32 @@ app.use(express.static(path.join(__dirname, 'frontend-build')));
       handler: async () => {
         const stats = await getDashboardStats();
         const stats2 = await getStripeStats();
-   
-        return [
-          
-          stats,stats2]
-     
-      }, 
-     
+        return [stats, stats2];
+      }
     },
-    
     componentLoader,
     resources: [
-
-  { 
-    resource: User, 
-    options: { navigation: 'Ressources' } 
-  },
-  { 
-    resource: Notification, 
-    options: { navigation: 'Ressources' } 
-  },
-  { 
-    resource: Skill, 
-    options: { navigation: 'Ressources' } 
-  },
-  { 
-    resource: Like, 
-    options: { navigation: 'Ressources' } 
-  },
-  { 
-    resource: Conversation, 
-    options: { navigation: 'Ressources' } 
-  },
-  { 
-    resource: Appointment, 
-    options: { navigation: 'Ressources' } 
-  },
-  { 
-    resource: Rating, 
-    options: { navigation: 'Ressources' } 
-  }
-],
-    
+      { resource: User, options: { navigation: 'Ressources' } },
+      { resource: Notification, options: { navigation: 'Ressources' } },
+      { resource: Skill, options: { navigation: 'Ressources' } },
+      { resource: Like, options: { navigation: 'Ressources' } },
+      { resource: Conversation, options: { navigation: 'Ressources' } },
+      { resource: Appointment, options: { navigation: 'Ressources' } },
+      { resource: Rating, options: { navigation: 'Ressources' } },
+    ],
     pages: {
       StatistiquesUtilisation: {
         label: "Statistiques d'utilisation",
         component: customDashboard,
-      }, StatistiquesStripe: {
+      },
+      StatistiquesStripe: {
         label: "Statistiques stripe",
         component: customDashboard2,
       }
     },
     rootPath: '/admin',
     branding: {
-      companyName: 'SkillsSwap',
+      companyName: 'SkillsSwap'
     }
   });
 
@@ -137,42 +120,31 @@ app.use(express.static(path.join(__dirname, 'frontend-build')));
     secret: 'adminjs-secret-key',
     resave: false,
     saveUninitialized: false,
-    cookie: { secure: false }, // true si HTTPS
+    cookie: { secure: false },
   }));
 
   const authProvider = new DefaultAuthProvider({
     authenticate: async ({ email, password }) => {
       const user = await User.findOne({ where: { email } });
       if (!user) return null;
-
-      const passwordMatch = await bcrypt.compare(password, user.password);
-      if (!passwordMatch || user.role !== 'admin') return null;
-
+      const ok = await bcrypt.compare(password, user.password);
+      if (!ok || user.role !== 'admin') return null;
       return { email: user.email, role: user.role };
     },
   });
 
   const adminRouter = AdminJSExpress.buildAuthenticatedRouter(
     adminJs,
-    {
-      cookiePassword: 'adminjs-cookie-secret',
-      provider: authProvider,
-    },
+    { cookiePassword: 'adminjs-cookie-secret', provider: authProvider },
     null,
-    {
-      secret: 'adminjs-secret-key',
-      resave: false,
-      saveUninitialized: false,
-    }
+    { secret: 'adminjs-secret-key', resave: false, saveUninitialized: false }
   );
 
   app.use(adminJs.options.rootPath, adminRouter);
 
-  // 🚨 Après AdminJS :
   app.use(express.json({ limit: '10mb' }));
   app.use(express.urlencoded({ limit: '10mb', extended: true }));
 
-  // Tes routes API
   app.use('/api/auth', authRoutes);
   app.use('/api', userRoutes);
   app.use('/api/skills', skillRoutes);
@@ -183,13 +155,16 @@ app.use(express.static(path.join(__dirname, 'frontend-build')));
   app.use('/api/ratings', ratingRoutes);
   app.use('/api/dashboard', dashboardRoutes);
   app.use('/api/analytics', analyticsRoutes);
+const SentryExpress = require('@sentry/express');
 
-  // fallback frontend SPA
+
   app.get('*', (req, res) => {
     res.sendFile(path.join(__dirname, 'frontend-build', 'index.html'));
   });
 
   console.log(`✅ AdminJS disponible sur http://localhost:3000${adminJs.options.rootPath}`);
 })();
+
+
 
 module.exports = app;
