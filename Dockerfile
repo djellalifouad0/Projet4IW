@@ -17,7 +17,7 @@ RUN npm run build
 # ===================
 # Étape 2 : Backend + build frontend
 # ===================
-FROM node:18
+FROM node:20
 
 # Dossier de travail pour le backend
 WORKDIR /app
