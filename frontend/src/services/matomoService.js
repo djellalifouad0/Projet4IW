@@ -1,7 +1,7 @@
 ﻿class MatomoService {
   constructor() {
     this.matomoUrl = import.meta.env.VITE_MATOMO_URL || 'http://localhost:8080';
-    this.siteId = import.meta.env.VITE_MATOMO_SITE_ID || '1';
+    this.siteId = import.meta.env.VITE_MATOMO_SITE_ID || '2';
     this.sessionStartTime = Date.now();
     this.pageLoadTime = Date.now();
 
