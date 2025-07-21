@@ -16,6 +16,7 @@
     "socket.io-client": "^4.8.1",
     "stripe": "^18.3.0",
     "vue": "^3.4.0",
+    "vue-matomo": "^4.2.0",
     "vue-router": "^4.5.1"
   },
   "devDependencies": {
