@@ -1,7 +1,7 @@
 # ===================
 # Étape 1 : Build frontend
 # ===================
-FROM node:18 AS frontend-build
+FROM node:20 AS frontend-build
 
 # Dossier de travail pour le frontend
 WORKDIR /frontend
