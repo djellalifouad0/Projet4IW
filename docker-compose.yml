@@ -55,6 +55,9 @@ services:
     depends_on:
       db:
         condition: service_healthy
+    volumes:
+      - matomo_data:/var/www/html
 
 volumes:
   db_data:
+  matomo_data:
