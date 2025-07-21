@@ -155,7 +155,6 @@ app.use(express.static(path.join(__dirname, 'frontend-build')));
   app.use('/api/ratings', ratingRoutes);
   app.use('/api/dashboard', dashboardRoutes);
   app.use('/api/analytics', analyticsRoutes);
-const SentryExpress = require('@sentry/express');
 
 
   app.get('*', (req, res) => {
