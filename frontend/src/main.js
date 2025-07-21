@@ -14,4 +14,3 @@ app.use(matomoPlugin)
 app.use(router)
 
 app.mount('#app')
-

@@ -1,37 +1,22 @@
-﻿import matomoService from '../services/matomoService.js'
+import VueMatomo from 'vue-matomo'
 
 export default {
   install(app) {
+    app.use(VueMatomo, {
+      // 🔷 Configure ton Matomo ici
+      host: 'https://srv908931.hstgr.cloud/matomo/', // <-- ton instance Matomo
+      siteId: 2, // <-- ton ID de site
+      trackerFileName: 'matomo', // facultatif, par défaut déjà correct
+      enableLinkTracking: true,
+      requireConsent: false,
+      trackInitialView: true, // pour la première page
+      enableHeartBeatTimer: true,
+      heartBeatTimerInterval: 15,
+    })
 
-    app.config.globalProperties.$matomo = matomoService
-    app.provide('matomo', matomoService)
-
-    const router = app.config.globalProperties.$router
-    
-    if (router) {
-
-      router.beforeEach((to, from, next) => {
-
-        if (from.name) {
-          matomoService.endPageTimer(from.name)
-        }
-        next()
-      })
-      
-      router.afterEach((to) => {
-
-        matomoService.trackPageView(to.name || to.path)
-        matomoService.startPageTimer()
-      })
+    // 🔷 Optionnel : déclenche un pageview explicite
+    if (window._paq) {
+      window._paq.push(['trackPageView'])
     }
-
-    window.addEventListener('error', (event) => {
-      matomoService.trackError(event.message, event.filename)
-    })
-
-    window.addEventListener('unhandledrejection', (event) => {
-      matomoService.trackError(event.reason.toString(), window.location.href)
-    })
   }
 }
-
