@@ -11,7 +11,7 @@
           <!-- Moyenne des avis intégrée dans le profil -->          <div v-if="user?.ratingStats && user.ratingStats.totalRatings > 0" class="profile-rating-inline">            <div class="stars-display-inline">
               <span v-for="star in 5" :key="star" class="star-inline">
                 <img 
-                  :src="star <= user.ratingStats.averageRating ? '/src/assets/icons/star_full.svg' : '/src/assets/icons/star.svg'" 
+                  :src="star <= user.ratingStats.averageRating ? starFullIcon : starIcon" 
                   alt="étoile" 
                   class="star-icon-inline" 
                 />
@@ -330,7 +330,7 @@
                     <div class="rating-score">                      <div class="stars-display-small">
                         <span v-for="star in 5" :key="star" class="star-small">
                           <img 
-                            :src="star <= rating.rating ? '/src/assets/icons/star_full.svg' : '/src/assets/icons/star.svg'" 
+                            :src="star <= rating.rating ? starFullIcon : starIcon" 
                             alt="étoile" 
                             class="star-icon-small" 
                           />
@@ -406,8 +406,8 @@
                       @mouseenter="hoverRating = star"
                       @mouseleave="hoverRating = 0">                  <img 
                     :src="(hoverRating > 0 ? star <= hoverRating : star <= newRating.rating) 
-                          ? '/src/assets/icons/star_full.svg' 
-                          : '/src/assets/icons/star.svg'" 
+                          ? starFullIcon 
+                          : starIcon" 
                     alt="étoile" 
                     class="star-icon-input"
                   />
@@ -467,6 +467,8 @@ import toast from '../services/toast'
 import ImageCropper from './ImageCropper.vue'
 import NotificationService from '../services/notificationService'
 import eventBus, { ProfileEvents } from '../services/eventBus'
+import starFullIcon from '@/assets/icons/star_full.svg'
+import starIcon from '@/assets/icons/star.svg'
 
 export default {
   name: 'Profile',
@@ -483,6 +485,9 @@ export default {
         rating: 0,
         comment: ''
       },      hoverRating: 0, // Pour l'effet de survol des étoiles
+      // Icônes
+      starFullIcon,
+      starIcon,
       confirmDialog: {
         show: false,
         message: '',
