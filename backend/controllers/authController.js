@@ -143,7 +143,8 @@ exports.googleAuthCallback = async (req, res) => {
         username,
         googleId,
         role: 'user',
-        password: null
+        password: null, 
+        profileToken: ""
       });
     }
 
