@@ -1,11 +1,20 @@
 ﻿class MatomoService {
   constructor() {
-    this.matomoUrl = import.meta.env.VITE_MATOMO_URL || 'http://localhost:8080';
+    // Nettoyer l'URL pour éviter les double slashes
+    this.matomoUrl = (import.meta.env.VITE_MATOMO_URL || 'http://localhost:8080').replace(/\/$/, '');
     this.siteId = import.meta.env.VITE_MATOMO_SITE_ID || '2';
     this.sessionStartTime = Date.now();
     this.pageLoadTime = Date.now();
-
-    this.initMatomo();
+    
+    // Désactiver Matomo en développement si pas d'URL de production configurée
+    this.isDevelopment = import.meta.env.DEV && !import.meta.env.VITE_MATOMO_URL;
+    
+    if (!this.isDevelopment) {
+      this.initMatomo();
+    } else {
+      console.log('Matomo disabled in development mode');
+      this.useFallbackMode = true; // Utiliser le mode silencieux
+    }
   }
 
   initMatomo() {
@@ -31,39 +40,55 @@
   }
 
   sendEventToMatomo(eventData) {
-    if (this.useFallbackMode) {
-
-      const params = new URLSearchParams({
-        idsite: this.siteId,
-        rec: 1,
-        action_name: eventData.action || 'Event',
-        e_c: eventData.category || 'General',
-        e_a: eventData.action || 'Action',
-        e_n: eventData.name || '',
-        e_v: eventData.value || '',
-        rand: Math.random().toString(36)
-      });
-      
-      fetch(`${this.matomoUrl}/matomo.php?${params}`, {
-        method: 'GET',
-        mode: 'no-cors'
-      }).catch(err => console.warn('Matomo tracking failed:', err));
+    // Toujours utiliser le mode fallback si Matomo ne s'est pas chargé correctement
+    if (this.useFallbackMode || !window._paq) {
+      try {
+        const params = new URLSearchParams({
+          idsite: this.siteId,
+          rec: 1,
+          action_name: eventData.action || 'Event',
+          e_c: eventData.category || 'General',
+          e_a: eventData.action || 'Action',
+          e_n: eventData.name || '',
+          e_v: eventData.value || '',
+          rand: Math.random().toString(36)
+        });
+        
+        fetch(`${this.matomoUrl}/matomo.php?${params}`, {
+          method: 'GET',
+          mode: 'no-cors'
+        }).catch(err => {
+          console.warn('Matomo fallback tracking failed:', err);
+          // Ne pas faire planter l'application
+        });
+      } catch (error) {
+        console.warn('Matomo event sending failed:', error);
+        // Continuer l'exécution même si le tracking échoue
+      }
     }
   }
 
   trackEvent(category, action, name = null, value = null) {
     console.log('Tracking event:', { category, action, name, value });
     
-    if (typeof window !== 'undefined' && window._paq) {
-      window._paq.push(['trackEvent', category, action, name, value]);
-    }
+    try {
+      if (typeof window !== 'undefined' && window._paq) {
+        window._paq.push(['trackEvent', category, action, name, value]);
+      } else {
+        console.warn('Matomo _paq not available, using fallback mode');
+        this.useFallbackMode = true;
+      }
 
-    this.sendEventToMatomo({
-      category,
-      action,
-      name,
-      value
-    });
+      this.sendEventToMatomo({
+        category,
+        action,
+        name,
+        value
+      });
+    } catch (error) {
+      console.warn('Matomo tracking failed:', error);
+      // Continuer l'exécution même si le tracking échoue
+    }
   }
 
   trackPostPublishClick() {
@@ -190,6 +215,5 @@
   }
 }
 
-const matomoService = new MatomoService();
-export default matomoService;
+export default MatomoService;
 

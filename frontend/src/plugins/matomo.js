@@ -1,21 +1,13 @@
-import VueMatomo from 'vue-matomo'
+import MatomoService from '../services/matomoService.js'
 
 export default {
   install(app) {
-    app.use(VueMatomo, {
-      host: 'https://srv908931.hstgr.cloud/matomo/', // ton instance
-      siteId: 2, // idSite correct
-      trackerFileName: 'matomo', // optionnel
-      enableLinkTracking: true,
-      requireConsent: false,
-      trackInitialView: true,
-      enableHeartBeatTimer: true,
-      heartBeatTimerInterval: 15,
-    })
-
-    // Si tu veux forcer un pageview supplémentaire à l'install
-    if (window._paq) {
-      window._paq.push(['trackPageView'])
-    }
+    const matomoService = new MatomoService()
+    
+    // Fournir le service Matomo via provide/inject
+    app.provide('matomo', matomoService)
+    
+    // Ajouter également comme propriété globale (optionnel)
+    app.config.globalProperties.$matomo = matomoService
   }
 }
