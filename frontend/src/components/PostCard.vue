@@ -90,7 +90,24 @@
           </div>
         </div>
         <div class="card-body">
-          <p>{{ description }}</p>
+          
+          <div v-if="isEditingInline" class="inline-edit-container" @click.stop>
+            <textarea 
+              v-model="editPostDescription" 
+              class="inline-edit-textarea"
+              @keydown.enter.ctrl="saveInlineEdit"
+              @keydown.escape="cancelInlineEdit"
+              @click.stop
+              ref="inlineTextarea"
+            ></textarea>
+            <div class="inline-edit-actions" @click.stop>
+              <button @click.stop="saveInlineEdit" class="inline-save-btn">Sauvegarder</button>
+              <button @click.stop="cancelInlineEdit" class="inline-cancel-btn">Annuler</button>
+              <span class="inline-edit-hint">Ctrl+Entrée pour sauvegarder</span>
+            </div>
+          </div>
+          
+          <p v-else>{{ description }}</p>
           <div class="post-date-modal">
             <span class="post-date-time">{{ postDateTime }}</span>
           </div>
@@ -1505,7 +1522,7 @@ export default {
 
 
 .confirmation-overlay {
-  z-index: 1001;
+  z-index: 10000;
 }
 
 .confirmation-dialog {
