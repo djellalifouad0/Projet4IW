@@ -37,7 +37,7 @@
     </div>
     
     <!-- Section avec onglets pour Posts et Rendez-vous -->
-    <div class="profile-section" v-if="userPosts.length || (user?.profileToken === loggedInUser?.profileToken)">
+    <div class="profile-section">
       <div class="profile-tabs">
         <button 
           :class="['tab-button', { active: activeTab === 'posts' }]"
@@ -619,9 +619,15 @@ export default {
       else if (this.user?.profileToken === this.loggedInUser?.profileToken && this.appointments.length > 0) {
         this.activeTab = 'appointments';
       }
-      // Par défaut, rester sur posts
+      // Sinon si c'est le profil de quelqu'un d'autre (pas le nôtre), afficher les avis
+      else if (this.user?.profileToken !== this.loggedInUser?.profileToken) {
+        this.activeTab = 'ratings';
+        this.loadUserRatings(); // Charger les avis directement
+      }
+      // Par défaut pour notre propre profil sans posts ni rendez-vous
       else {
-        this.activeTab = 'posts';
+        this.activeTab = 'ratings';
+        this.loadUserRatings(); // Charger les avis directement
       }
         console.log('Active tab:', this.activeTab);
     },    // Méthode pour naviguer vers la vue individuelle du post
