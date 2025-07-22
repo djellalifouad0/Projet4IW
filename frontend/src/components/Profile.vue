@@ -8,6 +8,13 @@
       <div class="profile-card-bottom-v2">        <div class="profile-avatar-block">
           <img class="profile-avatar-v2" :src="user?.avatar || `https://ui-avatars.com/api/?name=${encodeURIComponent(user?.username || 'User')}&background=ECBC76&color=fff&size=128&bold=true`" alt="Avatar utilisateur" />
           <div class="profile-name-v2">{{ user?.username || '' }}</div>
+          <!-- Bio utilisateur -->
+          <div v-if="user?.bio" class="profile-bio-v2">{{ user.bio }}</div>
+          <!-- Adresse utilisateur -->
+          <div v-if="user?.address" class="profile-address-inline">
+            <img :src="mapPinIcon" alt="Localisation" class="address-icon" />
+            {{ user.address }}
+          </div>
           <!-- Moyenne des avis intégrée dans le profil -->          <div v-if="user?.ratingStats && user.ratingStats.totalRatings > 0" class="profile-rating-inline">            <div class="stars-display-inline">
               <span v-for="star in 5" :key="star" class="star-inline">
                 <img 
@@ -20,7 +27,6 @@
             <span class="rating-text-inline">{{ user.ratingStats.averageRating.toFixed(1) }} • {{ user.ratingStats.totalRatings }} avis</span>
           </div>
         </div>        <div class="profile-infos-v2">
-          <div class="profile-address-v2">{{ user?.address || '' }}</div>
         </div><!-- Show 'Edit Profile' button only if the profile belongs to the logged-in user -->
         <div v-if="user?.profileToken === loggedInUser?.profileToken" class="profile-actions">
           <button class="profile-btn-icon" @click="showEditModal = true" title="Modifier le profil">
@@ -469,6 +475,7 @@ import NotificationService from '../services/notificationService'
 import eventBus, { ProfileEvents } from '../services/eventBus'
 import starFullIcon from '@/assets/icons/star_full.svg'
 import starIcon from '@/assets/icons/star.svg'
+import mapPinIcon from '@/assets/icons/map-pin.svg'
 
 export default {
   name: 'Profile',
@@ -488,6 +495,7 @@ export default {
       // Icônes
       starFullIcon,
       starIcon,
+      mapPinIcon,
       confirmDialog: {
         show: false,
         message: '',
@@ -1110,6 +1118,40 @@ export default {
   color: #181b26;
   margin: 0; /* Remove unnecessary margins */
   text-align: left; /* Align the username to the left */
+}
+
+.profile-bio-v2 {
+  font-size: 1rem;
+  color: #555;
+  margin: 8px 0 4px 0;
+  text-align: left;
+  line-height: 1.4;
+}
+
+.profile-address-inline {
+  font-size: 0.9rem;
+  color: #777;
+  margin: 2px 0;
+  text-align: left;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.dark-theme .profile-address-inline {
+  color: #bbb;
+}
+
+.address-icon {
+  width: 14px;
+  height: 14px;
+  opacity: 0.6;
+  flex-shrink: 0;
+}
+
+.dark-theme .address-icon {
+  filter: invert(0.8);
+  opacity: 0.8;
 }
 .profile-infos-v2 {
   display: flex;

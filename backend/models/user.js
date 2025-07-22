@@ -43,6 +43,16 @@ const User = sequelize.define('User', {
     allowNull: true,
     description: 'URL of the user cover image'
   },
+  bio: {
+    type: DataTypes.TEXT,
+    allowNull: true,
+    comment: 'User biography/description'
+  },
+  address: {
+    type: DataTypes.STRING(500),
+    allowNull: true,
+    comment: 'User address/location'
+  },
     validationToken: { type: DataTypes.STRING, allowNull: true },
   profileToken: {
     type: DataTypes.STRING,
