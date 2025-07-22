@@ -10,7 +10,7 @@ import './assets/styles/theme.css'
 
 const app = createApp(App)
 
-app.use(matomoPlugin)
+// app.use(matomoPlugin)
 app.use(router)
 
 app.mount('#app')
