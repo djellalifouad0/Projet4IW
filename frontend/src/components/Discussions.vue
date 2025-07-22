@@ -213,7 +213,7 @@
         </form>
       </div>
     </div>    <!-- Modal pour rechercher des utilisateurs -->
-    <div v-if="showSearchModal" :key="'search-modal-' + Date.now()" class="modal-overlay" @click="closeSearchModal">
+    <div v-if="showSearchModal" class="modal-overlay" @click="closeSearchModal">
       <div class="search-modal" @click.stop>
         <div class="search-modal-header">
           <h3>Rechercher des utilisateurs</h3>
@@ -342,7 +342,8 @@ export default {
       searchError: '', // Nouveau: message d'erreur pour la recherche
       showDeleteModal: false, // Nouveau: état pour le modal de suppression
       conversationToDelete: null, // Nouveau: conversation à supprimer
-      isOpeningModal: false // Nouveau: flag pour éviter les ouvertures multiples
+      isOpeningModal: false, // Nouveau: flag pour éviter les ouvertures multiples
+      searchTimeout: null // Nouveau: timeout pour le debounce de recherche
     }
   },
   computed: {
@@ -999,30 +1000,45 @@ export default {
       this.searchLoading = false;
       this.searchError = '';
       this.isOpeningModal = false; // Réinitialiser le flag
+      
+      // Nettoyer le timeout de recherche
+      if (this.searchTimeout) {
+        clearTimeout(this.searchTimeout);
+        this.searchTimeout = null;
+      }
     },
-    // Nouveau: méthode pour rechercher des utilisateurs
-    async searchUsers() {
+    // Nouveau: méthode pour rechercher des utilisateurs avec debounce
+    searchUsers() {
+      // Annuler la recherche précédente si elle existe
+      if (this.searchTimeout) {
+        clearTimeout(this.searchTimeout);
+      }
+
       if (this.searchQuery.length < 2) {
         this.searchResults = [];
         return;
       }
       
-      this.searchLoading = true;
-      this.searchError = '';
-        try {
-        const response = await api.get('/users/search', {
-          params: {
-            q: this.searchQuery
-          }
-        });
+      // Ajouter un délai avant d'effectuer la recherche
+      this.searchTimeout = setTimeout(async () => {
+        this.searchLoading = true;
+        this.searchError = '';
         
-        this.searchResults = response.data;
-      } catch (error) {
-        this.searchError = 'Erreur lors de la recherche d\'utilisateurs';
-        console.error('Error searching users:', error);
-      } finally {
-        this.searchLoading = false;
-      }
+        try {
+          const response = await api.get('/users/search', {
+            params: {
+              q: this.searchQuery
+            }
+          });
+          
+          this.searchResults = response.data;
+        } catch (error) {
+          this.searchError = 'Erreur lors de la recherche d\'utilisateurs';
+          console.error('Error searching users:', error);
+        } finally {
+          this.searchLoading = false;
+        }
+      }, 300); // Délai de 300ms
     },
     // Nouveau: méthode pour démarrer une conversation avec un utilisateur depuis les résultats de recherche
     async startConversationWithUser(user) {
@@ -1102,6 +1118,13 @@ export default {
       if (!message) return '';
       return message.length > maxLength ? message.slice(0, maxLength) + '…' : message;
     },
+  },
+  beforeDestroy() {
+    // Nettoyer le timeout de recherche
+    if (this.searchTimeout) {
+      clearTimeout(this.searchTimeout);
+      this.searchTimeout = null;
+    }
   }
 }
 </script>
