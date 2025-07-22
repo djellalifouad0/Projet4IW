@@ -46,7 +46,7 @@ exports.getComments = async (req, res) => {
   try {
     const comments = await Comment.findAll({
       where: { skillId: req.params.id },
-      include: [{ model: User, attributes: ['username', 'avatar'] }]
+      include: [{ model: User, attributes: ['username', 'avatar', 'profileToken'] }]
     });
     res.json(comments);
   } catch (error) {

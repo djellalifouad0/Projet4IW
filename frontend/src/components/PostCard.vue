@@ -118,7 +118,7 @@
                   <img class="comment-avatar" :src="comment.avatar || avatar" alt="avatar" />
                   <div class="comment-content">
                     <div class="comment-header">
-                      <span class="comment-author">{{ comment.author }}</span>
+                      <span class="comment-author" @click.stop="handleCommentAuthorClick(comment)" style="cursor: pointer;">{{ comment.author }}</span>
                       <span class="comment-time">• {{ comment.time || 'il y a 1 min' }}</span>
                     </div>
                     <div v-if="editingComment === comment.id" class="comment-edit">
@@ -145,7 +145,7 @@
                     <img class="comment-avatar" :src="reply.avatar || avatar" alt="avatar" />
                     <div class="comment-content">
                       <div class="comment-header">
-                        <span class="comment-author">{{ reply.author }}</span>
+                        <span class="comment-author" @click.stop="handleCommentAuthorClick(reply)" style="cursor: pointer;">{{ reply.author }}</span>
                         <span class="comment-time">• {{ reply.time || 'il y a 1 min' }}</span>
                       </div>
                       
@@ -326,6 +326,7 @@ export default {
           id: c.id,
           author: c.User?.username || 'Utilisateur',
           avatar: c.User?.avatar || '',
+          profileToken: c.User?.profileToken || '',
           time: c.createdAt ? new Date(c.createdAt).toLocaleString('fr-FR', { day: '2-digit', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit' }) : '',
           text: c.content,
           parentId: c.parentId || null,
@@ -430,6 +431,16 @@ export default {
       this.$emit('addressClicked', this.address);
 
       this.$router.push(`/carte?address=${encodeURIComponent(this.address)}`);
+    },
+
+    handleCommentAuthorClick(comment) {
+      // Rediriger vers le profil de l'auteur du commentaire
+      if (comment.profileToken) {
+        this.$router.push(`/profile/${comment.profileToken}`);
+      } else {
+        // Fallback si le profileToken n'est pas disponible
+        console.warn('ProfileToken non disponible pour ce commentaire');
+      }
     },
 
     startInlineEdit() {
@@ -951,6 +962,12 @@ export default {
 .comment-author {
   font-weight: 600;
   color: #28303F;
+  transition: color 0.2s ease;
+}
+
+.comment-author:hover {
+  color: #555;
+  text-decoration: underline;
 }
 .comment-time {
   color: #888;
