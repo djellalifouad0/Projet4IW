@@ -50,6 +50,36 @@ const AmChart = ({ id, title, type, data, categoryField, valueField }) => {
 
       series.data.setAll(data);
 
+      // Curseur interactif
+      chart.set('cursor', am5xy.XYCursor.new(root, {}));
+
+      if (type === 'bar') {
+        series.columns.template.setAll({
+          fill: am5.color('#4d70eb'),
+          stroke: am5.color('#4d70eb'),
+        });
+      }
+
+      if (type === 'line') {
+        // Ligne en bleu
+        series.strokes.template.setAll({
+          stroke: am5.color('#4d70eb'),
+          strokeWidth: 2,
+        });
+
+        // Points (bullets)
+        series.bullets.push(() => {
+          return am5.Bullet.new(root, {
+            sprite: am5.Circle.new(root, {
+              radius: 5,
+              fill: am5.color('#4d70eb'),
+              stroke: am5.color('#fff'),
+              strokeWidth: 2,
+            }),
+          });
+        });
+      }
+
       series.appear(1000);
       chart.appear(1000, 100);
     }
@@ -71,6 +101,12 @@ const AmChart = ({ id, title, type, data, categoryField, valueField }) => {
 
       series.data.setAll(data);
 
+      // Couleur unique pour tout
+      series.slices.template.setAll({
+        fill: am5.color('#4d70eb'),
+        stroke: am5.color('#4d70eb'),
+      });
+
       series.appear(1000, 100);
     }
 
@@ -78,18 +114,22 @@ const AmChart = ({ id, title, type, data, categoryField, valueField }) => {
   }, [id, type, data, categoryField, valueField, title]);
 
   return (
-    <div style={{
-      padding: '20px',
-      background: '#fff',
-      borderRadius: '12px',
-      boxShadow: '0 2px 8px rgba(0,0,0,0.1)'
-    }}>
-      <h2 style={{
-        fontSize: '1.5rem',
-        marginBottom: '20px',
-        color: '#333',
-        textAlign: 'center'
-      }}>
+    <div
+      style={{
+        padding: '20px',
+        background: '#fff',
+        borderRadius: '12px',
+        boxShadow: '0 2px 8px rgba(0,0,0,0.1)',
+      }}
+    >
+      <h2
+        style={{
+          fontSize: '1.5rem',
+          marginBottom: '20px',
+          color: '#333',
+          textAlign: 'center',
+        }}
+      >
         {title}
       </h2>
       <div id={id} style={{ width: '100%', height: '400px' }}></div>

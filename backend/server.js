@@ -58,7 +58,7 @@ const connectedUsers = new Map();
 const userConversations = new Map();
 
 io.on('connection', (socket) => {
-  logger.info(`🔌 Utilisateur connecté: ${socket.userId}`);
+  logger.info(`Utilisateur connecté: ${socket.userId}`);
   connectedUsers.set(socket.userId, socket.id);
 
   socket.on('join-conversation', (conversationId) => {

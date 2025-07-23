@@ -86,19 +86,6 @@ async function getDashboardStats() {
         group: 'status'
       })
     },
-   {
-  key: 'topSkills',
-  fn: () => Skill.findAll({
-    attributes: [
-      'description',
-      [Sequelize.fn('COUNT', Sequelize.col('description')), 'count']
-    ],
-    group: 'description',
-    order: [[Sequelize.literal('count'), 'DESC']],
-    limit: 10,
-    raw: true
-  })
-},
     {
       key: 'dailyLikes',
       fn: () => Like.findAll({
@@ -110,6 +97,23 @@ async function getDashboardStats() {
         group: 'date',
         order: [['date', 'ASC']]
       })
+    },
+  
+    {
+      key: 'totalConversations',
+      fn: () => Conversation.count()
+    },
+    {
+      key: 'totalAppointments',
+      fn: () => Appointment.count()
+    },
+    {
+      key: 'acceptedAppointments',
+      fn: () => Appointment.count({ where: { status: 'accepted' } })
+    },
+    {
+      key: 'refusedAppointments',
+      fn: () => Appointment.count({ where: { status: 'refused' } })
     }
   ]
 
@@ -121,7 +125,7 @@ async function getDashboardStats() {
     } catch (err) {
       console.error(`Query failed: ${query.key}`)
       console.error(err)
-      throw err // si tu souhaites arrêter tout dès la première erreur
+      throw err
     }
   }
 

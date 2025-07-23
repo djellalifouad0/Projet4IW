@@ -40,7 +40,7 @@ const DashboardStats = () => {
       categoryField: 'month',
       valueField: 'count',
     },
-    // … autres charts comme avant …
+
   ];
 
   const stripeCharts = [
@@ -54,7 +54,7 @@ const DashboardStats = () => {
     },
     {
       id: 'stripeMonthlyPaymentCounts',
-      title: 'Paiements Stripe mensuels',
+      title: 'Nombre de paiements mensuels',
       type: 'bar',
       data: data.stripeStats.stripeMonthlyPaymentCounts || [],
       categoryField: 'month',
@@ -76,14 +76,7 @@ const DashboardStats = () => {
       categoryField: 'type',
       valueField: 'count',
     },
-    {
-      id: 'stripeTopCustomers',
-      title: 'Top clients',
-      type: 'bar',
-      data: data.stripeStats.stripeTopCustomers || [],
-      categoryField: 'customer',
-      valueField: 'total',
-    },
+  
   ];
 
   const kpis = [
@@ -129,24 +122,11 @@ const DashboardStats = () => {
           </div>
         ))}
       </div>
-
-      <h2>Stats principales</h2>
+ 
       <div
         style={{
-          display: 'grid',
-          gridTemplateColumns: 'repeat(auto-fit, minmax(350px, 1fr))',
-          gap: '20px',
-        }}
-      >
-        {charts.map((chart) => (
-          <AmChart key={chart.id} {...chart} />
-        ))}
-      </div>
-
-      <h2>Stats Stripe</h2>
-      <div
-        style={{
-          display: 'grid',
+          display: 'flex',
+    flexDirection: 'column',
           gridTemplateColumns: 'repeat(auto-fit, minmax(350px, 1fr))',
           gap: '20px',
         }}

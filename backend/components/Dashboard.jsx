@@ -12,20 +12,24 @@ const Dashboard = () => {
     dailyComments: [],
     ratingsDistribution: [],
     appointmentsByStatus: [],
-    topSkills: [],
     dailyLikes: [],
+    // Ajout des stats globales
+    totalConversations: 0,
+    totalAppointments: 0,
+    acceptedAppointments: 0,
+    refusedAppointments: 0,
   });
 
   useEffect(() => {
     axios
       .get('/admin/api/dashboard')
       .then((res) => {
-        console.log('Données du dashboard', res.data);
-        setData(res.data[0]);
+        setData({ ...data, ...res.data[0] });
       })
       .catch((err) => {
         console.error('Erreur dashboard', err);
       });
+    // eslint-disable-next-line
   }, []);
 
   const charts = [
@@ -97,14 +101,6 @@ const Dashboard = () => {
       valueField: 'count',
     },
     {
-      id: 'topSkills',
-      title: 'Top 10 compétences',
-      type: 'bar',
-      data: data.topSkills,
-      categoryField: 'description',
-      valueField: 'count',
-    },
-    {
       id: 'dailyLikes',
       title: 'Likes quotidiens',
       type: 'line',
@@ -114,19 +110,44 @@ const Dashboard = () => {
     },
   ];
 
+  // Affichage des stats globales sous forme de cards (style Stripe)
+  const globalStats = [
+    { label: 'Conversations totales', value: data.totalConversations },
+    { label: 'Rendez-vous totaux', value: data.totalAppointments },
+    { label: 'Rendez-vous acceptés', value: data.acceptedAppointments },
+    { label: 'Rendez-vous refusés', value: data.refusedAppointments },
+  ];
+
   return (
-    <div style={{ padding: '20px' }}>
-      <div
-        style={{
-          display: 'grid',
-          gridTemplateColumns: 'repeat(auto-fit, minmax(350px, 1fr))',
-          gap: '20px',
-        }}
-      >
-        {charts.map((chart) => (
-          <AmChart key={chart.id} {...chart} />
+    <div
+      style={{
+        padding: '20px',
+        display: 'flex',
+        flexDirection: 'column',
+        gap: '30px',
+      }}
+    >
+      <div style={{ display: 'flex', gap: '20px', marginBottom: '20px', flexWrap: 'wrap' }}>
+        {globalStats.map((stat) => (
+          <div
+            key={stat.label}
+            style={{
+              background: '#f5f5f5',
+              padding: '20px',
+              borderRadius: '8px',
+              flex: '1 1 150px',
+              textAlign: 'center',
+              boxShadow: '0 2px 8px #0001',
+            }}
+          >
+            <div style={{ fontSize: '18px', fontWeight: 'bold' }}>{stat.value}</div>
+            <div>{stat.label}</div>
+          </div>
         ))}
       </div>
+      {charts.map((chart) => (
+        <AmChart key={chart.id} {...chart} />
+      ))}
     </div>
   );
 };
