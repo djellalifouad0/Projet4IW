@@ -49,7 +49,7 @@
 
 
 .dark-theme body {
-  background-color: var(--bg-primary) !important;
+  background-color: transparent !important; /* Transparent pour laisser voir le background animé */
   color: var(--text-primary) !important;
 }
 
@@ -79,7 +79,7 @@
 .dark-theme .navbar-actions a.active {
   color: var(--accent) !important;
   background: var(--bg-active) !important;
-  border-radius: 8px !important;
+  /* border-radius: 8px !important; */
 }
 
 
@@ -122,7 +122,7 @@
 
 
 .dark-theme .home-content {
-  background: var(--bg-primary) !important;
+  background: transparent !important; /* Transparent pour laisser voir le background animé */
 }
 
 .dark-theme .filters-bar {
@@ -149,9 +149,8 @@
 }
 
 .dark-theme .cards {
-  background: var(--bg-primary) !important;
+  overflow-x: visible !important; /* Retirer overflow-x hidden pour le background animé */
 }
-
 
 .dark-theme .card,
 .dark-theme .card-orange,
@@ -159,7 +158,7 @@
   background: var(--bg-card) !important;
   color: var(--text-primary) !important;
   border-color: var(--border-color) !important;
-  box-shadow: var(--shadow-card) !important;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2) !important; /* Ombre réduite en mode dark */
 }
 
 .dark-theme .card-header .name {
@@ -242,6 +241,10 @@
   color: var(--bg-primary) !important;
 }
 
+.dark-theme .comments-footer {
+  background: #1A1F2E;
+  border-top-color: var(--border-color) !important;
+}
 
 .dark-theme input,
 .dark-theme textarea,
@@ -333,18 +336,9 @@
   color: var(--text-brand) !important;
 }
 
-.dark-theme .carte-list {
-  background: var(--bg-sidebar) !important;
-}
-
-
-.dark-theme .dashboard-content {
-  background: var(--bg-primary) !important;
-}
-
 .dark-theme .dashboard-card {
-  background: var(--accent-light) !important;
-  color: var(--bg-primary) !important;
+  background: #1A1F2E !important;
+  color: var(--text-primary) !important;
 }
 
 .dark-theme .dashboard-card:hover {
@@ -353,21 +347,15 @@
 
 .dark-theme .dashboard-card h2,
 .dark-theme .dashboard-card p {
-  color: var(--bg-primary) !important;
+  color: var(--text-primary) !important;
 }
 
-
-.dark-theme .profile-content {
-  background: var(--bg-primary) !important;
-}
 
 .dark-theme .profile-section,
 .dark-theme .profile-card-bottom-v2 {
   background: var(--bg-card) !important;
   border: 1px solid var(--border-color) !important;
-  border-radius: 12px !important;
   box-shadow: var(--shadow-card) !important;
-  margin-bottom: 16px !important;
 }
 
 .dark-theme .profile-post-item {
@@ -421,10 +409,6 @@
   color: var(--bg-primary) !important;
 }
 
-
-.dark-theme .notifications-content {
-  background: var(--bg-primary) !important;
-}
 
 .dark-theme .notification-item {
   background: var(--bg-card) !important;
@@ -667,9 +651,9 @@
 }
 
 
-.dark-theme .post-view-container {
+/* .dark-theme .post-view-container {
   background: var(--bg-primary) !important;
-}
+} */
 
 .dark-theme .post-view-header h1 {
   color: var(--accent) !important;
@@ -698,10 +682,6 @@
 
 .dark-theme .stat-item {
   color: var(--text-primary) !important;
-}
-
-.dark-theme .stat-label {
-  color: var(--text-secondary) !important;
 }
 
 .dark-theme .related-post-item {
@@ -1050,7 +1030,7 @@
 .dark-theme button:disabled,
 .dark-theme input:disabled,
 .dark-theme textarea:disabled {
-  background: var(--bg-secondary) !important;
+  background: var(--bg-primary) !important;
   color: var(--text-muted) !important;
   border-color: var(--border-color) !important;
   opacity: 0.6;
@@ -1121,10 +1101,6 @@
 
 
 @media (max-width: 768px) {
-  .dark-theme .carte-list {
-    background: var(--bg-primary) !important;
-  }
-  
   .dark-theme .modal-card {
     background: var(--bg-primary) !important;
   }
@@ -1149,20 +1125,37 @@
   box-sizing: border-box;
 }
 
-.dark-theme body * {
-  color: inherit;
+/* Dark theme text colors with higher specificity for scoped components */
+.dark-theme .profile-name-v2[data-v-273753e9],
+.dark-theme .profile-name-v2 {
+  color: var(--text-primary) !important;
 }
 
-
-.dark-theme p,
-.dark-theme span,
-.dark-theme div:not(.theme-toggle):not(.theme-toggle *) {
-  color: inherit;
+.dark-theme .profile-bio-v2[data-v-273753e9],
+.dark-theme .profile-bio-v2 {
+  color: var(--text-secondary) !important;
 }
 
+.dark-theme .name[data-v-1a88f35b],
+.dark-theme .name {
+  color: var(--text-primary) !important;
+}
 
-.dark-theme div:not(.theme-toggle):not(.theme-toggle *) {
-  background-color: inherit;
+/* Dark theme modal styles */
+.dark-theme .search-modal {
+  background: var(--bg-card) !important;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.4) !important;
+}
+
+.dark-theme .modal-profile-edit {
+  background: var(--bg-card) !important;
+  box-shadow: 0 2px 24px rgba(0, 0, 0, 0.6) !important;
+}
+
+.dark-theme .appointment-modal {
+  background: var(--bg-card) !important;
+  box-shadow: 0 4px 24px rgba(0, 0, 0, 0.4), 0 1.5px 6px rgba(0, 0, 0, 0.2) !important;
+  border: 1.5px solid var(--border-color) !important;
 }
 
 
@@ -1300,5 +1293,19 @@
   text-decoration-color: transparent !important;
   text-decoration-thickness: 0 !important;
   text-underline-offset: 0 !important;
+}
+
+/* Correction couleur carte-list en responsive */
+@media (max-width: 1023px) {
+  .carte-list {
+    background: #fff4e3 !important;
+  }
+}
+
+/* Dark mode - Garder la couleur sombre pour la carte-list responsive */
+@media (max-width: 1023px) {
+  .dark-theme .carte-list {
+    background: #151A25 !important;
+  }
 }
 

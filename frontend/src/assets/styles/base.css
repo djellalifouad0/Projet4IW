@@ -11,8 +11,37 @@
 }
 
 body {
-  background-color: var(--primary-bg);
+  background-color: transparent; 
   color: var(--dark);
+}
+
+.home-content {
+  background: transparent !important;
+}
+
+.cards {
+  overflow-x: visible !important; 
+}
+
+.card, .card-orange, .card-paid {
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08) !important;
+}
+
+.profile-content {
+  background: transparent !important;
+}
+
+.dashboard-content {
+  background: transparent !important;
+}
+
+.profile-section {
+  background: #FFF4E3 !important;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08) !important;
+}
+
+.profile-card-bottom-v2 {
+  background: #FFF4E3 !important;
 }
 
 h1, h2, h3 {

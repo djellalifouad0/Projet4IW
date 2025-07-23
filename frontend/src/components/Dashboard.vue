@@ -194,7 +194,7 @@ export default {
   border-radius: 20px;
   box-shadow: 0 8px 25px rgba(228, 135, 0, 0.1);
   text-align: center;
-  border: 1px solid rgba(228, 135, 0, 0.1);
+  border: none;
   max-width: 800px;
   width: 100%;
 }
@@ -247,7 +247,7 @@ export default {
   align-items: center;
   box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
   transition: all 0.3s ease;
-  border: 2px solid #E48700;
+  border: none;
   width: 100%;
   max-width: 350px;
 }
@@ -313,7 +313,7 @@ export default {
   border-radius: 16px;
   padding: 3rem;
   box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
-  border: 2px solid #E48700;
+  border: none;
   width: 100%;
   max-width: 1000px;
 }
@@ -387,7 +387,7 @@ export default {
   background: #ffffff;
   padding: 0.8rem 1.5rem;
   border-radius: 12px;
-  border: 1px solid #E48700;
+  border: none;
   transition: all 0.3s ease;
 }
 
@@ -594,9 +594,9 @@ export default {
 }
 
 .dark-theme .dashboard-welcome {
-  background: #2d2d2d;
+  background: #1A1F2E;
   color: #e0e0e0;
-  border-color: #E48700;
+  border: none;
 }
 
 .dark-theme .section-title {
@@ -604,8 +604,8 @@ export default {
 }
 
 .dark-theme .stat-card {
-  background: #2d2d2d;
-  border-color: #E48700;
+  background: #1A1F2E;
+  border: none;
   box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
 }
 
@@ -626,8 +626,8 @@ export default {
 }
 
 .dark-theme .activity-chart {
-  background: #2d2d2d;
-  border-color: #E48700;
+  background: #1A1F2E;
+  border: none;
   box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
 }
 
@@ -644,9 +644,9 @@ export default {
 }
 
 .dark-theme .legend-item {
-  background: #2d2d2d;
+  background: #1A1F2E;
   color: #e0e0e0;
-  border-color: #E48700;
+  border: none;
 }
 
 .dark-theme .legend-item:hover {

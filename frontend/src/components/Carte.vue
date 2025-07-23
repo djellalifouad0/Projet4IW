@@ -1,5 +1,9 @@
 ﻿<template>
-  <div class="carte-page">    <div class="carte-header-fixed">
+  <div class="carte-page">
+    <!-- Background animé -->
+    <BackgroundManager />
+    
+    <div class="carte-header-fixed">
       <div class="carte-header-inner">
         <div class="carte-logo-bar" @click="$router.push('/')" style="cursor:pointer">
           <img
@@ -66,6 +70,7 @@
 <script>
 import PostCard from './PostCard.vue'
 import SearchBar from './SearchBar.vue'
+import BackgroundManager from './BackgroundManager.vue'
 import api from '../services/api'
 import toast from '../services/toast'
 import NotificationService from '../services/notificationService'
@@ -73,7 +78,7 @@ import socketService from '../services/socket'
 
 export default {
   name: 'Carte',
-  components: { PostCard, SearchBar },data() {
+  components: { PostCard, SearchBar, BackgroundManager },data() {
     return {
       posts: [],
       mapUrl: 'https://www.openstreetmap.org/export/embed.html?bbox=2.3775%2C48.8495%2C2.3865%2C48.8535&layer=mapnik',
@@ -321,12 +326,13 @@ export default {
 }
 .carte-page {
   width: 100vw;
-  min-height: 100vh;
+  /* min-height: 100vh; */
   background: #fefcf6;
   display: flex;
   flex-direction: column;
   align-items: center;
   padding-top: 130px;
+  position: relative;
 }
 .carte-content {
   display: flex;
@@ -339,7 +345,7 @@ export default {
 }
 .carte-list {
   width: 600px;
-  background: #fff4e3;
+  background: transparent;
   padding: 20px;
   display: flex;
   flex-direction: column;
@@ -475,7 +481,11 @@ export default {
     width: 100vw;
     height: calc(100vh - 140px);
     z-index: 15;
-    background: #fff4e3;
+    background: #fff;
+  /* Thème dark : fond noir pour la liste mobile */
+  .dark .carte-list {
+    background: #151A25;
+  }
     transform: translateX(-100%);
     transition: transform 0.3s ease;
     border-right: none;

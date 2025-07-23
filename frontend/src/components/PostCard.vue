@@ -685,6 +685,10 @@ export default {
 .post-actions {
   display: flex;
   gap: 4px;
+  
+  @media screen and (max-width: 600px) {
+    flex-direction: column;
+  }
 }
 
 .post-action-btn {
@@ -1195,7 +1199,7 @@ export default {
 }
 @media (max-width: 600px) {
   .card {
-    width: 85vw;
+    width: 100vw;
     max-width: 100%;
     padding: 18px 12px 18px 12px;
     border-radius: 16px;
@@ -1366,7 +1370,7 @@ export default {
   .modal-card {
     padding: 10px 10px 10px 10px;
     border-radius: 12px;
-    width: 85vw;
+    width: 100vw;
     max-width: 100%;
     box-sizing: border-box;
   }

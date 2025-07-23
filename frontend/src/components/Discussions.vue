@@ -2888,4 +2888,9 @@ export default {
     font-size: 15px;
   }
 }
+
+/* Dark theme styles */
+.dark-theme .chat-window {
+  background: #161B26 !important;
+}
 </style>
