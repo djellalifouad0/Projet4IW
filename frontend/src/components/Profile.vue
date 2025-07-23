@@ -1075,8 +1075,6 @@ export default {
   width: 100%;
   height: 220px;
   overflow: hidden;
-  border-top-left-radius: 18px;
-  border-top-right-radius: 18px;
 }
 .profile-cover-img {
   width: 100%;
@@ -1091,8 +1089,6 @@ export default {
   justify-content: space-between;
   background: #fdf3e6;
   padding: 0 1.5rem 1.6rem 1.5rem;
-  border-bottom-left-radius: 18px;
-  border-bottom-right-radius: 18px;
   position: relative;
   gap: 1.1rem;
   min-height: 120px;
@@ -1236,7 +1232,7 @@ export default {
 }
 .profile-section {
   background: #FFF4E3;
-  border-radius: 10px;
+  border-radius: 18px;
   box-shadow: 0 2px 8px #0001;
   padding: 1.5rem 2rem;
   max-width: 700px;
@@ -1530,7 +1526,7 @@ export default {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 1.3rem 2.2rem 0.7rem 3.2rem;
+  padding: 1.3rem 2.2rem 1.3rem 3.2rem;
   font-size: 1.25rem;
   font-weight: bold;
 }
@@ -1553,8 +1549,7 @@ export default {
   width: 100%;
   height: 160px;
   background: #eee;
-  border-top-left-radius: 18px;
-  border-top-right-radius: 18px;
+
   overflow: hidden;
 }
 .modal-cover-container {
@@ -1562,8 +1557,7 @@ export default {
   width: 100%;
   height: 160px;
   background: #eee;
-  border-top-left-radius: 18px;
-  border-top-right-radius: 18px;
+
   overflow: hidden;
 }
 
@@ -1672,7 +1666,7 @@ export default {
   filter: brightness(0) saturate(100%) invert(100%) sepia(0%) saturate(0%) hue-rotate(0deg) brightness(100%) contrast(100%);
 }
 .modal-form {
-  margin-top: 70px;
+  margin-top: 40px;
   display: flex;
   flex-direction: column;
   gap: 1.1rem;
@@ -2036,7 +2030,7 @@ export default {
   color: #666;
   font-style: italic;
   padding: 20px;
-  background: #f9f9f9;
+  background: #161B26;
   border-radius: 8px;
 }
 

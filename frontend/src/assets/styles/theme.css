@@ -242,7 +242,7 @@
 }
 
 .dark-theme .comments-footer {
-  background: var(--bg-primary) !important;
+  background: #1A1F2E;
   border-top-color: var(--border-color) !important;
 }
 
@@ -356,7 +356,6 @@
   background: var(--bg-card) !important;
   border: 1px solid var(--border-color) !important;
   box-shadow: var(--shadow-card) !important;
-  margin-bottom: 16px !important;
 }
 
 .dark-theme .profile-post-item {
@@ -652,9 +651,9 @@
 }
 
 
-.dark-theme .post-view-container {
+/* .dark-theme .post-view-container {
   background: var(--bg-primary) !important;
-}
+} */
 
 .dark-theme .post-view-header h1 {
   color: var(--accent) !important;
@@ -683,10 +682,6 @@
 
 .dark-theme .stat-item {
   color: var(--text-primary) !important;
-}
-
-.dark-theme .stat-label {
-  color: var(--text-secondary) !important;
 }
 
 .dark-theme .related-post-item {
@@ -1035,7 +1030,7 @@
 .dark-theme button:disabled,
 .dark-theme input:disabled,
 .dark-theme textarea:disabled {
-  background: var(--bg-secondary) !important;
+  background: var(--bg-primary) !important;
   color: var(--text-muted) !important;
   border-color: var(--border-color) !important;
   opacity: 0.6;
@@ -1130,15 +1125,31 @@
   box-sizing: border-box;
 }
 
-.dark-theme body * {
-  color: inherit;
+/* Dark theme text colors with higher specificity for scoped components */
+.dark-theme .profile-name-v2[data-v-273753e9],
+.dark-theme .profile-name-v2 {
+  color: var(--text-primary) !important;
 }
 
+.dark-theme .profile-bio-v2[data-v-273753e9],
+.dark-theme .profile-bio-v2 {
+  color: var(--text-secondary) !important;
+}
 
-.dark-theme p,
-.dark-theme span,
-.dark-theme div:not(.theme-toggle):not(.theme-toggle *) {
-  color: inherit;
+.dark-theme .name[data-v-1a88f35b],
+.dark-theme .name {
+  color: var(--text-primary) !important;
+}
+
+/* Dark theme modal styles */
+.dark-theme .search-modal {
+  background: var(--bg-card) !important;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.4) !important;
+}
+
+.dark-theme .modal-profile-edit {
+  background: var(--bg-card) !important;
+  box-shadow: 0 2px 24px rgba(0, 0, 0, 0.6) !important;
 }
 
 
@@ -1276,5 +1287,19 @@
   text-decoration-color: transparent !important;
   text-decoration-thickness: 0 !important;
   text-underline-offset: 0 !important;
+}
+
+/* Correction couleur carte-list en responsive */
+@media (max-width: 1023px) {
+  .carte-list {
+    background: #fff4e3 !important;
+  }
+}
+
+/* Dark mode - Garder la couleur sombre pour la carte-list responsive */
+@media (max-width: 1023px) {
+  .dark-theme .carte-list {
+    background: #151A25 !important;
+  }
 }
 

@@ -685,6 +685,10 @@ export default {
 .post-actions {
   display: flex;
   gap: 4px;
+  
+  @media screen and (max-width: 600px) {
+    flex-direction: column;
+  }
 }
 
 .post-action-btn {
