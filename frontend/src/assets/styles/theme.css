@@ -1152,6 +1152,12 @@
   box-shadow: 0 2px 24px rgba(0, 0, 0, 0.6) !important;
 }
 
+.dark-theme .appointment-modal {
+  background: var(--bg-card) !important;
+  box-shadow: 0 4px 24px rgba(0, 0, 0, 0.4), 0 1.5px 6px rgba(0, 0, 0, 0.2) !important;
+  border: 1.5px solid var(--border-color) !important;
+}
+
 
 .dark-theme [style*="color: #000"] {
   color: var(--text-primary) !important;
