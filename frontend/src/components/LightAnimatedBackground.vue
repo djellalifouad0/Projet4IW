@@ -50,11 +50,12 @@ export default {
     const generateShapes = () => {
       const shapeTypes = ['circle', 'square', 'triangle']
       const colors = [
-        'rgba(228, 135, 0, 0.15)',   // --accent: #E48700
-        'rgba(198, 85, 59, 0.15)',   // --title-color: #C6553B
-        'rgba(236, 188, 118, 0.2)',  // --primary-light: #ECBC76
-        'rgba(255, 244, 227, 0.3)',  // --primary-bg: #FFF4E3
-        'rgba(40, 48, 63, 0.1)',     // --dark: #28303F
+        'rgba(228, 135, 0, 0.35)',   // --accent: #E48700 plus vibrant
+        'rgba(198, 85, 59, 0.35)',   // --title-color: #C6553B plus vibrant
+        'rgba(236, 188, 118, 0.4)',  // --primary-light: #ECBC76 plus vibrant
+        'rgba(255, 165, 0, 0.3)',    // Orange vif ajouté
+        'rgba(205, 92, 92, 0.25)',   // Rouge indien pour contraste
+        'rgba(40, 48, 63, 0.2)',     // --dark: #28303F plus opaque
       ]
 
       const newShapes = []
@@ -96,13 +97,13 @@ export default {
   z-index: -999;
   pointer-events: none;
   overflow: hidden;
-  /* Background dégradé pour le mode light */
+  /* Background dégradé plus clair mais vibrant pour le mode light */
   background: linear-gradient(
     135deg,
-    #FFF4E3 0%,
-    #FEFCF6 30%,
-    #F9F7F1 60%,
-    #FFF4E3 100%
+    #F8EAD8 0%,
+    #F4E7D6 30%,
+    #F0E4D4 60%,
+    #F8EAD8 100%
   );
 }
 
@@ -165,8 +166,8 @@ export default {
   width: 100%;
   height: 100%;
   background-image: 
-    linear-gradient(rgba(228, 135, 0, 0.05) 1px, transparent 1px),
-    linear-gradient(90deg, rgba(228, 135, 0, 0.05) 1px, transparent 1px);
+    linear-gradient(rgba(228, 135, 0, 0.12) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(198, 85, 59, 0.08) 1px, transparent 1px);
   background-size: 100px 100px;
   animation: gridMove 20s linear infinite;
 }
@@ -206,7 +207,7 @@ export default {
     transform: translateY(0px) scale(0);
   }
   50% {
-    opacity: 0.8;
+    opacity: 1;
     transform: translateY(-100px) scale(1);
   }
 }
@@ -220,10 +221,11 @@ export default {
   right: 0;
   bottom: 0;
   background: 
-    radial-gradient(circle at 20% 20%, rgba(228, 135, 0, 0.08) 0%, transparent 50%),
-    radial-gradient(circle at 80% 30%, rgba(198, 85, 59, 0.08) 0%, transparent 50%),
-    radial-gradient(circle at 30% 80%, rgba(236, 188, 118, 0.1) 0%, transparent 50%),
-    radial-gradient(circle at 70% 70%, rgba(255, 244, 227, 0.15) 0%, transparent 50%);
+    radial-gradient(circle at 20% 20%, rgba(228, 135, 0, 0.18) 0%, transparent 50%),
+    radial-gradient(circle at 80% 30%, rgba(198, 85, 59, 0.16) 0%, transparent 50%),
+    radial-gradient(circle at 30% 80%, rgba(236, 188, 118, 0.2) 0%, transparent 50%),
+    radial-gradient(circle at 70% 70%, rgba(255, 165, 0, 0.12) 0%, transparent 50%),
+    radial-gradient(circle at 60% 10%, rgba(205, 92, 92, 0.1) 0%, transparent 50%);
   animation: pulse 12s ease-in-out infinite alternate;
 }
 

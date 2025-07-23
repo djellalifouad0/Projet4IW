@@ -338,8 +338,8 @@
 
 
 .dark-theme .dashboard-card {
-  background: var(--accent-light) !important;
-  color: var(--bg-primary) !important;
+  background: #1A1F2E !important;
+  color: var(--text-primary) !important;
 }
 
 .dark-theme .dashboard-card:hover {
@@ -348,7 +348,7 @@
 
 .dark-theme .dashboard-card h2,
 .dark-theme .dashboard-card p {
-  color: var(--bg-primary) !important;
+  color: var(--text-primary) !important;
 }
 
 
@@ -1144,11 +1144,6 @@
 .dark-theme span,
 .dark-theme div:not(.theme-toggle):not(.theme-toggle *) {
   color: inherit;
-}
-
-
-.dark-theme div:not(.theme-toggle):not(.theme-toggle *) {
-  background-color: inherit;
 }
 
 

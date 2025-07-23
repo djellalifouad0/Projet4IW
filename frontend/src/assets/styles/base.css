@@ -11,35 +11,37 @@
 }
 
 body {
-  background-color: transparent; /* Rendre transparent pour voir le background animé */
+  background-color: transparent; 
   color: var(--dark);
 }
 
-/* Mode light - éléments transparents pour le background animé */
 .home-content {
   background: transparent !important;
 }
 
 .cards {
-  overflow-x: visible !important; /* Pour laisser voir le background animé */
+  overflow-x: visible !important; 
 }
 
 .card, .card-orange, .card-paid {
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08) !important; /* Ombre réduite en mode light */
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08) !important;
 }
 
 .profile-content {
   background: transparent !important;
 }
 
-/* Forcer le background blanc pour les sections de profil */
+.dashboard-content {
+  background: transparent !important;
+}
+
 .profile-section {
-  background: #ffffff !important;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08) !important; /* Ombre réduite */
+  background: #FFF4E3 !important;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08) !important;
 }
 
 .profile-card-bottom-v2 {
-  background: #ffffff !important;
+  background: #FFF4E3 !important;
 }
 
 h1, h2, h3 {
