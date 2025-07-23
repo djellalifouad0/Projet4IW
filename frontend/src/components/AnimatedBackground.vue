@@ -43,10 +43,14 @@ export default {
       // Configuration du renderer
       renderer = new THREE.WebGLRenderer({ 
         alpha: true,
-        antialias: true 
+        antialias: true,
+        powerPreference: "high-performance",
+        preserveDrawingBuffer: false
       })
       renderer.setSize(window.innerWidth, window.innerHeight)
+      renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2))
       renderer.setClearColor(0x000000, 0) // Transparent
+      renderer.outputEncoding = THREE.sRGBEncoding
       containerRef.value.appendChild(renderer.domElement)
 
       // Création des particules
@@ -159,9 +163,14 @@ export default {
 
     const handleResize = () => {
       if (camera && renderer) {
-        camera.aspect = window.innerWidth / window.innerHeight
+        const width = window.innerWidth
+        const height = window.innerHeight
+        
+        camera.aspect = width / height
         camera.updateProjectionMatrix()
-        renderer.setSize(window.innerWidth, window.innerHeight)
+        
+        renderer.setSize(width, height)
+        renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2))
       }
     }
 
@@ -209,6 +218,7 @@ export default {
     var(--bg-secondary) 50%,
     var(--bg-tertiary) 100%
   );
+  overflow: hidden;
 }
 
 .animated-background canvas {
@@ -216,6 +226,9 @@ export default {
   position: absolute;
   top: 0;
   left: 0;
+  width: 100% !important;
+  height: 100% !important;
+  object-fit: cover;
 }
 
 /* Animation réduite pour l'accessibilité */
