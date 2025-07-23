@@ -79,7 +79,7 @@
 .dark-theme .navbar-actions a.active {
   color: var(--accent) !important;
   background: var(--bg-active) !important;
-  border-radius: 8px !important;
+  /* border-radius: 8px !important; */
 }
 
 

@@ -193,9 +193,7 @@ export default {
     height: 18px;
   }
   .search-submit-btn {
-    padding: 6px 10px;
-    font-size: 0.8rem;
-    border-radius: 8px;
+    display: none;
   }
 }
 </style>
