@@ -144,7 +144,7 @@ export default {
   }
 }
 
-@media (max-width: 1200px) {
+@media (max-width: 1350px) {
   .theme-text {
     display: none;
   }
