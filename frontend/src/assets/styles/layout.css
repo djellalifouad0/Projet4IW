@@ -8,7 +8,7 @@
 }
 
 body {
-  background-color: #fefcf6;
+  background-color: transparent; /* Transparent pour laisser voir le background animé */
   color: #1e1e1e;
   line-height: 1.6;
   min-height: 100vh;

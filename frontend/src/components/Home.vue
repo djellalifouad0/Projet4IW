@@ -411,7 +411,7 @@ export default {
   flex-direction: column;
   align-items: center;
   padding: 1.2rem 1rem 2.2rem 1rem;
-  background: #FEFCF6;
+  background: transparent; /* Rendre transparent pour voir le background animé */
   overflow-x: hidden; 
   max-width: 100vw; 
   min-height: 100vh; 

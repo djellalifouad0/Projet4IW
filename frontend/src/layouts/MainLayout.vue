@@ -76,7 +76,7 @@ export default {
   flex-direction: row;
   justify-content: center;
   min-height: 100vh;
-  background: #fefcf6;
+  background: transparent; /* Rendre transparent pour voir le background animé */
   width: 100vw;
   max-width: 100vw;
   box-sizing: border-box;

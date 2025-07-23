@@ -1,5 +1,7 @@
 ﻿<template>
   <ErrorBoundary>
+    <!-- Background Manager pour toutes les pages -->
+    <BackgroundManager />
     <router-view />
     <ToastContainer />
   </ErrorBoundary>
@@ -8,6 +10,7 @@
 <script>
 import ErrorBoundary from './components/ErrorBoundary.vue'
 import ToastContainer from './components/ToastContainer.vue'
+import BackgroundManager from './components/BackgroundManager.vue'
 import { onMounted, watch } from 'vue'
 import { useRoute } from 'vue-router'
 
@@ -15,7 +18,8 @@ export default {
   name: 'App',
   components: { 
     ErrorBoundary,
-    ToastContainer
+    ToastContainer,
+    BackgroundManager
   },
   setup() {
     const route = useRoute()
