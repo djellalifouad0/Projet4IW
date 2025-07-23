@@ -61,7 +61,7 @@ export default {
     }
 
     const createParticles = () => {
-      const particleCount = prefersReducedMotion.value ? 50 : 150
+      const particleCount = prefersReducedMotion.value ? 100 : 300 // Augmenté de 150 à 300 !
       const geometry = new THREE.BufferGeometry()
       const positions = new Float32Array(particleCount * 3)
       const colors = new Float32Array(particleCount * 3)
@@ -77,10 +77,10 @@ export default {
       ]
 
       for (let i = 0; i < particleCount; i++) {
-        // Position aléatoire
-        positions[i * 3] = (Math.random() - 0.5) * 20
-        positions[i * 3 + 1] = (Math.random() - 0.5) * 20
-        positions[i * 3 + 2] = (Math.random() - 0.5) * 10
+        // Position aléatoire avec une dispersion plus large
+        positions[i * 3] = (Math.random() - 0.5) * 30     // X: plus étalé
+        positions[i * 3 + 1] = (Math.random() - 0.5) * 30 // Y: plus étalé
+        positions[i * 3 + 2] = (Math.random() - 0.5) * 15 // Z: plus de profondeur
 
         // Couleur aléatoire depuis le thème
         const color = themeColors[Math.floor(Math.random() * themeColors.length)]
@@ -88,8 +88,8 @@ export default {
         colors[i * 3 + 1] = color.g
         colors[i * 3 + 2] = color.b
 
-        // Taille aléatoire
-        sizes[i] = Math.random() * 3 + 1
+        // Taille aléatoire plus variée
+        sizes[i] = Math.random() * 4 + 0.5 // Tailles de 0.5 à 4.5
       }
 
       geometry.setAttribute('position', new THREE.BufferAttribute(positions, 3))

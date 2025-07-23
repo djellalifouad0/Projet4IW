@@ -241,6 +241,10 @@
   color: var(--bg-primary) !important;
 }
 
+.dark-theme .comments-footer {
+  background: var(--bg-primary) !important;
+  border-top-color: var(--border-color) !important;
+}
 
 .dark-theme input,
 .dark-theme textarea,
@@ -331,11 +335,6 @@
 .dark-theme .carte-brand {
   color: var(--text-brand) !important;
 }
-
-.dark-theme .carte-list {
-  background: var(--bg-sidebar) !important;
-}
-
 
 .dark-theme .dashboard-card {
   background: #1A1F2E !important;
@@ -1107,10 +1106,6 @@
 
 
 @media (max-width: 768px) {
-  .dark-theme .carte-list {
-    background: var(--bg-primary) !important;
-  }
-  
   .dark-theme .modal-card {
     background: var(--bg-primary) !important;
   }

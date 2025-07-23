@@ -481,7 +481,7 @@ export default {
     width: 100vw;
     height: calc(100vh - 140px);
     z-index: 15;
-    background: #fff4e3;
+    background: #151A25;
     transform: translateX(-100%);
     transition: transform 0.3s ease;
     border-right: none;

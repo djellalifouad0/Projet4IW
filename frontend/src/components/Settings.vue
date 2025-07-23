@@ -520,7 +520,6 @@ export default {
 <style scoped>
 .settings-page {
   min-height: 100vh;
-  background: #fefcf6;
   padding: 20px 0;
 }
 
@@ -881,6 +880,26 @@ export default {
     width: 100%;
     text-align: center;
   }
+}
+
+/* Dark theme styles for icons */
+.dark-theme .title-icon,
+.dark-theme .section-icon {
+  filter: brightness(0) invert(1);
+}
+
+.dark-theme .notification-item img {
+  filter: brightness(0) invert(1);
+}
+
+/* Dark theme styles for text elements */
+.dark-theme .section-description,
+.dark-theme .settings-subtitle,
+.dark-theme .card-header p,
+.dark-theme .setting-info p,
+.dark-theme .notification-info p,
+.dark-theme .security-info p {
+  color: #cbd5e0; /* Lighter gray for better readability in dark mode */
 }
 
 @media (max-width: 480px) {
